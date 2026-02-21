@@ -1,97 +1,54 @@
 import DragDropUploader from "./DragDropUploader";
-import { useEffect, useState } from "react";
-export default function EditProdukModal({ produk, setMyProduks, onClose }) {
-  console.log("produkddddddd", produk);
+import { useState } from "react";
+export default function EditProdukModal({ produk, onClose }) {
   const [harga, setHarga] = useState(produk?.harga || 0);
   const [stok, setStok] = useState(produk?.stok || 0);
-  const [ukuran, setUkuran] = useState(produk?.ukuran || []);
+  const [ukuran, setUkuran] = useState(
+    produk?.sizes?.map((s) => s.size).join(", ") || "",
+  );
   const [warna, setWarna] = useState(produk?.warna || "");
-
-  const [currentEdit, setCurrentEdit] = useState({});
-  const [nama, setNama] = useState(currentEdit?.nama || "");
-  console.log("currentEdit", currentEdit);
+  const [image, setImage] = useState(null);
+  const [nama, setNama] = useState(produk?.nama || "");
 
   const updateFotoProduk = (file) => {
-    if (!file || !produk) return;
+    if (!file) return;
 
     const reader = new FileReader();
-
     reader.onloadend = () => {
-      const img = reader.result;
-
-      const produks = JSON.parse(localStorage.getItem("produkDB")) || [];
-
-      const updatedProduks = produks.map((post) => {
-        if (post.id !== produk.postId) return post;
-
-        return {
-          ...post,
-          produk: post.produk.map((p) =>
-            p.id === produk.id
-              ? {
-                  ...p,
-                  gambar: [img],
-                }
-              : p
-          ),
-        };
-      });
-
-      localStorage.setItem("produkDB", JSON.stringify(updatedProduks));
-
-      setMyProduks(updatedProduks);
+      setImage(reader.result); // base64
     };
-
     reader.readAsDataURL(file);
   };
 
-  const saveChanges = () => {
-    const produks = JSON.parse(localStorage.getItem("produkDB")) || [];
-
-    const updatedProduks = produks.map((post) => {
-      if (post.id !== produk.postId) return post;
-
-      return {
-        ...post,
-        nama,
-        produk: post.produk.map((p) =>
-          p.id === produk.id
-            ? {
-                ...p,
-                harga,
-                stok,
-                ukuran,
-                warna,
-                updatedAt: new Date().toISOString(),
-              }
-            : p
-        ),
-      };
-    });
-
-    localStorage.setItem("produkDB", JSON.stringify(updatedProduks));
-
-    setMyProduks(updatedProduks.filter((p) => p.id == produk.postId));
-
-    onClose();
-  };
-
-  useEffect(() => {
-    if (!currentEdit?.nama) return;
-    setNama(currentEdit.nama);
-  }, [currentEdit]);
-
-  useEffect(() => {
-    if (!produk?.postId) return;
+  const saveChanges = async () => {
     try {
-      const produks = JSON.parse(localStorage.getItem("produkDB")) || [];
-      const found = produks.find((p) => p.id === produk.postId);
-      if (found) setCurrentEdit(found);
-    } catch {
-      setCurrentEdit({});
-    } finally {
+      const sizesArray = ukuran
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      const res = await fetch(`/api/product/edit/${produk.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: produk.productId,
+          nama,
+          harga,
+          stok,
+          warna,
+          sizes: sizesArray,
+          image,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Gagal update");
+
+      onClose();
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menyimpan perubahan");
     }
-  }, [produk]);
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/30 flex justify-center items-center backdrop-blur-sm">

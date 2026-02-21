@@ -3,107 +3,63 @@
 import DragDropUploader from "./DragDropUploader";
 import { useState } from "react";
 
-export default function ProfileEditModal({
-  user,
-  setUser,
-  onClose,
-  currentUser,
-  setCurrentUser,
-}) {
+export default function ProfileEditModal({ user, setUser, onClose }) {
   console.log("onclose", onClose);
+  console.log("user", user);
 
   const [nama, setNama] = useState(user?.nama || "");
   const [email, setEmail] = useState(user?.email || "");
-  const [telepon, setTelepon] = useState(user?.telepon || "");
+  const [telepon, setTelepon] = useState(user?.noTelp || "");
   const [tanggalLahir, setTanggalLahir] = useState(user?.tanggalLahir || "");
-  const [gender, setGender] = useState(user?.gender || "Laki-laki");
-  const [foto, setFoto] = useState(user?.foto || "");
-  const [password, setPassword] = useState(user?.password || "");
+  const [gender, setGender] = useState(user?.jenisKelamin || "");
+  const [foto, setFoto] = useState(user?.imgProfile || "");
 
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   // =====================
   //      SIMPAN DATA
   // =====================
-  const saveChanges = () => {
-    const users = JSON.parse(localStorage.getItem("userDB")) || [];
+  const saveChanges = async () => {
+    try {
+      const res = await fetch(`/api/profile/${user.username}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nama,
+          foto,
+          email,
+          telepon,
+          tanggalLahir,
+          gender,
+        }),
+      });
 
-    const emailExists = users.find(
-      (u) => u.email === email && u.username !== user.username
-    );
-    if (emailExists) {
-      setError("Email sudah terdaftar oleh pengguna lain.");
-      setSuccess("");
-      return;
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Gagal update");
+        return;
+      }
+      setUser(data);
+
+      setSuccess("Profil berhasil diperbarui!");
+
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch {
+      console.error("Error updating profile.");
     }
-    const updatedUsers = users.map((u) =>
-      u.username === user.username
-        ? {
-            ...u,
-            nama,
-            email,
-            telepon,
-            tanggalLahir,
-            gender,
-          }
-        : u
-    );
-
-    localStorage.setItem("userDB", JSON.stringify(updatedUsers));
-    const updatedUser = updatedUsers.find((u) => u.username === user.username);
-
-    setUser(updatedUser);
-
-    const updateLoginSession =
-      currentUser.username === user.username
-        ? {
-            ...currentUser,
-            foto: setFoto(foto),
-            nama,
-            email,
-            telepon,
-            tanggalLahir,
-            gender,
-            password: setPassword(password),
-          }
-        : currentUser;
-    localStorage.setItem("loginSessionDB", JSON.stringify(updateLoginSession));
-    setCurrentUser(updateLoginSession);
-
-    setError("");
-    setSuccess("Profil berhasil diperbarui!");
-
-    setTimeout(() => {
-      onClose();
-    }, 1500); // Tutup modal setelah 1.5 detik
   };
 
-  // =====================
-  //   UPDATE FOTO SAJA
-  // =====================
   const updateFoto = (file) => {
     if (!file) return;
 
     const reader = new FileReader();
-
     reader.onloadend = () => {
-      const img = reader.result;
-      const users = JSON.parse(localStorage.getItem("userDB")) || [];
-
-      const updatedUsers = users.map((u) =>
-        u.username === user.username ? { ...u, foto: img } : u
-      );
-
-      localStorage.setItem("userDB", JSON.stringify(updatedUsers));
-
-      const updatedUser = updatedUsers.find(
-        (u) => u.username === user.username
-      );
-
-      setUser(updatedUser);
+      setFoto(reader.result); // base64
     };
-
     reader.readAsDataURL(file);
   };
 
@@ -189,6 +145,7 @@ export default function ProfileEditModal({
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
               >
+                <option value="">Pilih Gender</option>
                 <option value="Laki-laki">Laki-laki</option>
                 <option value="Perempuan">Perempuan</option>
               </select>
@@ -196,7 +153,6 @@ export default function ProfileEditModal({
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
         {success && <p className="text-sm text-green-600">{success}</p>}
 
         <div className="flex justify-end gap-4 pt-4">

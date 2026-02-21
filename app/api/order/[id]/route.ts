@@ -6,7 +6,7 @@ export async function GET(
   { params }: { params: { id: string } },
 ) {
   const orders = await prisma.order.findMany({
-    where: { buyerId: Number(params) },
+    where: { buyerId: params.id },
     include: {
       produk: {
         include: {

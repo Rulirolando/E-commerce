@@ -1,38 +1,10 @@
 "use client";
-import { CiSearch } from "react-icons/ci";
 import Link from "next/link";
 import { SlBasket } from "react-icons/sl";
-import { useState, useEffect } from "react";
+import SearchBar from "../components/SearchBar";
 import { useRouter } from "next/navigation";
-
-export default function Navbar({ className = "" }) {
+export default function Navbar({ className = "", currentUser }) {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState(null);
-  const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    try {
-      const loginSession = localStorage.getItem("loginSessionDB");
-      if (loginSession) setCurrentUser(JSON.parse(loginSession));
-    } catch {
-    } finally {
-    }
-  }, []);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const q = query.trim();
-
-    if (!q) {
-      router.push("/products"); // tampilkan semua
-      setQuery("");
-      return;
-    }
-
-    router.push(`/products?q=${encodeURIComponent(q)}`);
-    setQuery("");
-  };
-
   function capitalizeFirst(text) {
     if (!text) return "";
     return text.charAt(0).toUpperCase() + text.slice(1);
@@ -50,24 +22,7 @@ export default function Navbar({ className = "" }) {
       </h1>
 
       {/* Search bar */}
-      <form
-        onSubmit={handleSubmit}
-        className="w-1/2 flex justify-center items-center rounded-full hover:bg-[#636CCB] bg-[#50589C]"
-      >
-        <input
-          type="text"
-          placeholder="Cari produk..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="w-full outline-none bg-transparent px-2 py-2 ml-2 placeholder:text-blue-100"
-        />
-        <button
-          type="submit"
-          className="p-2 text-2xl cursor-pointer rounded-full bg-blue-800 h-full hover:bg-blue-700"
-        >
-          <CiSearch />
-        </button>
-      </form>
+      <SearchBar />
 
       <Link href="/keranjang">
         <SlBasket />
@@ -78,10 +33,10 @@ export default function Navbar({ className = "" }) {
       <div className="flex gap-6 text-sm">
         {currentUser ? (
           <>
-            <Link href={`/order/${currentUser.id}`}>Kelola pesanan</Link>
-            <Link href={`/profile/${currentUser.username}`}>
+            <Link href={`/order/${currentUser.user.id}`}>Kelola pesanan</Link>
+            <Link href={`/profile/${currentUser.user.id}`}>
               {" "}
-              <p>{capitalizeFirst(currentUser.username)}</p>
+              <p>{capitalizeFirst(currentUser.user.name)}</p>
             </Link>
           </>
         ) : (

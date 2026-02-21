@@ -1,20 +1,19 @@
 "use client";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/Footer";
 
 export default function ProdukDetail({ produkChose }) {
   console.log("produkChose", produkChose);
-  // ambil semua gambar dulu (pastikan ini ada sebelum useState)
   const allImg =
     produkChose?.variations?.flatMap(
       (v) => v.images?.map((i) => i.img) || [],
     ) || [];
   const [selectedImage, setSelectedImage] = useState(allImg[0] || "");
   const [currentUser, setCurrentUser] = useState({});
-  console.log(typeof currentUser.id);
-  console.log("ksdjfksjkdjfksjdkjf", currentUser.id);
+  const [addressList, setAddressList] = useState([]);
+
   console.log("currentuser", currentUser);
 
   const [selectedProduk, setSelectedProduk] = useState({
@@ -28,7 +27,6 @@ export default function ProdukDetail({ produkChose }) {
     gambar: "",
   });
 
-  console.log("produkChose", produkChose);
   console.log("selectedproduk", selectedProduk);
 
   function capitalizeFirst(text) {
@@ -48,7 +46,6 @@ export default function ProdukDetail({ produkChose }) {
         warna: "",
         gambar: img || allImg[0] || "",
         harga: harga || produkChose.variations[0]?.harga || 0,
-        stok: 0,
         jumlah: 1,
       }));
       setSelectedImage(img || allImg[0] || "");
@@ -103,28 +100,38 @@ export default function ProdukDetail({ produkChose }) {
   );
 
   async function handleBeli() {
+    // 1. Validasi pilihan user sebelum kirim
+    if (!selectedProduk.warna || !selectedProduk.ukuran) {
+      alert("Silakan pilih warna dan ukuran terlebih dahulu");
+      return;
+    }
+
+    const confirmation = confirm("Apakah Anda yakin ingin membeli produk ini?");
+    if (!confirmation) return;
+
+    const alamatUtama = addressList.find((addr) => addr.status === true);
+    if (!alamatUtama) return alert("Atur alamat utama dahulu!");
+
+    const alamat = confirm(
+      `Kirim ke alamat:\n${alamatUtama.alamat}\nTelepon: ${alamatUtama.telepon}\nKalau tidak silahkan atur di halaman profile.`,
+    );
+    if (!alamat) return;
+
     try {
-      // 1. Validasi pilihan user sebelum kirim
-      if (!selectedProduk.warna || !selectedProduk.ukuran) {
-        alert("Silakan pilih warna dan ukuran terlebih dahulu");
-        return;
-      }
-
-      const confirmation = confirm(
-        "Apakah Anda yakin ingin membeli produk ini?",
-      );
-      if (!confirmation) return;
-
       // 2. Susun Payload (Gunakan variabel 'payload' secara konsisten)
       const payload = {
         nama: selectedProduk.nama,
         warna: selectedProduk.warna,
         ukuran: selectedProduk.ukuran,
-        stok: Number(selectedProduk.stok),
         jumlah: Number(selectedProduk.jumlah),
         harga: Number(selectedProduk.harga),
+        totalHarga:
+          Number(selectedProduk.harga) * Number(selectedProduk.jumlah),
         gambar: selectedProduk.gambar,
-        produkId: Number(selectedProduk.id), // ID produk utama
+        namaPenerima: currentUser.nama,
+        telepon: String(alamatUtama.telepon || ""),
+        alamat: String(alamatUtama.alamat || ""),
+        produkId: Number(selectedProduk.id),
         buyerId: Number(currentUser.id),
       };
 
@@ -158,7 +165,6 @@ export default function ProdukDetail({ produkChose }) {
         warna: "",
         ukuran: "",
         jumlah: 1,
-        stok: 0,
       });
       setSelectedImage(allImg[0] || "");
     } catch (error) {
@@ -204,6 +210,22 @@ export default function ProdukDetail({ produkChose }) {
     setSelectedImage(allImg[0] || "");
   };
 
+  const fetchAddresses = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/profile/address/${currentUser.id}`, {
+        method: "GET",
+      });
+      const data = await response.json();
+      setAddressList(data);
+    } catch (error) {
+      console.error("Gagal ambil alamat:", error);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser?.id) fetchAddresses();
+  }, [fetchAddresses, currentUser]);
+
   useEffect(() => {
     try {
       const currentUser = JSON.parse(localStorage.getItem("loginSessionDB"));
@@ -231,7 +253,7 @@ export default function ProdukDetail({ produkChose }) {
       harga: produkChose.variations?.[0]?.harga ?? 0,
       warna: "",
       ukuran: "",
-      stok: 0,
+
       jumlah: 1,
     });
   }, [produkChose]);

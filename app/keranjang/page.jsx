@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Navbar from "../components/navbar";
 
@@ -9,6 +9,7 @@ export default function KeranjangPage() {
   const [currentUser, setCurrentUser] = useState(null);
   const [mounted, setMounted] = useState(false);
   const [selectProduk, setSelectProduk] = useState([]);
+  const [addressList, setAddressList] = useState([]);
   console.log("selectProduk", selectProduk);
 
   /* =====================
@@ -91,33 +92,80 @@ export default function KeranjangPage() {
      Checkout
   ====================== */
   const handleCheckout = async () => {
-    if (selectProduk.length === 0) {
-      alert("Pilih produk terlebih dahulu");
-      return;
+    if (selectProduk.length === 0) return alert("Pilih produk!");
+
+    const alamatUtama = addressList.find((addr) => addr.status === true);
+    if (!alamatUtama) return alert("Atur alamat utama dahulu!");
+
+    if (!confirm("Yakin checkout?")) return;
+
+    const alamat = confirm(
+      `Kirim ke alamat:\n${alamatUtama.alamat}\nTelepon: ${alamatUtama.telepon}\nKalau tidak silahkan atur di halaman profile.`,
+    );
+    if (!alamat) return;
+
+    try {
+      for (const item of selectProduk) {
+        // 1. Ambil gambar pertama dengan aman
+        const fotoProduk = item.variant?.images?.[0]?.img || "";
+
+        // 2. Susun payload dengan hati-hati (Jangan ada yang undefined)
+        const payload = {
+          nama: item.variant?.product?.nama || "Produk",
+          warna: item.variant?.warna || "Default",
+          ukuran: item.ukuran || "All Size",
+          jumlah: Number(item.jumlah) || 1,
+          harga: Number(item.variant?.harga) || 0,
+          totalHarga: Number((item.variant?.harga || 0) * (item.jumlah || 1)),
+          gambar: fotoProduk,
+          produkId: item.variant?.id ? Number(item.variant.id) : null,
+          buyerId: Number(currentUser.id),
+          namaPenerima: currentUser.nama || "Pembeli",
+          telepon: String(alamatUtama.telepon || ""),
+          alamat: String(alamatUtama.alamat || ""),
+        };
+
+        console.log("Payload yang dikirim ke API:", payload); // CEK INI DI CONSOLE BROWSER
+
+        const response = await fetch("/api/order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Server Error Response:", errorText);
+          throw new Error("Gagal membuat pesanan");
+        }
+      }
+
+      alert("Checkout berhasil!");
+      setSelectProduk([]);
+      if (typeof fetchData === "function") fetchData();
+    } catch (error) {
+      console.error("Checkout Error:", error);
+      alert(
+        "Terjadi kesalahan. Cek terminal VS Code untuk detail error Prisma.",
+      );
     }
-
-    const confirmCheckout = confirm("Yakin checkout produk ini?");
-    if (!confirmCheckout) return;
-
-    for (const item of selectProduk) {
-      await fetch("/api/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nama: item.nama,
-          warna: item.warna,
-          ukuran: item.ukuran,
-          jumlah: item.jumlah,
-          gambar: item.gambar,
-          variantId: item.variantId,
-          buyerId: currentUser.id,
-        }),
-      });
-    }
-
-    alert("Checkout berhasil");
-    setSelectProduk([]);
   };
+
+  const fetchAddresses = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/profile/address/${currentUser.id}`, {
+        method: "GET",
+      });
+      const data = await response.json();
+      setAddressList(data);
+    } catch (error) {
+      console.error("Gagal ambil alamat:", error);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser?.id) fetchAddresses();
+  }, [fetchAddresses, currentUser]);
 
   if (!mounted) {
     return (

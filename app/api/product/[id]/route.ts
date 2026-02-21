@@ -31,3 +31,50 @@ export async function GET(
     );
   }
 }
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+
+  try {
+    const idNumber = Number(id);
+
+    await prisma.img.deleteMany({
+      where: { variationId: idNumber },
+    });
+    await prisma.size.deleteMany({
+      where: { variationId: idNumber },
+    });
+    await prisma.cartItem.deleteMany({
+      where: { variantId: idNumber },
+    });
+    await prisma.order.deleteMany({
+      where: { produkId: idNumber },
+    });
+
+    const deleted = await prisma.variation.delete({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    if (deleted) {
+      return NextResponse.json(
+        { message: "Produk berhasil dihapus" },
+        { status: 200 },
+      );
+    } else {
+      return NextResponse.json(
+        { error: "Produk tidak ditemukan" },
+        { status: 404 },
+      );
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "Terjadi kesalahan saat menghapus produk" },
+      { status: 500 },
+    );
+  }
+}

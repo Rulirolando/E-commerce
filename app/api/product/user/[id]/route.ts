@@ -8,10 +8,15 @@ export async function GET(
     const { id } = await params;
 
     const product = await prisma.product.findMany({
-      where: { ownerId: Number(id) },
+      where: { ownerId: id },
       include: {
         owner: { select: { username: true, id: true } },
-        variations: { include: { images: true, sizes: true } },
+        variations: {
+          include: {
+            images: true,
+            sizes: { select: { size: true, variationId: true } },
+          },
+        },
       },
     });
 

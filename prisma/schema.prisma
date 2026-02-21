@@ -9,24 +9,37 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
+  id          String      @id @default(uuid())
   username    String   @unique
   email       String   @unique
-  password    String
+  password    String?
   nama      String?
-  alamat     String?
   noTelp     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt 
   tanggalLahir DateTime?
   jenisKelamin String?
+  imgProfile  String?
 
   products    Product[]
   loves     Love[]
-
-
   carts Cart[]
-  orders      Order[]
+  orders      Order[] @relation("BuyerOrders")
+  addresses  Address[]
+}
+
+model Address {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  nama      String
+  alamat    String   
+  telepon   String
+  lokasi    String
+  status    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt             
+  user      User     @relation(fields: [userId], references: [id])
+  produk    Product[]
 }
 
 model Product {
@@ -36,10 +49,12 @@ model Product {
   deskripsi  String?
   lokasi      String
   comment     String?
-  ownerId     Int
+  ownerId     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
+  
+addressId     Int?     
+  addressAuthor Address? @relation(fields: [addressId], references: [id])
   owner       User     @relation(fields: [ownerId], references: [id])
   variations   Variation[]
   loves     Love[]
@@ -59,7 +74,7 @@ model Variation {
   images     Img[]      
   cartItems CartItem[]
   sizes      Size[]
-  orders     Order[]
+  orders     Order[]  @relation("ProdukInOrders")
 }
 model Size {
   id          Int      @id @default(autoincrement())
@@ -67,7 +82,7 @@ model Size {
   size        String
 createdAt   DateTime @default(now())
 updatedAt   DateTime @updatedAt
-  variation   Variation @relation(fields: [variationId], references: [id])
+  variation   Variation @relation(fields: [variationId], references: [id], onDelete: Cascade)
 }
 model Img {
   id          Int      @id @default(autoincrement())
@@ -76,13 +91,13 @@ model Img {
   createdAt   DateTime @default(now())
 
 updatedAt   DateTime @updatedAt
-  variation   Variation @relation(fields: [variationId], references: [id])
+  variation   Variation @relation(fields: [variationId], references: [id], onDelete: Cascade)
 }
 
 
 model Love {
   id        Int      @id @default(autoincrement())
-  userId    Int
+  userId   String
   productId Int
   status    Boolean @default(true)
   createdAt DateTime @default(now())
@@ -98,23 +113,28 @@ model Order {
   warna      String
   nama       String
   ukuran      String
-  stok       Int
   harga      Int
-  gambar    String
-  buyerId     Int
+  gambar    String @db.Text
+  namaPenerima String @default("")
+  telepon   String @default("")
+  alamat    String @default("")   //amamat penerima
   status      String   @default("Belum dibayar") 
   createdAt   DateTime @default(now())
   jumlah        Int
-  produkId     Int
  totalHarga  Int
-  buyer       User     @relation(fields: [buyerId], references: [id])
-  produk      Variation  @relation(fields: [produkId], references: [id])
 
+  buyerId     String
+  buyer       User     @relation("BuyerOrders",fields: [buyerId], references: [id])
+
+   produkId     Int?
+  produk      Variation?  @relation("ProdukInOrders", fields: [produkId], references: [id], onDelete: SetNull)
+
+  @@index([buyerId])
 }
 
 model Cart {
   id      Int       @id @default(autoincrement())
-  userId  Int 
+  userId  String 
   user    User      @relation(fields: [userId], references: [id])
   items  CartItem[]
 }

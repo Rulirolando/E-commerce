@@ -1,107 +1,105 @@
-"use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+"use client"; // Wajib untuk Client Side
+
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+
 export default function LoginPage() {
-  const router = useRouter();
-  const [user, setUser] = useState({ email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  // Handler untuk Login Credentials (Email/Password)
+  const handleCredentialsLogin = async (e) => {
     e.preventDefault();
-    if (user.email === "" || user.password === "") {
-      alert("Semua field harus diisi");
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    if (!email || !password) {
+      alert("Email dan password harus diisi");
       return;
     }
+
+    setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: user.email,
-          password: user.password,
-        }),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        callbackUrl: "/", // Tujuan setelah login sukses
+        redirect: false,
       });
-      const userExists = await res.json();
-      console.log(userExists);
 
-      if (!res.ok) {
-        alert(userExists.message);
-        return;
+      if (result?.error) {
+        alert("Login gagal! Periksa kembali email dan password Anda.");
+      } else {
+        // Login berhasil, redirect ke halaman utama
+        window.location.href = "/";
       }
-      // Login berhasil, simpan login session
-      localStorage.setItem("loginSessionDB", JSON.stringify(userExists.user));
-
-      alert("Login berhasil");
-      router.push("/");
-    } catch {
-      alert("Gagal koneksi ke server");
+    } catch (error) {
+      console.error(error);
+      alert("Terjadi kesalahan sistem.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    try {
-      const loginSession = localStorage.getItem("loginSessionDB");
-      if (loginSession) {
-        window.location.href = "/";
-      }
-    } catch {
-    } finally {
-      setLoading(true);
-    }
-  }, []);
+  // Handler untuk Google Login
+  const handleGoogleLogin = async () => {
+    await signIn("google", { callbackUrl: "/" });
+  };
 
-  if (!loading) return <p>Loading...</p>;
   return (
-    <>
-      <div className=" w-full h-screen flex justify-center items-center bg-blue-50">
-        <div className="w-64 h-3/4 border-blue-50 rounded-lg shadow-blue-950 shadow-lg flex flex-col p-2">
-          <div className="flex justify-center items-center">
-            <p className="text-blue-400 text-3xl font-bold">Rulshop</p>
-          </div>
-
-          <p className="text-blue-400 text-xl font-bold mt-4">Masuk</p>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-2 mt-4">
-            <input
-              type="email"
-              placeholder="Email"
-              className="p-2 border-2 border-blue-400 rounded-md"
-              value={user.email}
-              onChange={(e) => setUser({ ...user, email: e.target.value })}
-            />
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className="p-2 border-2 border-blue-400 rounded-md w-full"
-                value={user.password}
-                onChange={(e) => setUser({ ...user, password: e.target.value })}
-              />
-
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-2 text-sm text-blue-500"
-              >
-                {showPassword ? "Hide" : "Show"}
-              </button>
-            </div>
-
-            <button
-              type="submit"
-              className="p-2 bg-blue-400 text-white rounded-md cursor-pointer hover:bg-blue-500"
-            >
-              Masuk
-            </button>
-          </form>
-          <p className="text-blue-400 text-sm mt-4">
-            Belum punya akun?{" "}
-            <a href="/auth/daftar" className="text-blue-500 cursor-pointer">
-              Daftar
-            </a>
-          </p>
+    <div className="w-full h-screen flex justify-center items-center bg-blue-50">
+      <div className="w-64 h-3/4 rounded-lg shadow-lg flex flex-col p-4 bg-white">
+        <div className="flex justify-center">
+          <p className="text-blue-400 text-3xl font-bold">Rulshop</p>
         </div>
+
+        <p className="text-blue-400 text-xl font-bold mt-4">Masuk</p>
+
+        <form
+          onSubmit={handleCredentialsLogin}
+          className="flex flex-col gap-3 mt-4"
+        >
+          <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            className="p-2 border-2 border-blue-400 rounded-md"
+          />
+
+          <input
+            name="password"
+            type="password"
+            placeholder="Password"
+            className="p-2 border-2 border-blue-400 rounded-md"
+          />
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="p-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 disabled:bg-gray-300"
+          >
+            {loading ? "Proses..." : "Masuk"}
+          </button>
+        </form>
+
+        <div className="my-4 text-center text-sm text-gray-400">atau</div>
+
+        {/* GOOGLE LOGIN */}
+        <button
+          onClick={handleGoogleLogin}
+          type="button"
+          className="p-2 border border-blue-400 rounded-md text-blue-500 hover:bg-blue-50 w-full"
+        >
+          Masuk dengan Google
+        </button>
+
+        <p className="text-blue-400 text-sm mt-4">
+          Belum punya akun?{" "}
+          <a href="/auth/daftar" className="text-blue-500">
+            Daftar
+          </a>
+        </p>
       </div>
-    </>
+    </div>
   );
 }

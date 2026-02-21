@@ -1,14 +1,13 @@
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 export default function AddAdressModal({ currentUser, onClose, onAddAddress }) {
   const [address, setAddress] = useState({
-    id: uuidv4(),
-    userId: currentUser,
+    userId: currentUser?.user?.id,
     status: false,
     nama: "",
     alamat: "",
     telepon: 0,
     lokasi: "",
+    status: false,
   });
 
   const handleAlamat = (e) => {
