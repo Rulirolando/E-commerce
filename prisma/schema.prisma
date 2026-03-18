@@ -84,7 +84,7 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-addressId     Int?     
+ addressId     Int?     
   addressAuthor Address? @relation(fields: [addressId], references: [id])
   owner       User     @relation(fields: [ownerId], references: [id])
   variations   Variation[]

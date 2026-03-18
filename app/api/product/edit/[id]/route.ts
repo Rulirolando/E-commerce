@@ -18,46 +18,42 @@ export async function PATCH(
       );
     }
 
-    await prisma.product.update({
-      where: { id: Number(productId) },
-      data: { nama },
-    });
-
-    await prisma.variation.update({
-      where: { id: variationId },
-      data: {
-        harga,
-        stok,
-        warna,
-      },
-    });
-
-    await prisma.size.deleteMany({
-      where: { variationId },
-    });
-
-    if (Array.isArray(sizes)) {
-      await prisma.size.createMany({
-        data: sizes.map((s) => ({
-          variationId,
-          size: s,
-        })),
-      });
-    }
-
-    if (image) {
-      await prisma.img.deleteMany({
-        where: { variationId },
+    await prisma.$transaction(async (tx) => {
+      // 1. Update Tabel Product
+      await tx.product.update({
+        where: { id: Number(productId) },
+        data: { nama },
       });
 
-      await prisma.img.create({
+      // 2. Update Tabel Variation
+      await tx.variation.update({
+        where: { id: variationId },
         data: {
-          variationId,
-          img: image,
+          harga: Number(harga),
+          stok: Number(stok),
+          warna,
         },
       });
-    }
 
+      // 3. Update Sizes (Hapus lama, buat baru)
+      await tx.size.deleteMany({ where: { variationId } });
+      if (Array.isArray(sizes) && sizes.length > 0) {
+        await tx.size.createMany({
+          data: sizes.map((s) => ({
+            variationId,
+            size: s,
+          })),
+        });
+      }
+
+      // 4. Update Image (Jika ada upload baru)
+      if (image) {
+        await tx.img.deleteMany({ where: { variationId } });
+        await tx.img.create({
+          data: { variationId, img: image },
+        });
+      }
+    });
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("EDIT PRODUCT ERROR:", err);

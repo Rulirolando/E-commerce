@@ -41,6 +41,7 @@ export default function ProfilePage({ userId, currentUser }) {
   const [isEdit, setIsEdit] = useState(false);
   const [onEdit, setOnEdit] = useState({});
   const [myProduks, setMyProduks] = useState(null);
+  console.log("my produk:", myProduks);
 
   const [addressList, setAddressList] = useState([]);
 
