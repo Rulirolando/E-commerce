@@ -187,25 +187,33 @@ export default function SearchProduk() {
               } flex flex-wrap items-start justify-center h-full bg-blue-200 dark:bg-slate-900 rounded-2xl`}
             >
               {produkList.length > 0 ? (
-                filteredProduk.map((p) => (
-                  <CardProduk
-                    key={p.id}
-                    onClick={() => setProdukChosen(p)}
-                    nama={p.nama}
-                    harga={
-                      "Rp " + p.variations?.[0]?.harga.toLocaleString("id-ID")
-                    }
-                    gambar={p.variations?.[0]?.images?.[0]?.img || ""}
-                    terjual={p.variations?.[0]?.terjual || 0}
-                    edit={false}
-                    isLoved={p.loves.some(
-                      (l) =>
-                        l.userId === currentUser?.user.id && l.status === true,
-                    )}
-                    onLove={() => toggleLove(p.id)}
-                    showLove={p.ownerId === currentUser?.user.id}
-                  />
-                ))
+                filteredProduk.map((p) => {
+                  const totalStokSemuaVariasi = p.variations?.reduce(
+                    (acc, curr) => acc + curr.stok,
+                    0,
+                  );
+                  return (
+                    <CardProduk
+                      key={p.id}
+                      onClick={() => setProdukChosen(p)}
+                      nama={p.nama}
+                      stok={totalStokSemuaVariasi}
+                      harga={
+                        "Rp " + p.variations?.[0]?.harga.toLocaleString("id-ID")
+                      }
+                      gambar={p.variations?.[0]?.images?.[0]?.img || ""}
+                      terjual={p.variations?.[0]?.terjual || 0}
+                      edit={false}
+                      isLoved={p.loves.some(
+                        (l) =>
+                          l.userId === currentUser?.user.id &&
+                          l.status === true,
+                      )}
+                      onLove={() => toggleLove(p.id)}
+                      showLove={p.ownerId === currentUser?.user.id}
+                    />
+                  );
+                })
               ) : (
                 <div className="p-10 text-center dark:text-white">
                   <p>Produk Tidak Ditemukan!</p>

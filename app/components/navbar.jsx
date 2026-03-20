@@ -4,12 +4,15 @@ import { SlBasket } from "react-icons/sl";
 import SearchBar from "../components/SearchBar";
 import { useRouter } from "next/navigation";
 import { IoMoon, IoSunny } from "react-icons/io5";
+import { FaRegBell } from "react-icons/fa";
 import useThemeStore from "../../store/useThemeStore";
 import { useEffect } from "react";
+import useNotificationStore from "../../store/useNotificationStore";
 
 export default function Navbar({ className = "", currentUser }) {
   const router = useRouter();
   const { isDarkMode, toggleDarkMode } = useThemeStore();
+  const { unreadCount, setUnreadCount } = useNotificationStore();
 
   useEffect(() => {
     if (isDarkMode) {
@@ -18,6 +21,27 @@ export default function Navbar({ className = "", currentUser }) {
       document.documentElement.classList.remove("dark");
     }
   }, [isDarkMode]);
+
+  useEffect(() => {
+    if (currentUser) {
+      const fetchNotifications = async () => {
+        try {
+          const res = await fetch(
+            `/api/notifications?userId=${currentUser.user.id}`,
+          );
+          const data = await res.json();
+          const count = data.filter((n) => !n.isRead).length;
+          setUnreadCount(count);
+        } catch {
+          console.error("Gagal mengambil notifikasi");
+        }
+      };
+
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 120000);
+      return () => clearInterval(interval);
+    }
+  }, [currentUser, setUnreadCount]);
 
   function capitalizeFirst(text) {
     if (!text) return "";
@@ -45,6 +69,21 @@ export default function Navbar({ className = "", currentUser }) {
       >
         {isDarkMode ? <IoSunny /> : <IoMoon />}
       </button>
+
+      {currentUser && (
+        <Link
+          href="/notifications"
+          className="relative p-2 hover:bg-slate-700 rounded-full transition-all"
+        >
+          <FaRegBell className="text-2xl" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-[#3C467B] dark:border-slate-900">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </Link>
+      )}
+
       <Link href="/keranjang">
         <SlBasket />
       </Link>

@@ -36,45 +36,43 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params;
-
   try {
-    const idNumber = Number(id);
+    const { id } = await params;
+    const variationId = Number(id);
 
-    await prisma.img.deleteMany({
-      where: { variationId: idNumber },
-    });
-    await prisma.size.deleteMany({
-      where: { variationId: idNumber },
-    });
-    await prisma.cartItem.deleteMany({
-      where: { variantId: idNumber },
-    });
-    await prisma.order.deleteMany({
-      where: { produkId: idNumber },
+    const result = await prisma.$transaction(async (tx) => {
+      const variation = await tx.variation.findUnique({
+        where: { id: variationId },
+        select: { productId: true },
+      });
+
+      if (!variation) throw new Error("Variasi tidak ditemukan");
+
+      await tx.cartItem.deleteMany({ where: { cartId: variationId } });
+
+      await tx.variation.delete({
+        where: { id: variationId },
+      });
+
+      const remainingVariations = await tx.variation.count({
+        where: { productId: variation.productId },
+      });
+
+      if (remainingVariations === 0) {
+        await tx.love.deleteMany({ where: { productId: variation.productId } });
+
+        await tx.product.delete({
+          where: { id: variation.productId },
+        });
+        return { message: "Variasi dan Produk dihapus karena variasi habis" };
+      }
+
+      return { message: "Variasi berhasil dihapus" };
     });
 
-    const deleted = await prisma.variation.delete({
-      where: {
-        id: Number(id),
-      },
-    });
-
-    if (deleted) {
-      return NextResponse.json(
-        { message: "Produk berhasil dihapus" },
-        { status: 200 },
-      );
-    } else {
-      return NextResponse.json(
-        { error: "Produk tidak ditemukan" },
-        { status: 404 },
-      );
-    }
-  } catch {
-    return NextResponse.json(
-      { error: "Terjadi kesalahan saat menghapus produk" },
-      { status: 500 },
-    );
+    return NextResponse.json(result);
+  } catch (error) {
+    console.error("DELETE ERROR:", error);
+    return NextResponse.json({ message: error }, { status: 500 });
   }
 }

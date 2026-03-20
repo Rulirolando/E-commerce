@@ -97,6 +97,47 @@ export default function Home({ currentUser }) {
     fetchProducts();
   }, []);
 
+  const renderProduk = () => {
+    let sortedList = [...produkList];
+
+    if (recentProduk === "terbaru") {
+      sortedList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else {
+      // Perbaikan Sorting Terlaris: Ambil terjual dari variasi pertama
+      sortedList.sort((a, b) => {
+        const terjualA = a.variations?.[0]?.terjual || 0;
+        const terjualB = b.variations?.[0]?.terjual || 0;
+        return terjualB - terjualA;
+      });
+    }
+
+    return sortedList.slice(0, 6).map((p) => {
+      const totalStokSemuaVariasi = p.variations?.reduce(
+        (acc, curr) => acc + curr.stok,
+        0,
+      );
+      const mainVariant = p.variations?.[0];
+
+      return (
+        <CardProduk
+          key={p.id}
+          onClick={() => router.push(`produk/${p.id}`)}
+          nama={p.nama}
+          harga={"Rp " + (mainVariant?.harga?.toLocaleString("id-ID") || "0")}
+          gambar={mainVariant?.images?.[0]?.img}
+          terjual={mainVariant?.terjual || 0}
+          stok={totalStokSemuaVariasi}
+          edit={false}
+          isLoved={p.loves?.some(
+            (l) => l.userId === currentUser?.user?.id && l.status === true,
+          )}
+          onLove={() => toggleLove(p.id)}
+          showLove={p.ownerId === currentUser?.user?.id}
+        />
+      );
+    });
+  };
+
   return (
     <>
       <div className="w-full bg-blue-100 dark:bg-slate-950 transition-colors duration-300 min-h-screen">
@@ -137,12 +178,12 @@ export default function Home({ currentUser }) {
         >
           {showAllKategori ? "Lihat Lebih Sedikit" : "Lihat Semua"}
         </button>
-        <h1 className="text-center font-bold text-5xl mt-12 dark:text-white">
-          Produk Terbaru
-        </h1>
-        <p className="text-center mt-4">
+        <p className="text-center mt-4 dark:text-slate-300">
           Jelajahi berbagai produk pilihan kami
         </p>
+        <h1 className="text-center font-bold text-5xl mt-12 dark:text-white">
+          Produk {recentProduk === "terbaru" ? "Terbaru" : "Terlaris"}
+        </h1>
         <div className="w-full flex justify-center mt-7">
           <div className="bg-white dark:bg-slate-800 dark:border-slate-700 transition-colors border-gray-100 shadow-lg rounded-2xl px-1 flex">
             <button
@@ -166,51 +207,7 @@ export default function Home({ currentUser }) {
           </div>
         </div>
         <div className="w-full flex gap-1 justify-center mt-7">
-          {recentProduk === "terbaru"
-            ? produkList
-                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                .map((p) => (
-                  <CardProduk
-                    onClick={() => router.push(`produk/${p.id}`)}
-                    key={p.id}
-                    nama={p.nama}
-                    harga={
-                      "Rp " + p.variations?.[0]?.harga.toLocaleString("id-ID")
-                    }
-                    gambar={p.variations?.[0]?.images?.[0]?.img}
-                    terjual={p.variations?.[0]?.terjual || 0}
-                    edit={false}
-                    isLoved={p.loves.some(
-                      (l) =>
-                        l.userId === currentUser?.user?.id && l.status === true,
-                    )}
-                    onLove={() => toggleLove(p.id)}
-                    showLove={p.ownerId === currentUser?.user?.id}
-                  />
-                ))
-                .slice(0, 6)
-            : produkList
-                .sort((a, b) => b.variations.terjual - a.variations.terjual)
-                .map((p) => (
-                  <CardProduk
-                    key={p.id}
-                    onClick={() => router.push(`produk/${p.id}`)}
-                    nama={p.nama}
-                    harga={
-                      "Rp " + p.variations?.[0]?.harga.toLocaleString("id-ID")
-                    }
-                    gambar={p.variations?.[0]?.images?.[0]?.img}
-                    terjual={p.variations?.[0]?.terjual || 0}
-                    edit={false}
-                    isLoved={p.loves.some(
-                      (l) =>
-                        l.userId === currentUser?.user?.id && l.status === true,
-                    )}
-                    onLove={() => toggleLove(p.id)}
-                    showLove={p.ownerId === currentUser?.user?.id}
-                  />
-                ))
-                .slice(0, 6)}
+          {renderProduk()}
         </div>
         <button
           className="flex justify-self-center mt-7 px-4 py-2  text-blue-400 border-2 border-blue-700  shadow-blue-500 rounded-lg hover:bg-blue-300 text-center cursor-pointer transition translate hover:-translate-y-1 hover:scale-105 duration-300"

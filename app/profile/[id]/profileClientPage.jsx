@@ -628,8 +628,9 @@ export default function ProfilePage({ userId, currentUser }) {
                         key={p.id}
                         nama={item.nama}
                         harga={p.harga}
+                        stok={p.stok}
                         gambar={p.images[0]?.img}
-                        terjual={item.terjual}
+                        terjual={p.terjual}
                         edit={currentUser?.user.id === userId ? true : false}
                         onEdit={() => {
                           setOnEdit({
@@ -681,6 +682,7 @@ export default function ProfilePage({ userId, currentUser }) {
                     <CardProduk
                       key={produk.id}
                       nama={produk.product?.nama}
+                      stok={produk.product?.variations?.[0]?.stok}
                       harga={
                         "Rp " +
                         produk.product?.variations?.[0]?.harga.toLocaleString(

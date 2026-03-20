@@ -8,6 +8,7 @@ export default function CardProduk({
   terjual,
   edit,
   onEdit,
+  stok,
   isLoved,
   onLove,
   onClick,
@@ -19,11 +20,12 @@ export default function CardProduk({
     if (!text) return "";
     return text.charAt(0).toUpperCase() + text.slice(1);
   }
+  const isHabis = stok <= 0;
   return (
     <>
       <div
-        onClick={onClick}
-        className="cursor-pointer flex-1 min-w-52 max-w-[200px]  m-2 border border-gray-400 shadow-lg rounded-lg flex flex-col p-2 dark:border-slate-600 dark:bg-slate-700 transition-all duration-300 dark:hover:bg-slate-750"
+        onClick={isHabis ? null : onClick}
+        className={`cursor-pointer flex-1 min-w-52 max-w-[200px]  m-2 border border-gray-400 shadow-lg rounded-lg flex flex-col p-2 dark:border-slate-600 dark:bg-slate-700 transition-all duration-300 dark:hover:bg-slate-750  ${isHabis ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         {" "}
         <div className="relative w-full">

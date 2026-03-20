@@ -57,6 +57,11 @@ export type Account = Prisma.AccountModel
  */
 export type Otp = Prisma.OtpModel
 /**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
  * Model Address
  * 
  */

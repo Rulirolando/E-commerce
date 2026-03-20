@@ -55,18 +55,23 @@ export async function POST(req: Request) {
         for (const order of existingOrders) {
           if (order.produkId) {
             // UPDATE STOK DI TABEL VARIATION
-            const updatedVariation = await tx.variation.update({
-              where: { id: order.produkId }, // Pastikan ini ID Variasi (produkId dari order)
+            await tx.variation.update({
+              where: { id: order.produkId },
               data: {
                 stok: { decrement: order.jumlah },
                 terjual: { increment: order.jumlah },
               },
             });
-            console.log(
-              `STOK BERHASIL DIKURANGI: ${updatedVariation.warna} sisa ${updatedVariation.stok}`,
-            );
           }
         }
+        // 2. BUAT NOTIFIKASI (Hanya saat pertama kali bayar berhasil)
+        await tx.notification.create({
+          data: {
+            userId: existingOrders[0].buyerId,
+            title: "Pembayaran Berhasil!",
+            message: `Pembayaran pesanan ${orderId} telah kami terima. Barang akan segera diproses.`,
+          },
+        });
       }
 
       // Update status semua order dengan transactionId tersebut

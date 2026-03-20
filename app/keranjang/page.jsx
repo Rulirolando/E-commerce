@@ -13,9 +13,6 @@ export default function KeranjangPage() {
   const { data: session, status } = useSession();
   const currentUser = session;
 
-  /* =====================
-     Fetch keranjang dari API
-  ====================== */
   useEffect(() => {
     if (!currentUser?.user.id) return;
 

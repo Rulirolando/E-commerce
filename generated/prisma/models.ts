@@ -11,6 +11,7 @@
 export type * from './models/User'
 export type * from './models/Account'
 export type * from './models/Otp'
+export type * from './models/Notification'
 export type * from './models/Address'
 export type * from './models/Product'
 export type * from './models/Variation'

@@ -54,6 +54,7 @@ export const ModelName = {
   User: 'User',
   Account: 'Account',
   Otp: 'Otp',
+  Notification: 'Notification',
   Address: 'Address',
   Product: 'Product',
   Variation: 'Variation',
@@ -127,6 +128,18 @@ export const OtpScalarFieldEnum = {
 } as const
 
 export type OtpScalarFieldEnum = (typeof OtpScalarFieldEnum)[keyof typeof OtpScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  title: 'title',
+  message: 'message',
+  isRead: 'isRead',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
 export const AddressScalarFieldEnum = {

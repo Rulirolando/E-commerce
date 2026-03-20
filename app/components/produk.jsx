@@ -20,7 +20,7 @@ export default function ShowProduk({ produkSelected }) {
   }
 
   function handleOwner() {
-    if (currentUser.id === produkSelected.ownerId) {
+    if (currentUser.user.id === produkSelected.ownerId) {
       alert("Anda adalah pemilik produk ini.");
       return;
     }
