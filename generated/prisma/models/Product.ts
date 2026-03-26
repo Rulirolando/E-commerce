@@ -264,6 +264,7 @@ export type ProductWhereInput = {
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   variations?: Prisma.VariationListRelationFilter
   loves?: Prisma.LoveListRelationFilter
+  review?: Prisma.ReviewListRelationFilter
 }
 
 export type ProductOrderByWithRelationInput = {
@@ -281,6 +282,7 @@ export type ProductOrderByWithRelationInput = {
   owner?: Prisma.UserOrderByWithRelationInput
   variations?: Prisma.VariationOrderByRelationAggregateInput
   loves?: Prisma.LoveOrderByRelationAggregateInput
+  review?: Prisma.ReviewOrderByRelationAggregateInput
 }
 
 export type ProductWhereUniqueInput = Prisma.AtLeast<{
@@ -301,6 +303,7 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   variations?: Prisma.VariationListRelationFilter
   loves?: Prisma.LoveListRelationFilter
+  review?: Prisma.ReviewListRelationFilter
 }, "id">
 
 export type ProductOrderByWithAggregationInput = {
@@ -349,6 +352,7 @@ export type ProductCreateInput = {
   owner: Prisma.UserCreateNestedOneWithoutProductsInput
   variations?: Prisma.VariationCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveCreateNestedManyWithoutProductInput
+  review?: Prisma.ReviewCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateInput = {
@@ -364,6 +368,7 @@ export type ProductUncheckedCreateInput = {
   addressId?: number | null
   variations?: Prisma.VariationUncheckedCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutProductInput
+  review?: Prisma.ReviewUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductUpdateInput = {
@@ -378,6 +383,7 @@ export type ProductUpdateInput = {
   owner?: Prisma.UserUpdateOneRequiredWithoutProductsNestedInput
   variations?: Prisma.VariationUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUpdateManyWithoutProductNestedInput
+  review?: Prisma.ReviewUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateInput = {
@@ -393,6 +399,7 @@ export type ProductUncheckedUpdateInput = {
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   variations?: Prisma.VariationUncheckedUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutProductNestedInput
+  review?: Prisma.ReviewUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductCreateManyInput = {
@@ -607,6 +614,20 @@ export type ProductUpdateOneRequiredWithoutLovesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProductUpdateToOneWithWhereWithoutLovesInput, Prisma.ProductUpdateWithoutLovesInput>, Prisma.ProductUncheckedUpdateWithoutLovesInput>
 }
 
+export type ProductCreateNestedOneWithoutReviewInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutReviewInput, Prisma.ProductUncheckedCreateWithoutReviewInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutReviewInput
+  connect?: Prisma.ProductWhereUniqueInput
+}
+
+export type ProductUpdateOneRequiredWithoutReviewNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductCreateWithoutReviewInput, Prisma.ProductUncheckedCreateWithoutReviewInput>
+  connectOrCreate?: Prisma.ProductCreateOrConnectWithoutReviewInput
+  upsert?: Prisma.ProductUpsertWithoutReviewInput
+  connect?: Prisma.ProductWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductUpdateToOneWithWhereWithoutReviewInput, Prisma.ProductUpdateWithoutReviewInput>, Prisma.ProductUncheckedUpdateWithoutReviewInput>
+}
+
 export type ProductCreateWithoutOwnerInput = {
   nama: string
   kategori: string
@@ -618,6 +639,7 @@ export type ProductCreateWithoutOwnerInput = {
   addressAuthor?: Prisma.AddressCreateNestedOneWithoutProdukInput
   variations?: Prisma.VariationCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveCreateNestedManyWithoutProductInput
+  review?: Prisma.ReviewCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateWithoutOwnerInput = {
@@ -632,6 +654,7 @@ export type ProductUncheckedCreateWithoutOwnerInput = {
   addressId?: number | null
   variations?: Prisma.VariationUncheckedCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutProductInput
+  review?: Prisma.ReviewUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductCreateOrConnectWithoutOwnerInput = {
@@ -687,6 +710,7 @@ export type ProductCreateWithoutAddressAuthorInput = {
   owner: Prisma.UserCreateNestedOneWithoutProductsInput
   variations?: Prisma.VariationCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveCreateNestedManyWithoutProductInput
+  review?: Prisma.ReviewCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateWithoutAddressAuthorInput = {
@@ -701,6 +725,7 @@ export type ProductUncheckedCreateWithoutAddressAuthorInput = {
   updatedAt?: Date | string
   variations?: Prisma.VariationUncheckedCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutProductInput
+  review?: Prisma.ReviewUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductCreateOrConnectWithoutAddressAuthorInput = {
@@ -740,6 +765,7 @@ export type ProductCreateWithoutVariationsInput = {
   addressAuthor?: Prisma.AddressCreateNestedOneWithoutProdukInput
   owner: Prisma.UserCreateNestedOneWithoutProductsInput
   loves?: Prisma.LoveCreateNestedManyWithoutProductInput
+  review?: Prisma.ReviewCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateWithoutVariationsInput = {
@@ -754,6 +780,7 @@ export type ProductUncheckedCreateWithoutVariationsInput = {
   updatedAt?: Date | string
   addressId?: number | null
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutProductInput
+  review?: Prisma.ReviewUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductCreateOrConnectWithoutVariationsInput = {
@@ -783,6 +810,7 @@ export type ProductUpdateWithoutVariationsInput = {
   addressAuthor?: Prisma.AddressUpdateOneWithoutProdukNestedInput
   owner?: Prisma.UserUpdateOneRequiredWithoutProductsNestedInput
   loves?: Prisma.LoveUpdateManyWithoutProductNestedInput
+  review?: Prisma.ReviewUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateWithoutVariationsInput = {
@@ -797,6 +825,7 @@ export type ProductUncheckedUpdateWithoutVariationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loves?: Prisma.LoveUncheckedUpdateManyWithoutProductNestedInput
+  review?: Prisma.ReviewUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductCreateWithoutLovesInput = {
@@ -810,6 +839,7 @@ export type ProductCreateWithoutLovesInput = {
   addressAuthor?: Prisma.AddressCreateNestedOneWithoutProdukInput
   owner: Prisma.UserCreateNestedOneWithoutProductsInput
   variations?: Prisma.VariationCreateNestedManyWithoutProductInput
+  review?: Prisma.ReviewCreateNestedManyWithoutProductInput
 }
 
 export type ProductUncheckedCreateWithoutLovesInput = {
@@ -824,6 +854,7 @@ export type ProductUncheckedCreateWithoutLovesInput = {
   updatedAt?: Date | string
   addressId?: number | null
   variations?: Prisma.VariationUncheckedCreateNestedManyWithoutProductInput
+  review?: Prisma.ReviewUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductCreateOrConnectWithoutLovesInput = {
@@ -853,6 +884,7 @@ export type ProductUpdateWithoutLovesInput = {
   addressAuthor?: Prisma.AddressUpdateOneWithoutProdukNestedInput
   owner?: Prisma.UserUpdateOneRequiredWithoutProductsNestedInput
   variations?: Prisma.VariationUpdateManyWithoutProductNestedInput
+  review?: Prisma.ReviewUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateWithoutLovesInput = {
@@ -867,6 +899,81 @@ export type ProductUncheckedUpdateWithoutLovesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   variations?: Prisma.VariationUncheckedUpdateManyWithoutProductNestedInput
+  review?: Prisma.ReviewUncheckedUpdateManyWithoutProductNestedInput
+}
+
+export type ProductCreateWithoutReviewInput = {
+  nama: string
+  kategori: string
+  deskripsi?: string | null
+  lokasi: string
+  comment?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  addressAuthor?: Prisma.AddressCreateNestedOneWithoutProdukInput
+  owner: Prisma.UserCreateNestedOneWithoutProductsInput
+  variations?: Prisma.VariationCreateNestedManyWithoutProductInput
+  loves?: Prisma.LoveCreateNestedManyWithoutProductInput
+}
+
+export type ProductUncheckedCreateWithoutReviewInput = {
+  id?: number
+  nama: string
+  kategori: string
+  deskripsi?: string | null
+  lokasi: string
+  comment?: string | null
+  ownerId: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  addressId?: number | null
+  variations?: Prisma.VariationUncheckedCreateNestedManyWithoutProductInput
+  loves?: Prisma.LoveUncheckedCreateNestedManyWithoutProductInput
+}
+
+export type ProductCreateOrConnectWithoutReviewInput = {
+  where: Prisma.ProductWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductCreateWithoutReviewInput, Prisma.ProductUncheckedCreateWithoutReviewInput>
+}
+
+export type ProductUpsertWithoutReviewInput = {
+  update: Prisma.XOR<Prisma.ProductUpdateWithoutReviewInput, Prisma.ProductUncheckedUpdateWithoutReviewInput>
+  create: Prisma.XOR<Prisma.ProductCreateWithoutReviewInput, Prisma.ProductUncheckedCreateWithoutReviewInput>
+  where?: Prisma.ProductWhereInput
+}
+
+export type ProductUpdateToOneWithWhereWithoutReviewInput = {
+  where?: Prisma.ProductWhereInput
+  data: Prisma.XOR<Prisma.ProductUpdateWithoutReviewInput, Prisma.ProductUncheckedUpdateWithoutReviewInput>
+}
+
+export type ProductUpdateWithoutReviewInput = {
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  kategori?: Prisma.StringFieldUpdateOperationsInput | string
+  deskripsi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lokasi?: Prisma.StringFieldUpdateOperationsInput | string
+  comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  addressAuthor?: Prisma.AddressUpdateOneWithoutProdukNestedInput
+  owner?: Prisma.UserUpdateOneRequiredWithoutProductsNestedInput
+  variations?: Prisma.VariationUpdateManyWithoutProductNestedInput
+  loves?: Prisma.LoveUpdateManyWithoutProductNestedInput
+}
+
+export type ProductUncheckedUpdateWithoutReviewInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  kategori?: Prisma.StringFieldUpdateOperationsInput | string
+  deskripsi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lokasi?: Prisma.StringFieldUpdateOperationsInput | string
+  comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  variations?: Prisma.VariationUncheckedUpdateManyWithoutProductNestedInput
+  loves?: Prisma.LoveUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductCreateManyOwnerInput = {
@@ -892,6 +999,7 @@ export type ProductUpdateWithoutOwnerInput = {
   addressAuthor?: Prisma.AddressUpdateOneWithoutProdukNestedInput
   variations?: Prisma.VariationUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUpdateManyWithoutProductNestedInput
+  review?: Prisma.ReviewUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateWithoutOwnerInput = {
@@ -906,6 +1014,7 @@ export type ProductUncheckedUpdateWithoutOwnerInput = {
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   variations?: Prisma.VariationUncheckedUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutProductNestedInput
+  review?: Prisma.ReviewUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateManyWithoutOwnerInput = {
@@ -943,6 +1052,7 @@ export type ProductUpdateWithoutAddressAuthorInput = {
   owner?: Prisma.UserUpdateOneRequiredWithoutProductsNestedInput
   variations?: Prisma.VariationUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUpdateManyWithoutProductNestedInput
+  review?: Prisma.ReviewUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateWithoutAddressAuthorInput = {
@@ -957,6 +1067,7 @@ export type ProductUncheckedUpdateWithoutAddressAuthorInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   variations?: Prisma.VariationUncheckedUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutProductNestedInput
+  review?: Prisma.ReviewUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductUncheckedUpdateManyWithoutAddressAuthorInput = {
@@ -979,11 +1090,13 @@ export type ProductUncheckedUpdateManyWithoutAddressAuthorInput = {
 export type ProductCountOutputType = {
   variations: number
   loves: number
+  review: number
 }
 
 export type ProductCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   variations?: boolean | ProductCountOutputTypeCountVariationsArgs
   loves?: boolean | ProductCountOutputTypeCountLovesArgs
+  review?: boolean | ProductCountOutputTypeCountReviewArgs
 }
 
 /**
@@ -1010,6 +1123,13 @@ export type ProductCountOutputTypeCountLovesArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.LoveWhereInput
 }
 
+/**
+ * ProductCountOutputType without action
+ */
+export type ProductCountOutputTypeCountReviewArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReviewWhereInput
+}
+
 
 export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1026,6 +1146,7 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   variations?: boolean | Prisma.Product$variationsArgs<ExtArgs>
   loves?: boolean | Prisma.Product$lovesArgs<ExtArgs>
+  review?: boolean | Prisma.Product$reviewArgs<ExtArgs>
   _count?: boolean | Prisma.ProductCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["product"]>
 
@@ -1078,6 +1199,7 @@ export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   variations?: boolean | Prisma.Product$variationsArgs<ExtArgs>
   loves?: boolean | Prisma.Product$lovesArgs<ExtArgs>
+  review?: boolean | Prisma.Product$reviewArgs<ExtArgs>
   _count?: boolean | Prisma.ProductCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProductIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1096,6 +1218,7 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     owner: Prisma.$UserPayload<ExtArgs>
     variations: Prisma.$VariationPayload<ExtArgs>[]
     loves: Prisma.$LovePayload<ExtArgs>[]
+    review: Prisma.$ReviewPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1506,6 +1629,7 @@ export interface Prisma__ProductClient<T, Null = never, ExtArgs extends runtime.
   owner<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   variations<T extends Prisma.Product$variationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$variationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VariationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   loves<T extends Prisma.Product$lovesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$lovesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LovePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  review<T extends Prisma.Product$reviewArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Product$reviewArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2005,6 +2129,30 @@ export type Product$lovesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.LoveScalarFieldEnum | Prisma.LoveScalarFieldEnum[]
+}
+
+/**
+ * Product.review
+ */
+export type Product$reviewArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Review
+   */
+  select?: Prisma.ReviewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Review
+   */
+  omit?: Prisma.ReviewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewInclude<ExtArgs> | null
+  where?: Prisma.ReviewWhereInput
+  orderBy?: Prisma.ReviewOrderByWithRelationInput | Prisma.ReviewOrderByWithRelationInput[]
+  cursor?: Prisma.ReviewWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReviewScalarFieldEnum | Prisma.ReviewScalarFieldEnum[]
 }
 
 /**

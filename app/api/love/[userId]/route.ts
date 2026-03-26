@@ -21,6 +21,7 @@ export async function GET(
       include: {
         product: {
           include: {
+            review: true,
             variations: {
               include: {
                 images: true,
@@ -31,7 +32,26 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(favorites);
+    const processedFavorites = favorites.map((fav) => {
+      const product = fav.product;
+      const reviews = product.review || [];
+      const totalReviews = reviews.length;
+
+      const sumRating = reviews.reduce((acc, rev) => acc + rev.rating, 0);
+
+      const avgRating = totalReviews > 0 ? sumRating / totalReviews : 0;
+
+      return {
+        ...fav,
+        product: {
+          ...product,
+          avgRating: parseFloat(avgRating.toFixed(1)),
+          totalReviews: totalReviews,
+        },
+      };
+    });
+
+    return NextResponse.json(processedFavorites);
   } catch (error) {
     console.error("GET FAVORITE ERROR:", error);
     return NextResponse.json(

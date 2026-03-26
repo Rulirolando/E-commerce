@@ -12,6 +12,12 @@ export async function GET(
       include: {
         owner: { select: { username: true, id: true } },
         variations: { include: { images: true, sizes: true } },
+        review: {
+          include: {
+            user: { select: { nama: true, imgProfile: true } },
+          },
+          orderBy: { createdAt: "desc" },
+        },
       },
     });
 

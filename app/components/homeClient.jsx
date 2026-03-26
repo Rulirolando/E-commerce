@@ -13,7 +13,6 @@ export default function Home({ currentUser }) {
   const [produkList, setProdukList] = useState([]);
   console.log("produkList", produkList);
   const [recentProduk, setRecentProduk] = useState("terbaru");
-  console.log("Current", currentUser);
 
   async function toggleLove(produkId) {
     if (!currentUser) {
@@ -112,10 +111,6 @@ export default function Home({ currentUser }) {
     }
 
     return sortedList.slice(0, 6).map((p) => {
-      const totalStokSemuaVariasi = p.variations?.reduce(
-        (acc, curr) => acc + curr.stok,
-        0,
-      );
       const mainVariant = p.variations?.[0];
 
       return (
@@ -126,8 +121,10 @@ export default function Home({ currentUser }) {
           harga={"Rp " + (mainVariant?.harga?.toLocaleString("id-ID") || "0")}
           gambar={mainVariant?.images?.[0]?.img}
           terjual={mainVariant?.terjual || 0}
-          stok={totalStokSemuaVariasi}
+          stok={p.totalSemuaStokVariasi}
           edit={false}
+          avgRating={p.avgRating}
+          totalReviews={p.totalReviews}
           isLoved={p.loves?.some(
             (l) => l.userId === currentUser?.user?.id && l.status === true,
           )}

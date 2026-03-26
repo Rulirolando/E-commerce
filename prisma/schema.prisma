@@ -28,6 +28,7 @@ model User {
   addresses  Address[]
   account Account[]
   notifications Notification[]
+  review Review[]
 }
 
 model Account {
@@ -102,6 +103,7 @@ model Product {
   owner       User     @relation(fields: [ownerId], references: [id])
   variations   Variation[]
   loves     Love[]
+  review Review[]
 }
 
 model Variation {
@@ -170,6 +172,7 @@ model Order {
  transactionId String?
 
  author String @default("") // orang yang punya produk
+ review Review[]
 
   buyerId     String
   buyer       User     @relation("BuyerOrders",fields: [buyerId], references: [id])
@@ -178,6 +181,23 @@ model Order {
   produk      Variation?  @relation("ProdukInOrders", fields: [produkId], references: [id], onDelete: SetNull)
 
   @@index([buyerId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int      @default(0)
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+
+  orderId   Int      
+  order     Order    @relation(fields: [orderId], references: [id])
 }
 
 model Cart {

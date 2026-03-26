@@ -15,6 +15,8 @@ export default function CardProduk({
   onHapus,
   loveProduk = false,
   showLove = false,
+  avgRating = 0,
+  totalReviews = 0,
 }) {
   function capitalizeFirst(text) {
     if (!text) return "";
@@ -52,11 +54,20 @@ export default function CardProduk({
         <h1 className="font-semibold text-gray-800 dark:text-slate-100 line-clamp-2 min-h-10">
           {capitalizeFirst(nama)}
         </h1>
-        <p>★★★★★</p>
+        <div className="flex items-center gap-1 my-1">
+          <div className="flex text-amber-400 text-2xl">
+            {[...Array(5)].map((_, i) => (
+              <span key={i}>{i < Math.round(avgRating) ? "★" : "☆"}</span>
+            ))}
+          </div>
+          <span className="text-2xs text-gray-500 dark:text-slate-400">
+            ({totalReviews})
+          </span>
+        </div>
         <p className="font-light text-xs dark:text-slate-400 uppercase tracking-tight">
           Terjual: {terjual}
         </p>
-        <p className="font-light text-sm dark:text-blue-400">{harga}</p>
+        <p className="font-light text-sm dark:text-blue-400">Rp.{harga}</p>
         <div className="flex justify-between w-full gap-1">
           {" "}
           <button

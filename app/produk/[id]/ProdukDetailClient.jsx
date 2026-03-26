@@ -483,9 +483,42 @@ export default function ProdukDetail({ produkChose }) {
         </div>
       </div>
       <div className="w-full dark:bg-slate-950 transition-colors duration-300">
-        <div className="m-4 bg-blue-100 shadow-lg rounded-md p-2 dark:bg-slate-800 text-black dark:text-white">
-          <h1 className="text-4xl font-semibold mt-3">Komentar</h1>
-          <p className="text-lg font-light mt-2">{produkChose.comment}</p>
+        <div className="m-4 bg-blue-100 shadow-lg rounded-md p-6 dark:bg-slate-800 text-black dark:text-white">
+          <h1 className="text-2xl font-semibold mb-6">
+            Ulasan Produk ({produkChose.review?.length || 0})
+          </h1>
+
+          {produkChose.review && produkChose.review.length > 0 ? (
+            <div className="space-y-6">
+              {produkChose.review.map((rev, index) => (
+                <div
+                  key={index}
+                  className="border-b dark:border-slate-700 pb-4 last:border-0"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="flex text-amber-400 text-lg">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i}>{i < rev.rating ? "★" : "☆"}</span>
+                      ))}
+                    </div>
+                    <p className="font-bold">
+                      {rev.user?.nama || "Pembeli Rulshop"}
+                    </p>
+                  </div>
+                  <p className="text-gray-600 dark:text-slate-300 italic">
+                    {rev.comment}
+                  </p>
+                  <p className="text-[10px] text-gray-400 mt-2">
+                    {new Date(rev.createdAt).toLocaleDateString("id-ID")}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 italic">
+              Belum ada komentar untuk produk ini.
+            </p>
+          )}
         </div>
       </div>
       <Footer />

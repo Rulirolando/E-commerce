@@ -336,6 +336,7 @@ export type OrderWhereInput = {
   author?: Prisma.StringFilter<"Order"> | string
   buyerId?: Prisma.StringFilter<"Order"> | string
   produkId?: Prisma.IntNullableFilter<"Order"> | number | null
+  review?: Prisma.ReviewListRelationFilter
   buyer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   produk?: Prisma.XOR<Prisma.VariationNullableScalarRelationFilter, Prisma.VariationWhereInput> | null
 }
@@ -359,6 +360,7 @@ export type OrderOrderByWithRelationInput = {
   author?: Prisma.SortOrder
   buyerId?: Prisma.SortOrder
   produkId?: Prisma.SortOrderInput | Prisma.SortOrder
+  review?: Prisma.ReviewOrderByRelationAggregateInput
   buyer?: Prisma.UserOrderByWithRelationInput
   produk?: Prisma.VariationOrderByWithRelationInput
 }
@@ -385,6 +387,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   author?: Prisma.StringFilter<"Order"> | string
   buyerId?: Prisma.StringFilter<"Order"> | string
   produkId?: Prisma.IntNullableFilter<"Order"> | number | null
+  review?: Prisma.ReviewListRelationFilter
   buyer?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   produk?: Prisma.XOR<Prisma.VariationNullableScalarRelationFilter, Prisma.VariationWhereInput> | null
 }, "id">
@@ -455,6 +458,7 @@ export type OrderCreateInput = {
   totalHarga: number
   transactionId?: string | null
   author?: string
+  review?: Prisma.ReviewCreateNestedManyWithoutOrderInput
   buyer: Prisma.UserCreateNestedOneWithoutOrdersInput
   produk?: Prisma.VariationCreateNestedOneWithoutOrdersInput
 }
@@ -478,6 +482,7 @@ export type OrderUncheckedCreateInput = {
   author?: string
   buyerId: string
   produkId?: number | null
+  review?: Prisma.ReviewUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -496,6 +501,7 @@ export type OrderUpdateInput = {
   totalHarga?: Prisma.IntFieldUpdateOperationsInput | number
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   author?: Prisma.StringFieldUpdateOperationsInput | string
+  review?: Prisma.ReviewUpdateManyWithoutOrderNestedInput
   buyer?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
   produk?: Prisma.VariationUpdateOneWithoutOrdersNestedInput
 }
@@ -519,6 +525,7 @@ export type OrderUncheckedUpdateInput = {
   author?: Prisma.StringFieldUpdateOperationsInput | string
   buyerId?: Prisma.StringFieldUpdateOperationsInput | string
   produkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  review?: Prisma.ReviewUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -670,6 +677,11 @@ export type OrderSumOrderByAggregateInput = {
   produkId?: Prisma.SortOrder
 }
 
+export type OrderScalarRelationFilter = {
+  is?: Prisma.OrderWhereInput
+  isNot?: Prisma.OrderWhereInput
+}
+
 export type OrderCreateNestedManyWithoutBuyerInput = {
   create?: Prisma.XOR<Prisma.OrderCreateWithoutBuyerInput, Prisma.OrderUncheckedCreateWithoutBuyerInput> | Prisma.OrderCreateWithoutBuyerInput[] | Prisma.OrderUncheckedCreateWithoutBuyerInput[]
   connectOrCreate?: Prisma.OrderCreateOrConnectWithoutBuyerInput | Prisma.OrderCreateOrConnectWithoutBuyerInput[]
@@ -754,6 +766,20 @@ export type OrderUncheckedUpdateManyWithoutProdukNestedInput = {
   deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
 }
 
+export type OrderCreateNestedOneWithoutReviewInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutReviewInput, Prisma.OrderUncheckedCreateWithoutReviewInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutReviewInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneRequiredWithoutReviewNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutReviewInput, Prisma.OrderUncheckedCreateWithoutReviewInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutReviewInput
+  upsert?: Prisma.OrderUpsertWithoutReviewInput
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutReviewInput, Prisma.OrderUpdateWithoutReviewInput>, Prisma.OrderUncheckedUpdateWithoutReviewInput>
+}
+
 export type OrderCreateWithoutBuyerInput = {
   warna: string
   nama: string
@@ -770,6 +796,7 @@ export type OrderCreateWithoutBuyerInput = {
   totalHarga: number
   transactionId?: string | null
   author?: string
+  review?: Prisma.ReviewCreateNestedManyWithoutOrderInput
   produk?: Prisma.VariationCreateNestedOneWithoutOrdersInput
 }
 
@@ -791,6 +818,7 @@ export type OrderUncheckedCreateWithoutBuyerInput = {
   transactionId?: string | null
   author?: string
   produkId?: number | null
+  review?: Prisma.ReviewUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutBuyerInput = {
@@ -859,6 +887,7 @@ export type OrderCreateWithoutProdukInput = {
   totalHarga: number
   transactionId?: string | null
   author?: string
+  review?: Prisma.ReviewCreateNestedManyWithoutOrderInput
   buyer: Prisma.UserCreateNestedOneWithoutOrdersInput
 }
 
@@ -880,6 +909,7 @@ export type OrderUncheckedCreateWithoutProdukInput = {
   transactionId?: string | null
   author?: string
   buyerId: string
+  review?: Prisma.ReviewUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutProdukInput = {
@@ -906,6 +936,104 @@ export type OrderUpdateWithWhereUniqueWithoutProdukInput = {
 export type OrderUpdateManyWithWhereWithoutProdukInput = {
   where: Prisma.OrderScalarWhereInput
   data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutProdukInput>
+}
+
+export type OrderCreateWithoutReviewInput = {
+  warna: string
+  nama: string
+  ukuran: string
+  harga: number
+  estimasiTiba?: string | null
+  gambar: string
+  namaPenerima?: string
+  telepon?: string
+  alamat?: string
+  status?: string
+  createdAt?: Date | string
+  jumlah: number
+  totalHarga: number
+  transactionId?: string | null
+  author?: string
+  buyer: Prisma.UserCreateNestedOneWithoutOrdersInput
+  produk?: Prisma.VariationCreateNestedOneWithoutOrdersInput
+}
+
+export type OrderUncheckedCreateWithoutReviewInput = {
+  id?: number
+  warna: string
+  nama: string
+  ukuran: string
+  harga: number
+  estimasiTiba?: string | null
+  gambar: string
+  namaPenerima?: string
+  telepon?: string
+  alamat?: string
+  status?: string
+  createdAt?: Date | string
+  jumlah: number
+  totalHarga: number
+  transactionId?: string | null
+  author?: string
+  buyerId: string
+  produkId?: number | null
+}
+
+export type OrderCreateOrConnectWithoutReviewInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutReviewInput, Prisma.OrderUncheckedCreateWithoutReviewInput>
+}
+
+export type OrderUpsertWithoutReviewInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutReviewInput, Prisma.OrderUncheckedUpdateWithoutReviewInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutReviewInput, Prisma.OrderUncheckedCreateWithoutReviewInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutReviewInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutReviewInput, Prisma.OrderUncheckedUpdateWithoutReviewInput>
+}
+
+export type OrderUpdateWithoutReviewInput = {
+  warna?: Prisma.StringFieldUpdateOperationsInput | string
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  ukuran?: Prisma.StringFieldUpdateOperationsInput | string
+  harga?: Prisma.IntFieldUpdateOperationsInput | number
+  estimasiTiba?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gambar?: Prisma.StringFieldUpdateOperationsInput | string
+  namaPenerima?: Prisma.StringFieldUpdateOperationsInput | string
+  telepon?: Prisma.StringFieldUpdateOperationsInput | string
+  alamat?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  jumlah?: Prisma.IntFieldUpdateOperationsInput | number
+  totalHarga?: Prisma.IntFieldUpdateOperationsInput | number
+  transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  author?: Prisma.StringFieldUpdateOperationsInput | string
+  buyer?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  produk?: Prisma.VariationUpdateOneWithoutOrdersNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutReviewInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  warna?: Prisma.StringFieldUpdateOperationsInput | string
+  nama?: Prisma.StringFieldUpdateOperationsInput | string
+  ukuran?: Prisma.StringFieldUpdateOperationsInput | string
+  harga?: Prisma.IntFieldUpdateOperationsInput | number
+  estimasiTiba?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gambar?: Prisma.StringFieldUpdateOperationsInput | string
+  namaPenerima?: Prisma.StringFieldUpdateOperationsInput | string
+  telepon?: Prisma.StringFieldUpdateOperationsInput | string
+  alamat?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  jumlah?: Prisma.IntFieldUpdateOperationsInput | number
+  totalHarga?: Prisma.IntFieldUpdateOperationsInput | number
+  transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  author?: Prisma.StringFieldUpdateOperationsInput | string
+  buyerId?: Prisma.StringFieldUpdateOperationsInput | string
+  produkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type OrderCreateManyBuyerInput = {
@@ -944,6 +1072,7 @@ export type OrderUpdateWithoutBuyerInput = {
   totalHarga?: Prisma.IntFieldUpdateOperationsInput | number
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   author?: Prisma.StringFieldUpdateOperationsInput | string
+  review?: Prisma.ReviewUpdateManyWithoutOrderNestedInput
   produk?: Prisma.VariationUpdateOneWithoutOrdersNestedInput
 }
 
@@ -965,6 +1094,7 @@ export type OrderUncheckedUpdateWithoutBuyerInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   author?: Prisma.StringFieldUpdateOperationsInput | string
   produkId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  review?: Prisma.ReviewUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutBuyerInput = {
@@ -1023,6 +1153,7 @@ export type OrderUpdateWithoutProdukInput = {
   totalHarga?: Prisma.IntFieldUpdateOperationsInput | number
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   author?: Prisma.StringFieldUpdateOperationsInput | string
+  review?: Prisma.ReviewUpdateManyWithoutOrderNestedInput
   buyer?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
 }
 
@@ -1044,6 +1175,7 @@ export type OrderUncheckedUpdateWithoutProdukInput = {
   transactionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   author?: Prisma.StringFieldUpdateOperationsInput | string
   buyerId?: Prisma.StringFieldUpdateOperationsInput | string
+  review?: Prisma.ReviewUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutProdukInput = {
@@ -1067,6 +1199,35 @@ export type OrderUncheckedUpdateManyWithoutProdukInput = {
 }
 
 
+/**
+ * Count Type OrderCountOutputType
+ */
+
+export type OrderCountOutputType = {
+  review: number
+}
+
+export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  review?: boolean | OrderCountOutputTypeCountReviewArgs
+}
+
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OrderCountOutputType
+   */
+  select?: Prisma.OrderCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountReviewArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReviewWhereInput
+}
+
 
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1087,8 +1248,10 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   author?: boolean
   buyerId?: boolean
   produkId?: boolean
+  review?: boolean | Prisma.Order$reviewArgs<ExtArgs>
   buyer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   produk?: boolean | Prisma.Order$produkArgs<ExtArgs>
+  _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1160,8 +1323,10 @@ export type OrderSelectScalar = {
 
 export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "warna" | "nama" | "ukuran" | "harga" | "estimasiTiba" | "gambar" | "namaPenerima" | "telepon" | "alamat" | "status" | "createdAt" | "jumlah" | "totalHarga" | "transactionId" | "author" | "buyerId" | "produkId", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  review?: boolean | Prisma.Order$reviewArgs<ExtArgs>
   buyer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   produk?: boolean | Prisma.Order$produkArgs<ExtArgs>
+  _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   buyer?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1175,6 +1340,7 @@ export type OrderIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
 export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Order"
   objects: {
+    review: Prisma.$ReviewPayload<ExtArgs>[]
     buyer: Prisma.$UserPayload<ExtArgs>
     produk: Prisma.$VariationPayload<ExtArgs> | null
   }
@@ -1591,6 +1757,7 @@ readonly fields: OrderFieldRefs;
  */
 export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  review<T extends Prisma.Order$reviewArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$reviewArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   buyer<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   produk<T extends Prisma.Order$produkArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$produkArgs<ExtArgs>>): Prisma.Prisma__VariationClient<runtime.Types.Result.GetResult<Prisma.$VariationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -2033,6 +2200,30 @@ export type OrderDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Limit how many Orders to delete.
    */
   limit?: number
+}
+
+/**
+ * Order.review
+ */
+export type Order$reviewArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Review
+   */
+  select?: Prisma.ReviewSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Review
+   */
+  omit?: Prisma.ReviewOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewInclude<ExtArgs> | null
+  where?: Prisma.ReviewWhereInput
+  orderBy?: Prisma.ReviewOrderByWithRelationInput | Prisma.ReviewOrderByWithRelationInput[]
+  cursor?: Prisma.ReviewWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReviewScalarFieldEnum | Prisma.ReviewScalarFieldEnum[]
 }
 
 /**

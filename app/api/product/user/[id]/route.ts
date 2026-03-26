@@ -10,6 +10,7 @@ export async function GET(
     const product = await prisma.product.findMany({
       where: { ownerId: id },
       include: {
+        review: true,
         owner: { select: { username: true, id: true } },
         variations: {
           include: {
@@ -26,8 +27,23 @@ export async function GET(
         { status: 404 },
       );
     }
+    const processedProducts = product.map((product) => {
+      const totalReviews = product.review.length;
+      const sumRating = product.review.reduce(
+        (acc, rev) => acc + rev.rating,
+        0,
+      );
 
-    return NextResponse.json(product, { status: 200 });
+      const avgRating = totalReviews > 0 ? sumRating / totalReviews : 0;
+
+      return {
+        ...product,
+        avgRating: parseFloat(avgRating.toFixed(1)), // Contoh: 4.5
+        totalReviews: totalReviews,
+      };
+    });
+
+    return NextResponse.json(processedProducts, { status: 200 });
   } catch (err) {
     console.error("Prisma Error:", err);
     return NextResponse.json(

@@ -71,6 +71,7 @@ export async function GET() {
             sizes: true,
           },
         },
+        review: true,
         loves: {
           select: {
             userId: true,
@@ -88,7 +89,27 @@ export async function GET() {
         createdAt: "desc",
       },
     });
-    return NextResponse.json(products, { status: 200 });
+    const processedProducts = products.map((product) => {
+      const totalReviews = product.review.length;
+      const sumRating = product.review.reduce(
+        (acc, rev) => acc + rev.rating,
+        0,
+      );
+      const totalSemuaStokVariasi = product.variations.reduce(
+        (acc, curr) => acc + curr.stok,
+        0,
+      );
+      const avgRating = totalReviews > 0 ? sumRating / totalReviews : 0;
+
+      return {
+        ...product,
+        avgRating: parseFloat(avgRating.toFixed(1)), // Contoh: 4.5
+        totalReviews: totalReviews,
+        totalSemuaStokVariasi: totalSemuaStokVariasi,
+      };
+    });
+
+    return NextResponse.json(processedProducts, { status: 200 });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

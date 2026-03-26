@@ -25,11 +25,13 @@ import EditProdukModal from "../../components/EditProduk";
 import { signOut } from "next-auth/react";
 import { format, formatDistanceToNow, isValid } from "date-fns";
 import { id } from "date-fns/locale"; // Untuk bahasa Indonesia
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage({ userId, currentUser }) {
   const [user, setUser] = useState({});
   const [username, setUsername] = useState(null);
   const [produkLoves, setProdukLoves] = useState([]);
+  console.log("produkLoves:", produkLoves);
   const [activeMenu, setActiveMenu] = useState("profile");
   const [activePesananMenu, setActivePesananMenu] = useState("semuapesanan");
   const [notifEnabled, setNotifEnabled] = useState(false);
@@ -39,13 +41,18 @@ export default function ProfilePage({ userId, currentUser }) {
   const [isEditAddress, setIsEditAddress] = useState(null);
   const [editAddress, setEditAddress] = useState(null);
   const [produkBeli, setProdukBeli] = useState([]);
-  console.log("produk beli:", produkBeli);
+  const [isLoading, setIsLoading] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [onEdit, setOnEdit] = useState({});
   const [myProduks, setMyProduks] = useState(null);
-  console.log("my produk:", myProduks);
-
   const [addressList, setAddressList] = useState([]);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  console.log("selectedOrder:", selectedOrder);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+
+  const router = useRouter();
 
   async function toggleLove(produkId) {
     const res = await fetch("/api/love", {
@@ -420,6 +427,23 @@ export default function ProfilePage({ userId, currentUser }) {
                         Lihat detail
                       </Link>
                     </button>
+                    {produk.status === "Selesai" && !produk.review?.length && (
+                      <button
+                        onClick={() => {
+                          setSelectedOrder(produk);
+                          setShowReviewModal(true);
+                        }}
+                        className="bg-amber-500 hover:bg-amber-600 text-white rounded-lg p-2 transition-colors"
+                      >
+                        Beri Ulasan
+                      </button>
+                    )}
+                    {produk.status === "Selesai" &&
+                      produk.review?.length > 0 && (
+                        <span className="text-[10px] text-green-600 dark:text-green-400 font-medium ml-2 italic">
+                          Sudah diulas
+                        </span>
+                      )}
                   </div>
                 </div>
               </div>
@@ -459,6 +483,7 @@ export default function ProfilePage({ userId, currentUser }) {
               width={50}
               height={50}
               className="w-16 h-16 rounded-full mb-4 border-transparent dark:border-slate-700 shadow-sm"
+              referrerPolicy="no-referrer"
             />
             <h2 className=" font-light text-sm text-gray-500 dark:text-slate-400">
               {user.username}
@@ -588,7 +613,7 @@ export default function ProfilePage({ userId, currentUser }) {
                     produk.status === "Sudah dibayar" &&
                     produk.buyerId === currentUser.user.id,
                 )}
-              ){/* Dikemas pesanan */}
+              {/* Dikemas pesanan */}
               {activePesananMenu === "dikemaspesanan" &&
                 filteredProduk(
                   (produk) =>
@@ -663,6 +688,9 @@ export default function ProfilePage({ userId, currentUser }) {
                         nama={item.nama}
                         harga={p.harga}
                         stok={p.stok}
+                        avgRating={item.avgRating}
+                        totalReviews={item.totalReviews}
+                        onClick={() => router.push(`/produk/${p.id}`)}
                         gambar={p.images[0]?.img}
                         terjual={p.terjual}
                         edit={currentUser?.user.id === userId ? true : false}
@@ -723,6 +751,8 @@ export default function ProfilePage({ userId, currentUser }) {
                           "id-ID",
                         )
                       }
+                      avgRating={produk.product?.avgRating}
+                      totalReviews={produk.product?.totalReviews}
                       gambar={produk.product?.variations?.[0]?.images?.[0]?.img}
                       terjual={produk.product?.variations?.[0]?.terjual || 0}
                       edit={false}
@@ -730,6 +760,11 @@ export default function ProfilePage({ userId, currentUser }) {
                       onLove={() => toggleLove(produk.productId)}
                       showLove={
                         produk.product?.ownerId === currentUser?.user.id
+                      }
+                      onClick={() =>
+                        router.push(
+                          `/produk/${produk.product?.variations?.[0]?.id}`,
+                        )
                       }
                     />
                   ))
@@ -1082,6 +1117,80 @@ export default function ProfilePage({ userId, currentUser }) {
           </>
         )}
       </div>
+      {showReviewModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl w-full max-w-md shadow-xl">
+            <h2 className="text-xl font-bold mb-4 dark:text-white">
+              Ulas Produk: {selectedOrder?.nama}
+            </h2>
+
+            <div className="flex gap-2 mb-4">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => setRating(star)}
+                  className={`text-2xl ${rating >= star ? "text-amber-400" : "text-gray-300"}`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+
+            <textarea
+              className="w-full p-3 border rounded-lg dark:bg-slate-700 dark:border-slate-600 dark:text-white mb-4"
+              placeholder="Tulis komentar kamu..."
+              rows="4"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-2">
+              <button
+                disabled={isLoading}
+                onClick={() => setShowReviewModal(false)}
+                className="px-4 py-2 text-gray-500"
+              >
+                Batal
+              </button>
+              <button
+                onClick={async () => {
+                  setIsLoading(true);
+                  try {
+                    const res = await fetch("/api/review", {
+                      method: "POST",
+                      body: JSON.stringify({
+                        userId: currentUser.user.id,
+                        productId: Number(selectedOrder.produk.productId),
+                        orderId: Number(selectedOrder.id),
+                        rating: Number(rating),
+                        comment,
+                      }),
+                    });
+                    if (res.ok) {
+                      const savedReview = await res.json();
+                      alert("Terima kasih ulasannya!");
+                      setShowReviewModal(false);
+                      setProdukBeli((prev) =>
+                        prev.map((p) =>
+                          p.id === selectedOrder.id
+                            ? { ...p, review: [savedReview] }
+                            : p,
+                        ),
+                      );
+                    }
+                  } catch {
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }}
+                className={`${isLoading ? "bg-gray-400" : "bg-blue-600"} px-4 py-2 text-white rounded-lg`}
+              >
+                {isLoading ? "Mengirim..." : "Kirim Ulasan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

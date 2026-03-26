@@ -10,6 +10,7 @@ export async function GET(
   const orders = await prisma.order.findMany({
     where: { buyerId: id },
     include: {
+      review: true,
       produk: {
         include: {
           images: true,
