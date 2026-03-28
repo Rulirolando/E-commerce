@@ -3,6 +3,7 @@ import { Inter, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import Script from "next/script";
+import Providers from "./components/Providers";
 
 const geistSans = Inter({
   variable: "--font-geist-sans",
@@ -24,8 +25,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const storage = localStorage.getItem('theme-storage');
+                  if (storage) {
+                    const parsed = JSON.parse(storage);
+                    if (parsed.state && parsed.state.isDarkMode === true) {
+                      document.documentElement.classList.add('dark');
+                    } else {
+                      document.documentElement.classList.remove('dark');
+                    }
+                  } 
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         <Script
           src="https://app.sandbox.midtrans.com/snap/snap.js"
           data-client-key={process.env.MIDTRANS_CLIENT_KEY}
@@ -35,7 +55,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider>
+          <Providers>{children}</Providers>
+        </SessionProvider>
       </body>
     </html>
   );

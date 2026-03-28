@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+
 import Navbar from "../components/navbar";
 import { useSession } from "next-auth/react";
 import {
@@ -8,75 +8,66 @@ import {
   FaCheckDouble,
 } from "react-icons/fa";
 import useNotificationStore from "../../store/useNotificationStore";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function NotificationPage() {
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
   const { data: session, status } = useSession();
   const currentUser = session;
   const { decreaseCount } = useNotificationStore();
+  const queryClient = useQueryClient();
 
-  const handleSelesaikanPesanan = async (orderId) => {
-    const confirm = window.confirm("Apakah Anda yakin barang sudah diterima?");
-    if (!confirm) return;
-
-    try {
+  const orderMutation = useMutation({
+    mutationFn: async (orderId) => {
       const res = await fetch("/api/order", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: orderId, status: "Selesai" }),
       });
+      if (!res.ok) throw new Error("Gagal update status");
+      return res.json();
+    },
+    onSuccess: () => {
+      alert("Pesanan selesai! Terima kasih telah berbelanja.");
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
 
-      if (res.ok) {
-        alert("Pesanan selesai! Terima kasih telah berbelanja.");
-        window.location.reload(); // Refresh untuk update status
-      }
-    } catch {
-      alert("Gagal memperbarui status pesanan");
-    }
+  const handleSelesaikanPesanan = async (orderId) => {
+    const confirm = window.confirm("Apakah Anda yakin barang sudah diterima?");
+    if (!confirm) return;
+
+    orderMutation.mutate(orderId);
   };
 
-  useEffect(() => {
-    if (!currentUser?.user.id) return;
+  const { data: notifications = [], isLoading } = useQuery({
+    queryKey: ["notifications", currentUser?.user?.id],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/notifications?userId=${currentUser.user.id}`,
+      );
+      if (!res.ok) throw new Error("Gagal mengambil notifikasi");
+      return res.json();
+    },
+    enabled: !!currentUser?.user?.id,
+  });
 
-    const fetchNotifications = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(
-          `/api/notifications?userId=${currentUser.user.id}`,
-        );
-        const data = await res.json();
-        setNotifications(data || []);
-      } catch (error) {
-        console.error("Gagal mengambil notifikasi:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNotifications();
-  }, [currentUser]);
-
-  const markAllAsRead = async () => {
-    if (!currentUser?.user.id) return;
-
-    try {
-      const response = await fetch("/api/notifications", {
+  const readAllMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/notifications", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: currentUser.user.id }),
       });
+      if (!res.ok) throw new Error("Gagal update notifikasi");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      decreaseCount();
+    },
+  });
 
-      if (response.ok) {
-        setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
-        decreaseCount();
-      }
-    } catch (error) {
-      console.error("Gagal update notifikasi:", error);
-    }
-  };
-
-  if (status === "loading" || loading) {
+  if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
         <Navbar currentUser={currentUser} />
@@ -106,10 +97,14 @@ export default function NotificationPage() {
 
           {unreadCount > 0 && (
             <button
-              onClick={markAllAsRead}
+              onClick={() => readAllMutation.mutate()}
+              disabled={readAllMutation.isPending}
               className="flex items-center gap-2 text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all font-semibold shadow-md"
             >
-              <FaCheckDouble /> Tandai Semua Dibaca
+              <FaCheckDouble />
+              {readAllMutation.isPending
+                ? "Memproses..."
+                : "Tandai Semua Dibaca"}
             </button>
           )}
         </div>

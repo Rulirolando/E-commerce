@@ -1,63 +1,53 @@
 "use client";
 import { useState, useEffect } from "react";
 import ShowProduk from "./produk";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import kategoriList from "../../public/assets/kategoriProduk";
 import CardProduk from "./CardProduk";
 import { useSession } from "next-auth/react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function SearchProduk() {
   const searchParams = useSearchParams();
-  const kategoriURL = (searchParams.get("q") || "").toLowerCase().trim();
-  const [kategori, setKategori] = useState(kategoriURL || "");
+  const keyword = (searchParams.get("q") || "").toLowerCase().trim();
+  const router = useRouter();
+
+  const [kategori, setKategori] = useState("");
   const [warna, setWarna] = useState("");
   const [ukuran, setUkuran] = useState("");
   const [lokasi, setLokasi] = useState("");
-  console.log("kategorilist", kategori);
   const [produkChosen, setProdukChosen] = useState("");
-  const [produkList, setProdukList] = useState([]);
-  console.log("produklist", produkList);
-  const [loading, setLoading] = useState(false);
+  console.log("produkChosen:", produkChosen);
   const { data: session } = useSession();
   const currentUser = session;
+  const queryClient = useQueryClient();
 
-  async function toggleLove(produkId) {
-    if (!currentUser.user.id) {
-      alert("Silakan login terlebih dahulu untuk menyukai produk.");
-      return;
-    }
-    try {
+  const { data: produkList = [], isLoading } = useQuery({
+    queryKey: ["products-search"],
+    queryFn: async () => {
+      const res = await fetch("/api/products/search");
+      if (!res.ok) throw new Error();
+      return res.json();
+    },
+  });
+
+  const loveMutation = useMutation({
+    mutationFn: async (productId) => {
       const res = await fetch("/api/love", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: currentUser.user.id,
-          productId: produkId,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: currentUser.user.id, productId }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        return alert(love.message);
-      }
-      setProdukList((prev) =>
-        prev.map((p) =>
-          p.id === produkId
-            ? {
-                ...p,
-                loves: data.loves
-                  ? [...p.loves, { userId: currentUser.user.id, status: true }]
-                  : p.loves.filter((l) => l.userId !== currentUser.user.id),
-              }
-            : p,
-        ),
-      );
-    } catch (error) {
-      console.error("Error toggling love:", error);
-      alert("Terjadi kesalahan saat menyukai produk. Silakan coba lagi.");
-    }
-  }
+      return res.json();
+    },
+    onSuccess: () => {
+      // Refresh data produk agar status Love terupdate otomatis
+      queryClient.invalidateQueries({ queryKey: ["products-search"] });
+    },
+  });
+
+  const activeKategori = keyword !== "" ? "" : kategori;
+
   const filteredProduk = produkList.filter((p) => {
     const allWarna = p.variations.map((item) => item.warna.toLowerCase());
     const allUkuran = p.variations.map((item) =>
@@ -65,7 +55,7 @@ export default function SearchProduk() {
     );
 
     const matchKategori =
-      kategori === "" ||
+      activeKategori === "" ||
       p.kategori.toLowerCase().includes(kategori.toLowerCase());
 
     const matchWarna = warna === "" || allWarna.includes(warna.toLowerCase());
@@ -74,8 +64,6 @@ export default function SearchProduk() {
 
     const matchLokasi =
       lokasi === "" || p.lokasi.toLowerCase().includes(lokasi.toLowerCase());
-
-    const keyword = (searchParams.get("q") || "").toLowerCase().trim();
 
     const matchCari =
       keyword === "" ||
@@ -88,26 +76,19 @@ export default function SearchProduk() {
     );
   });
 
-  // 🔥 Load data dari localStorage
   useEffect(() => {
-    try {
-      fetch("/api/products/search")
-        .then((res) => res.json())
-        .then((data) => {
-          setProdukList(data);
-        });
-    } catch {
-      setProdukList([]);
-    } finally {
-      setLoading(true);
-    }
-  }, []);
+    const resetFilter = () => {
+      if (keyword !== "") {
+        setKategori("");
+        setWarna("");
+        setUkuran("");
+        setLokasi("");
+      }
+    };
+    resetFilter();
+  }, [keyword]);
 
-  useEffect(() => {
-    setKategori(""); // reset kategori saat search
-  }, [searchParams]);
-
-  if (!loading) return <p className="dark:text-white">Memuat...</p>;
+  if (isLoading) return <p className="dark:text-white">Memuat...</p>;
 
   return (
     <>
@@ -121,7 +102,12 @@ export default function SearchProduk() {
               className="border dark:border-slate-700 dark:bg-slate-800 dark:text-white border-gray-300 rounded-xl px-3 py-2"
               value={warna}
               onChange={(e) => {
-                setWarna(e.target.value);
+                const selected = e.target.value;
+                setWarna(selected);
+
+                if (searchParams.get("q")) {
+                  router.push("/products");
+                }
               }}
             >
               <option value="">Semua Warna</option>
@@ -137,7 +123,12 @@ export default function SearchProduk() {
               className="border dark:border-slate-700 dark:bg-slate-800 dark:text-white border-gray-300 rounded-xl px-3 py-2"
               value={ukuran}
               onChange={(e) => {
-                setUkuran(e.target.value);
+                const selected = e.target.value;
+                setUkuran(selected);
+
+                if (searchParams.get("q")) {
+                  router.push("/products");
+                }
               }}
             >
               <option value="">Semua Ukuran</option>
@@ -152,7 +143,12 @@ export default function SearchProduk() {
               className="border border-gray-300  dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl px-3 py-2"
               value={lokasi}
               onChange={(e) => {
-                setLokasi(e.target.value);
+                const selected = e.target.value;
+                setLokasi(selected);
+
+                if (searchParams.get("q")) {
+                  router.push("/products");
+                }
               }}
             >
               <option value="">Semua Lokasi</option>
@@ -165,7 +161,12 @@ export default function SearchProduk() {
               className="border border-gray-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white rounded-xl px-1 py-2 text-center"
               value={kategori}
               onChange={(e) => {
-                setKategori(e.target.value);
+                const selected = e.target.value;
+                setKategori(selected);
+
+                if (searchParams.get("q")) {
+                  router.push("/products");
+                }
               }}
             >
               <option value="">Semua Kategori</option>
@@ -209,7 +210,10 @@ export default function SearchProduk() {
                           l.userId === currentUser?.user.id &&
                           l.status === true,
                       )}
-                      onLove={() => toggleLove(p.id)}
+                      onLove={() => {
+                        if (!currentUser) return alert("Login dulu yuk!");
+                        loveMutation.mutate(p.id);
+                      }}
                       showLove={p.ownerId === currentUser?.user.id}
                     />
                   );

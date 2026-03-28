@@ -29,7 +29,7 @@ export default function ShowProduk({ produkSelected }) {
   useEffect(() => {
     try {
       if (produkSelected && produkSelected.variations.length > 0) {
-        setSelectedImage(produkSelected.variations[0].gambar[0]);
+        setSelectedImage(produkSelected.variations[0].images[0].img);
       }
     } catch {
       setSelectedImage("");
@@ -52,7 +52,9 @@ export default function ShowProduk({ produkSelected }) {
 
   const idImg =
     produkSelected && selectedImage
-      ? produkSelected.variations.find((p) => p.gambar.includes(selectedImage))
+      ? produkSelected.variations.find((p) =>
+          p.images[0].img.includes(selectedImage),
+        )
       : null;
 
   console.log("idimg", idImg);
@@ -106,7 +108,7 @@ export default function ShowProduk({ produkSelected }) {
               Ukuran:
               <span className="bg-blue-300 text-blue-900 px-3 mx-1 rounded-full text-sm font-medium dark:bg-blue-900 dark:text-blue-100">
                 {idImg
-                  ? idImg.ukuran.join(" | ")
+                  ? idImg.sizes.flatMap((p) => p.size).join(" | ")
                   : produkSelected.variations[0].sizes
                       .flatMap((p) => p.size)
                       .join(" | ")}
@@ -155,17 +157,7 @@ export default function ShowProduk({ produkSelected }) {
           </div>
 
           <p className="mt-4 text-justify text-gray-500 dark:text-gray-300">
-            {produkSelected.deskripsi} Lorem ipsum dolor sit amet consectetur
-            adipisicing elit. Corporis aliquam est consectetur corrupti
-            perspiciatis voluptate eum quod tempore nam, amet nemo, omnis earum,
-            soluta quaerat! Ad odit voluptate aperiam doloribus. Lorem ipsum
-            dolor sit amet consectetur adipisicing elit. Vel cum commodi fugiat
-            dolorum quidem, ab obcaecati esse dolor aperiam sint? Praesentium
-            amet iste autem officia mollitia! Quos corporis beatae consequatur?
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Tempora
-            ipsam voluptates non numquam provident sint sequi, perferendis vel
-            ad nemo delectus iste, aperiam, enim porro! Iste eum voluptate
-            cupiditate? Voluptatibus.
+            {produkSelected.deskripsi}
           </p>
         </>
       ) : (

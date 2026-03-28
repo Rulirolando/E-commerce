@@ -71,6 +71,7 @@ export async function GET(req: Request) {
               include: {
                 product: true,
                 sizes: true,
+                images: true,
               },
             },
           },

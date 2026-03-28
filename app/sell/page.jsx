@@ -1,20 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import kategoriList from "../../public/assets/kategoriProduk";
 import { useRouter } from "next/navigation";
 import Navbar from "../components/navbar";
 import DragDropUploader from "../components/DragDropUploader";
 import { useSession } from "next-auth/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function JualPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const currentUser = session;
   console.log("currentUser:", currentUser);
-  const [produkList, setProdukList] = useState([]);
-  console.log("produkList", produkList);
+  const queryClient = useQueryClient();
 
   const [form, setForm] = useState(() => ({
     nama: "",
@@ -34,17 +34,30 @@ export default function JualPage() {
 
   const [variasiList, setVariasiList] = useState([]);
 
-  // Load products + session once
-  useEffect(() => {
-    try {
-      fetch("/api/product")
-        .then((res) => res.json())
-        .then(setProdukList)
-        .catch(console.error);
-    } catch {
-    } finally {
+  const postProduct = async (newProduk) => {
+    const res = await fetch("/api/product", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newProduk),
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Gagal menyimpan produk");
     }
-  }, []);
+    return res.json();
+  };
+
+  const mutation = useMutation({
+    mutationFn: postProduct,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      alert("Produk berhasil disimpan!");
+      router.push("/");
+    },
+    onError: (error) => {
+      alert(error.message);
+    },
+  });
 
   const tambahVariasi = () => {
     if (!currentUser)
@@ -85,33 +98,16 @@ export default function JualPage() {
   const simpanProduk = async () => {
     if (!currentUser) return alert("Anda harus login terlebih dahulu.");
 
-    try {
-      const newProduk = {
-        nama: form.nama,
-        kategori: form.kategori,
-        deskripsi: form.deskripsi,
-        lokasi: form.lokasi,
-        comment: form.comment,
-        ownerId: currentUser.user.id,
-        variasiList,
-      };
-      const res = await fetch("/api/product", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newProduk),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.message);
-        return;
-      }
-      alert("Produk berhasil disimpan");
-      router.push("/");
-    } catch {
-      alert("Gagal koneksi ke server");
-    }
+    const newProduk = {
+      nama: form.nama,
+      kategori: form.kategori,
+      deskripsi: form.deskripsi,
+      lokasi: form.lokasi,
+      comment: form.comment,
+      ownerId: currentUser.user.id,
+      variasiList,
+    };
+    mutation.mutate(newProduk);
   };
 
   if (status === "loading") {
@@ -128,7 +124,7 @@ export default function JualPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300 w-full">
+      <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300 w-full p-3">
         <Navbar currentUser={currentUser} />
         <div className="p-6 max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-4 dark:text-white">{`Jual produk kamu ${capitalizeFirst(
@@ -327,50 +323,6 @@ export default function JualPage() {
         >
           Simpan Produk
         </button>
-
-        {/* DAFTAR PRODUK */}
-        <h2 className="text-xl font-bold mt-8 dark:text-white">Produk Kamu</h2>
-
-        <div className="mt-4 space-y-4">
-          {produkList
-            .filter((p) => p.ownerId === currentUser.user.id)
-            .map((p) => (
-              <div
-                key={p.id}
-                className="p-4 border rounded-xl bg-white dark:border-slate-800 dark:bg-slate-900 shadow-sm transition-colors"
-              >
-                <h3 className="font-bold dark:text-white">{p.nama}</h3>
-                <p className="text-sm  dark:bg-blue-900 text-blue-700 dark:text-blue-200">
-                  {p.kategori}
-                </p>
-
-                <div className="flex gap-2 mt-2 overflow-auto">
-                  {p.variations?.map((v) => (
-                    <div
-                      key={v.id}
-                      className="w-20 h-20 rounded overflow-hidden border dark:border-slate-700"
-                    >
-                      {v.images?.[0]?.img ? (
-                        <Image
-                          src={v.images[0].img}
-                          alt={v.warna}
-                          width={100}
-                          height={100}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 dark:bg-slate-800">
-                          No Image
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                <p className="text-sm mt-2 dark:text-gray-400">{p.deskripsi}</p>
-              </div>
-            ))}
-        </div>
       </div>
     </>
   );

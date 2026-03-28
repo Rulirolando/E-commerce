@@ -1,9 +1,10 @@
 "use client";
 import Image from "next/image";
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/Footer";
 import { useSession } from "next-auth/react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function ProdukDetail({ produkChose }) {
   const { data: session } = useSession();
@@ -13,8 +14,10 @@ export default function ProdukDetail({ produkChose }) {
     produkChose?.variations?.flatMap(
       (v) => v.images?.map((i) => i.img) || [],
     ) || [];
-  const [selectedImage, setSelectedImage] = useState(allImg[0] || "");
-  const [addressList, setAddressList] = useState([]);
+  const queryClient = useQueryClient();
+  const firstVariation = produkChose?.variations?.[0];
+  const firstImage = firstVariation?.images?.[0]?.img || allImg[0] || "";
+  const [selectedImage, setSelectedImage] = useState(firstImage);
 
   console.log("currentuser", currentUser);
 
@@ -25,11 +28,9 @@ export default function ProdukDetail({ produkChose }) {
     ukuran: "",
     stok: 0,
     jumlah: 1,
-    harga: 0,
-    gambar: "",
+    harga: firstVariation?.harga || 0,
+    gambar: firstImage,
   });
-
-  console.log("selectedproduk", selectedProduk);
 
   function capitalizeFirst(text) {
     if (!text) return "";
@@ -101,12 +102,36 @@ export default function ProdukDetail({ produkChose }) {
     v.images?.some((img) => img.img === selectedImage),
   );
 
+  const orderMutation = useMutation({
+    mutationFn: async (orderPayload) => {
+      const res = await fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      });
+      if (!res.ok) throw new Error("Gagal membuat pesanan");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      window.snap.pay(data.token, {
+        onSuccess: () => {
+          alert("Pembayaran Berhasil!");
+          window.location.href = `/profile/${currentUser.user.id}`;
+        },
+        onPending: () => alert("Harap selesaikan pembayaran."),
+      });
+      resetSelection();
+    },
+  });
+
   async function handleBeli() {
     // 1. Validasi pilihan user sebelum kirim
     if (!selectedProduk.warna || !selectedProduk.ukuran) {
       alert("Silakan pilih warna dan ukuran terlebih dahulu");
       return;
     }
+
+    if (!currentUser) return alert("Silakan login terlebih dahulu.");
 
     if (currentUser.user.id === selectedProduk.ownerId) {
       alert("Anda tidak bisa membeli produk Anda sendiri.");
@@ -124,75 +149,45 @@ export default function ProdukDetail({ produkChose }) {
     );
     if (!alamat) return;
 
-    try {
-      // 2. Susun Payload (Gunakan variabel 'payload' secara konsisten)
-      const payload = {
-        name: selectedProduk.nama,
-        warna: selectedProduk.warna,
-        ukuran: selectedProduk.ukuran,
-        quantity: Number(selectedProduk.jumlah),
-        price: Number(selectedProduk.harga),
-        author: selectedProduk.ownerId,
-        gambar: selectedProduk.gambar,
-        variantId: Number(selectedProduk.produkId),
-      };
-
-      console.log("Data yang akan dikirim:", payload); // Ganti 'update' jadi 'payload'
-
-      const res = await fetch("/api/order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    orderMutation.mutate({
+      items: [
+        {
+          name: selectedProduk.nama,
+          warna: selectedProduk.warna,
+          ukuran: selectedProduk.ukuran,
+          quantity: selectedProduk.jumlah,
+          price: selectedProduk.harga,
+          author: selectedProduk.ownerId,
+          variantId: selectedProduk.produkId,
+          gambar: selectedProduk.gambar,
         },
-        body: JSON.stringify({
-          items: [payload],
-          totalHarga:
-            Number(selectedProduk.harga) * Number(selectedProduk.jumlah),
-          buyerId: currentUser.user.id,
-          customerDetails: {
-            namaPenerima: currentUser.user.name,
-            telepon: alamatUtama.telepon,
-            alamat: alamatUtama.alamat,
-          },
-        }),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Server Error Response:", errorText);
-        throw new Error("Gagal membuat pesanan");
-      }
-
-      const data = await res.json();
-
-      window.snap.pay(data.token, {
-        onSuccess: function () {
-          alert("Pembayaran Berhasil!");
-          // Redirect ke halaman pesanan atau bersihkan keranjang
-          window.location.href = `/profile/${currentUser.user.id}`;
-        },
-        onPending: function () {
-          alert("Harap selesaikan pembayaran.");
-        },
-      });
-
-      // 3. Reset state setelah berhasil
-      setSelectedProduk({
-        id: produkChose.id,
-        produkId: 0,
-        gambar: allImg[0] || "",
-        harga: produkChose.variations[0]?.harga || 0,
-        nama: produkChose.nama,
-        warna: "",
-        ukuran: "",
-        jumlah: 1,
-      });
-      setSelectedImage(allImg[0] || "");
-    } catch (error) {
-      console.error("Error Catch:", error);
-      alert("Terjadi kesalahan: " + error.message);
-    }
+      ],
+      totalHarga: selectedProduk.harga * selectedProduk.jumlah,
+      buyerId: currentUser.user.id,
+      customerDetails: {
+        namaPenerima: currentUser.user.name,
+        telepon: alamatUtama.telepon,
+        alamat: alamatUtama.alamat,
+      },
+    });
   }
+
+  const cartMutation = useMutation({
+    mutationFn: async (payload) => {
+      const res = await fetch("/api/keranjang", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      alert("Produk berhasil ditambahkan ke keranjang!");
+      // Invalidate agar angka di Navbar/Keranjang update otomatis
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      resetSelection();
+    },
+  });
 
   const handleAddToCart = async () => {
     if (!selectedProduk.warna || !selectedProduk.ukuran) {
@@ -200,23 +195,22 @@ export default function ProdukDetail({ produkChose }) {
       return;
     }
 
+    if (!currentUser) return alert("Silakan login terlebih dahulu.");
+
     if (currentUser.user.id === selectedProduk.ownerId) {
       alert("Anda tidak bisa menambahkan produk Anda sendiri ke keranjang.");
       return;
     }
 
-    await fetch("/api/keranjang", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: currentUser.user.id,
-        variantId: selectedProduk.produkId,
-        ukuran: selectedProduk.ukuran,
-        jumlah: selectedProduk.jumlah,
-      }),
+    cartMutation.mutate({
+      userId: currentUser.user.id,
+      variantId: selectedProduk.produkId,
+      ukuran: selectedProduk.ukuran,
+      jumlah: selectedProduk.jumlah,
     });
-    alert("Produk berhasil ditambahkan ke keranjang!");
-    // reset selectedProduk lengkap (termasuk gambar & harga)
+  };
+
+  const resetSelection = () => {
     setSelectedProduk({
       id: produkChose.id,
       produkId: 0,
@@ -231,47 +225,15 @@ export default function ProdukDetail({ produkChose }) {
     setSelectedImage(allImg[0] || "");
   };
 
-  const fetchAddresses = useCallback(async () => {
-    if (!currentUser.user?.id) return;
-    try {
-      const response = await fetch(
-        `/api/profile/address/${currentUser.user.id}`,
-        {
-          method: "GET",
-        },
-      );
-      if (!response.ok) throw new Error("Failed to fetch");
-      const data = await response.json();
-      setAddressList(data);
-    } catch (error) {
-      console.error("Gagal ambil alamat:", error);
-    }
-  }, [currentUser.user?.id]);
-
-  useEffect(() => {
-    fetchAddresses();
-  }, [fetchAddresses, currentUser.user?.id]);
-
-  useEffect(() => {
-    if (!produkChose) return;
-
-    const firstImage = produkChose.variations?.[0]?.images?.[0]?.img ?? null;
-
-    setSelectedImage(firstImage);
-
-    setSelectedProduk({
-      id: produkChose.id,
-      ownerId: produkChose.owner?.id,
-      produkId: 0,
-      nama: produkChose.nama,
-      gambar: firstImage,
-      harga: produkChose.variations?.[0]?.harga ?? 0,
-      warna: "",
-      ukuran: "",
-
-      jumlah: 1,
-    });
-  }, [produkChose]);
+  const { data: addressList = [] } = useQuery({
+    queryKey: ["addresses", currentUser?.user?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/profile/address/${currentUser.user.id}`);
+      if (!res.ok) throw new Error();
+      return res.json();
+    },
+    enabled: !!currentUser?.user?.id,
+  });
 
   if (!produkChose || !selectedProduk) {
     return <div className="dark:text-white">Loading produk...</div>;
@@ -458,27 +420,7 @@ export default function ProdukDetail({ produkChose }) {
         <div className="m-4 bg-blue-100 shadow-lg rounded-md p-2 text-black dark:text-white dark:bg-slate-800">
           <p className="text-4xl font-semibold mt-3">Deskripsi Produk</p>
           <p className="text-lg font-light mt-2 text-justify leading-relaxed mx-2">
-            {capitalizeFirst(produkChose.deskripsi)} Lorem ipsum dolor sit amet,
-            consectetur adipisicing elit. Quidem obcaecati nobis earum aut, eum,
-            dolores soluta, assumenda qui nulla ipsum ex maxime amet doloremque
-            odio delectus dolorem minima illo nemo. Lorem ipsum dolor sit amet
-            consectetur adipisicing elit. Odio quasi, placeat ex, qui dolor
-            officia recusandae rem totam, unde hic veniam quo suscipit. Deleniti
-            voluptate non ducimus consectetur reprehenderit dignissimos! Earum
-            laudantium enim, quod in neque adipisci, deleniti vero perspiciatis
-            dicta hic ipsa corrupti odit eos, alias nisi similique quaerat
-            ducimus velit! Consequuntur dignissimos harum rem. Eaque harum
-            quidem a? Id in, fugit ab beatae dolor quis aliquid ipsum illum
-            quasi quo. Asperiores, beatae ratione sit placeat nesciunt eius,
-            dolores accusamus dolorum pariatur vitae omnis, itaque aliquid
-            dolore laborum ducimus. Voluptatibus natus unde non consectetur quis
-            pariatur corporis esse officiis consequatur iste, nesciunt error
-            doloremque quisquam fuga aspernatur deserunt rem amet accusamus? Et
-            blanditiis amet, ipsa temporibus est saepe aliquid! Facere voluptate
-            tempora tenetur dicta perspiciatis error maxime itaque et blanditiis
-            excepturi consequatur adipisci voluptatum, laboriosam cumque iste
-            optio! Rem itaque minima quasi ad cum fugit iusto dolores corrupti
-            quis?
+            {capitalizeFirst(produkChose.deskripsi)}
           </p>
         </div>
       </div>

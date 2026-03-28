@@ -71,7 +71,10 @@ export default function CardProduk({
         <div className="flex justify-between w-full gap-1">
           {" "}
           <button
-            onClick={onEdit}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
             className={`${
               edit === false ? "hidden" : ""
             } text-center border-gray-100 bg-blue-500 rounded-lg p-2 mt-2 cursor-pointer w-1/2 dark:bg-blue-600 dark:hover:bg-blue-500 transition-colors `}
@@ -79,7 +82,10 @@ export default function CardProduk({
             Edit
           </button>
           <button
-            onClick={onHapus}
+            onClick={(e) => {
+              e.stopPropagation();
+              onHapus();
+            }}
             className={`${
               edit === false ? "hidden" : ""
             } text-center border-gray-100 bg-blue-500 rounded-lg p-2 mt-2 cursor-pointer w-1/2 dark:bg-red-600 dark:hover:bg-red-500 transition-colors`}

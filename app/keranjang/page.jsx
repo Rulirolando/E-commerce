@@ -1,33 +1,43 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Navbar from "../components/navbar";
 import { useSession } from "next-auth/react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function KeranjangPage() {
-  const [keranjang, setKeranjang] = useState(null);
-  console.log("keranjang", keranjang);
   const [selectProduk, setSelectProduk] = useState([]);
-  const [addressList, setAddressList] = useState([]);
+
   console.log("selectProduk", selectProduk);
   const { data: session, status } = useSession();
   const currentUser = session;
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    if (!currentUser?.user.id) return;
-
-    const fetchCart = async () => {
+  const { data: keranjang = { items: [] }, isLoading } = useQuery({
+    queryKey: ["cart", currentUser?.user?.id],
+    queryFn: async () => {
       const res = await fetch(`/api/keranjang?userId=${currentUser.user.id}`);
       const data = await res.json();
-      setKeranjang(data || {});
-    };
+      console.log("data keranjang:", data);
+      return data;
+    },
+    enabled: !!currentUser?.user?.id, // Hanya jalan jika user login
+  });
 
-    fetchCart();
-  }, [currentUser]);
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      await fetch(`/api/keranjang/${id}`, { method: "DELETE" });
+    },
+    onSuccess: () => {
+      // Refresh data keranjang otomatis
+      queryClient.invalidateQueries({
+        queryKey: ["cart", currentUser?.user?.id],
+      });
+      // Juga bersihkan pilihan produk yang mungkin baru saja dihapus
+      setSelectProduk([]);
+    },
+  });
 
-  /* =====================
-     Helper
-  ====================== */
   const isSelected = (item) =>
     selectProduk.some(
       (p) =>
@@ -56,21 +66,12 @@ export default function KeranjangPage() {
   const handleSelectAll = (checked) => {
     setSelectProduk(checked ? keranjang.items : []);
   };
-  /* =====================
-     Hapus item
-  ====================== */
+
   const handleHapus = async (id) => {
     if (!confirm("Yakin hapus item ini?")) return;
-
-    await fetch(`/api/keranjang/${id}`, { method: "DELETE" });
-    const res = await fetch(`/api/keranjang?userId=${currentUser.user.id}`);
-    const data = await res.json();
-    setKeranjang(data || {});
+    deleteMutation.mutate(id);
   };
 
-  /* =====================
-     Checkout
-  ====================== */
   const handleCheckout = async () => {
     if (selectProduk.length === 0) return alert("Pilih produk!");
 
@@ -140,26 +141,17 @@ export default function KeranjangPage() {
     }
   };
 
-  const fetchAddresses = useCallback(async () => {
-    try {
-      const response = await fetch(
-        `/api/profile/address/${currentUser.user.id}`,
-        {
-          method: "GET",
-        },
-      );
-      const data = await response.json();
-      setAddressList(data);
-    } catch (error) {
-      console.error("Gagal ambil alamat:", error);
-    }
-  }, [currentUser]);
+  const { data: addressList = [] } = useQuery({
+    queryKey: ["addresses", currentUser?.user?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/profile/address/${currentUser.user.id}`);
+      if (!res.ok) throw new Error("Gagal ambil alamat");
+      return res.json();
+    },
+    enabled: !!currentUser?.user?.id,
+  });
 
-  useEffect(() => {
-    if (currentUser?.user.id) fetchAddresses();
-  }, [fetchAddresses, currentUser]);
-
-  if (status === "loading") {
+  if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
         <Navbar currentUser={currentUser} />

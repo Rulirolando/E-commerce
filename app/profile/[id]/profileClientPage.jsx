@@ -26,12 +26,11 @@ import { signOut } from "next-auth/react";
 import { format, formatDistanceToNow, isValid } from "date-fns";
 import { id } from "date-fns/locale"; // Untuk bahasa Indonesia
 import { useRouter } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function ProfilePage({ userId, currentUser }) {
   const [user, setUser] = useState({});
   const [username, setUsername] = useState(null);
-  const [produkLoves, setProdukLoves] = useState([]);
-  console.log("produkLoves:", produkLoves);
   const [activeMenu, setActiveMenu] = useState("profile");
   const [activePesananMenu, setActivePesananMenu] = useState("semuapesanan");
   const [notifEnabled, setNotifEnabled] = useState(false);
@@ -51,25 +50,39 @@ export default function ProfilePage({ userId, currentUser }) {
   console.log("selectedOrder:", selectedOrder);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
-
+  const queryClient = useQueryClient();
   const router = useRouter();
 
+  const { data: produkLoves = [], isLoading: loadingLoves } = useQuery({
+    queryKey: ["Favorite", currentUser?.user?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/love/${currentUser.user.id}`);
+      if (!res.ok) throw new Error("Gagal mengambil favorit");
+      return res.json();
+    },
+    enabled: !!currentUser.user.id,
+  });
+  const loveMutation = useMutation({
+    mutationFn: async (produkId) => {
+      const res = await fetch("/api/love", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: currentUser?.user?.id,
+          productId: produkId,
+        }),
+      });
+      if (!res.ok) throw new Error("Gagal update wishlist");
+      return res.json();
+    },
+    onSuccess: () => {
+      // Refresh data produk secara instan di UI
+      queryClient.invalidateQueries({ queryKey: ["Favorite"] });
+    },
+  });
   async function toggleLove(produkId) {
-    const res = await fetch("/api/love", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: currentUser.user.id,
-        productId: produkId,
-      }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) return alert(data.message);
-
-    // refresh favorit
-    const fav = await fetch(`/api/love/${currentUser.user.id}`);
-    setProdukLoves(await fav.json());
+    if (!currentUser) return alert("Silakan login terlebih dahulu.");
+    loveMutation.mutate(produkId);
   }
 
   async function handleSubmitAddress(e, id) {
@@ -273,28 +286,6 @@ export default function ProfilePage({ userId, currentUser }) {
     } finally {
     }
   }, [currentUser.user.id]);
-
-  useEffect(() => {
-    async function fetchFavorites() {
-      if (!currentUser?.user?.id) {
-        return;
-      }
-
-      const userId = currentUser.user.id;
-      console.log("userId string:", userId);
-
-      if (!userId) {
-        console.log("STOP: userId is empty");
-        return;
-      }
-
-      const res = await fetch(`/api/love/${userId}`);
-      const data = await res.json();
-      setProdukLoves(data);
-    }
-
-    fetchFavorites();
-  }, [currentUser]);
 
   const menuItems = [
     {
@@ -690,7 +681,7 @@ export default function ProfilePage({ userId, currentUser }) {
                         stok={p.stok}
                         avgRating={item.avgRating}
                         totalReviews={item.totalReviews}
-                        onClick={() => router.push(`/produk/${p.id}`)}
+                        onClick={() => router.push(`/produk/${p.productId}`)}
                         gambar={p.images[0]?.img}
                         terjual={p.terjual}
                         edit={currentUser?.user.id === userId ? true : false}
@@ -739,39 +730,52 @@ export default function ProfilePage({ userId, currentUser }) {
 
               <div className="flex flex-start flex-wrap w-full h-full">
                 {/* Card Produk */}
-                {produkLoves.length > 0 ? (
-                  produkLoves.map((produk) => (
-                    <CardProduk
-                      key={produk.id}
-                      nama={produk.product?.nama}
-                      stok={produk.product?.variations?.[0]?.stok}
-                      harga={
-                        "Rp " +
-                        produk.product?.variations?.[0]?.harga.toLocaleString(
-                          "id-ID",
-                        )
-                      }
-                      avgRating={produk.product?.avgRating}
-                      totalReviews={produk.product?.totalReviews}
-                      gambar={produk.product?.variations?.[0]?.images?.[0]?.img}
-                      terjual={produk.product?.variations?.[0]?.terjual || 0}
-                      edit={false}
-                      isLoved={produk.status === true}
-                      onLove={() => toggleLove(produk.productId)}
-                      showLove={
-                        produk.product?.ownerId === currentUser?.user.id
-                      }
-                      onClick={() =>
-                        router.push(
-                          `/produk/${produk.product?.variations?.[0]?.id}`,
-                        )
-                      }
-                    />
-                  ))
+                {loadingLoves ? (
+                  <div className="flex justify-center items-center w-full py-10">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+                    <p className="ml-3 text-gray-500">Memuat favorit...</p>
+                  </div>
                 ) : (
-                  <p className="text-gray-500 dark:text-slate-400 italic">
-                    Belum ada produk favorit
-                  </p>
+                  <>
+                    {produkLoves.length > 0 ? (
+                      produkLoves.map((produk) => (
+                        <CardProduk
+                          key={produk.id}
+                          nama={produk.product?.nama}
+                          stok={produk.product?.variations?.[0]?.stok}
+                          harga={
+                            "Rp " +
+                            produk.product?.variations?.[0]?.harga.toLocaleString(
+                              "id-ID",
+                            )
+                          }
+                          avgRating={produk.product?.avgRating}
+                          totalReviews={produk.product?.totalReviews}
+                          gambar={
+                            produk.product?.variations?.[0]?.images?.[0]?.img
+                          }
+                          terjual={
+                            produk.product?.variations?.[0]?.terjual || 0
+                          }
+                          edit={false}
+                          isLoved={produk.status === true}
+                          onLove={() => toggleLove(produk.productId)}
+                          showLove={
+                            produk.product?.ownerId === currentUser?.user.id
+                          }
+                          onClick={() =>
+                            router.push(
+                              `/produk/${produk.product?.variations?.[0]?.id}`,
+                            )
+                          }
+                        />
+                      ))
+                    ) : (
+                      <p className="text-gray-500 dark:text-slate-400 italic">
+                        Belum ada produk favorit
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             </div>

@@ -4,52 +4,46 @@ import Image from "next/image";
 import img from "../../public/assets/img/pngtree-e-commerce-website-displayed-on-laptop-screen-with-shopping-cart-and-image_3903594.jpg";
 import kategoriList from "../../public/assets/kategoriProduk";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Footer from "../components/Footer";
 import CardProduk from "../components/CardProduk";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
 export default function Home({ currentUser }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [showAllKategori, setShowAll] = useState(false);
-  const [produkList, setProdukList] = useState([]);
-  console.log("produkList", produkList);
   const [recentProduk, setRecentProduk] = useState("terbaru");
 
-  async function toggleLove(produkId) {
-    if (!currentUser) {
-      alert("Silakan login terlebih dahulu untuk menyukai produk.");
-      return;
-    }
-    try {
+  const { data: produkList = [], isLoading } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const res = await fetch("/api/product");
+      if (!res.ok) throw new Error("Gagal mengambil produk");
+      return res.json();
+    },
+  });
+  const loveMutation = useMutation({
+    mutationFn: async (produkId) => {
       const res = await fetch("/api/love", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: currentUser.user.id,
+          userId: currentUser?.user?.id,
           productId: produkId,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        return alert(data.message);
-      }
-      setProdukList((prev) =>
-        prev.map((p) =>
-          p.id === produkId
-            ? {
-                ...p,
-                loves: data.loves
-                  ? [...p.loves, { userId: currentUser.user.id, status: true }]
-                  : p.loves.filter((l) => l.userId !== currentUser.user.id),
-              }
-            : p,
-        ),
-      );
-    } catch (error) {
-      console.error("Error toggling love:", error);
-      alert("Terjadi kesalahan saat menyukai produk. Silakan coba lagi.");
-    }
+      if (!res.ok) throw new Error("Gagal update wishlist");
+      return res.json();
+    },
+    onSuccess: () => {
+      // Refresh data produk secara instan di UI
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+  async function toggleLove(produkId) {
+    if (!currentUser) return alert("Silakan login terlebih dahulu.");
+    loveMutation.mutate(produkId);
   }
   const kategoriArray = Object.keys(kategoriList)
     .map((key) => {
@@ -83,20 +77,8 @@ export default function Home({ currentUser }) {
     ? kategoriArray
     : kategoriArray.slice(0, 6);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch("/api/product");
-        const data = await res.json();
-        setProdukList(data);
-      } catch (err) {
-        console.error("Gagal ambil produk", err);
-      }
-    };
-    fetchProducts();
-  }, []);
-
   const renderProduk = () => {
+    if (isLoading) return <p className="dark:text-white">Memuat Produk...</p>;
     let sortedList = [...produkList];
 
     if (recentProduk === "terbaru") {
