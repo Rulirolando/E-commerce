@@ -84,8 +84,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.name = token.name as string; // Paksa name masuk ke session klien
         session.user.image = token.picture as string;
       }
-      // Log ini akan muncul di TERMINAL VS CODE (bukan browser)
-      console.log("SESSION DATA:", session);
+
       return session;
     },
     async signIn({ account }) {

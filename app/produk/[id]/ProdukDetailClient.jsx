@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/Footer";
 import { useSession } from "next-auth/react";
+import ChatSeller from "../../../lib/ui/ChatSeller";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function ProdukDetail({ produkChose }) {
@@ -395,24 +396,17 @@ export default function ProdukDetail({ produkChose }) {
             >
               Beli Sekarang
             </button>
+
             <button
               onClick={() => handleAddToCart()}
               className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200 cursor-pointer"
             >
               Tambah ke Keranjang
             </button>
-          </div>
-
-          <div className="relative w-1/2 h-16 border dark:border-slate-600 dark:bg-slate-800 mt-3 rounded-lg">
-            <div className="absolute top-1 left-1 w-14 h-14 border dark:border-slate-600 rounded-full flex items-center justify-center">
-              <p className="text-sm font-semibold ">Profile</p>
-            </div>
-            <div className="absolute w-1/2 h-1/2 left-16 top-1/4 flex items-center">
-              <p className="text-sm font-semibold">Toko kelontong</p>
-            </div>
-            <button className="absolute top-1/4 right-1 w-14 h-7 cursor-pointer border rounded-md flex items-center justify-center bg-blue-500 text-white font-semibold">
-              dddd
-            </button>
+            <ChatSeller
+              sellerId={produkChose.ownerId}
+              userId={currentUser?.user?.id}
+            />
           </div>
         </div>
       </div>
@@ -463,6 +457,7 @@ export default function ProdukDetail({ produkChose }) {
           )}
         </div>
       </div>
+
       <Footer />
     </>
   );

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         { status: 401 },
       );
     }
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password || "");
     if (!isMatch) {
       return NextResponse.json(
         { message: "Email atau password salah" },

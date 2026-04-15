@@ -8,6 +8,7 @@ import { FaRegBell } from "react-icons/fa";
 import useThemeStore from "../../store/useThemeStore";
 import { useEffect } from "react";
 import useNotificationStore from "../../store/useNotificationStore";
+import { IoChatbubbleEllipses } from "react-icons/io5";
 
 export default function Navbar({ className = "", currentUser }) {
   const router = useRouter();
@@ -81,6 +82,15 @@ export default function Navbar({ className = "", currentUser }) {
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
+        </Link>
+      )}
+
+      {currentUser && (
+        <Link
+          href="/chat"
+          className="relative p-2 hover:bg-slate-700 rounded-full transition-all"
+        >
+          <IoChatbubbleEllipses />
         </Link>
       )}
 
