@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { socket } from "../../lib/socket";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Navbar from "../../app/components/navbar";
 import { IoSend } from "react-icons/io5";
 
-export default function ChatPage() {
+function ChatContent() {
   const { data: session } = useSession();
   const router = useRouter();
   const currentUser = session;
@@ -203,5 +203,19 @@ export default function ChatPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center bg-blue-400">
+          Loading Chat...
+        </div>
+      }
+    >
+      <ChatContent />
+    </Suspense>
   );
 }

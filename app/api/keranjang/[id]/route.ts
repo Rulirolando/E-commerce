@@ -27,10 +27,11 @@ export async function DELETE(
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const cartItemId = Number(params.id);
+    const { id } = await params;
+    const cartItemId = Number(id);
     const { jumlah } = await req.json();
 
     if (jumlah <= 0) {

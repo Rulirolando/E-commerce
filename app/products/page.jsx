@@ -4,8 +4,9 @@ import SearchProduk from "../components/Products";
 import Navbar from "../components/navbar";
 import Footer from "../components/Footer";
 import { useSession } from "next-auth/react";
+import { Suspense } from "react";
 
-export default function Products() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const cari = searchParams.get("q") || "";
   const { data: session } = useSession();
@@ -17,5 +18,13 @@ export default function Products() {
       <SearchProduk cari={cari} />
       <Footer />
     </>
+  );
+}
+
+export default function Products() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

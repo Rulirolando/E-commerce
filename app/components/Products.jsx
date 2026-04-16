@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import ShowProduk from "./produk";
 import { useRouter, useSearchParams } from "next/navigation";
 import kategoriList from "../../public/assets/kategoriProduk";
@@ -7,7 +7,7 @@ import CardProduk from "./CardProduk";
 import { useSession } from "next-auth/react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export default function SearchProduk() {
+function Search() {
   const searchParams = useSearchParams();
   const keyword = (searchParams.get("q") || "").toLowerCase().trim();
   const router = useRouter();
@@ -231,5 +231,13 @@ export default function SearchProduk() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function SearchProduk() {
+  return (
+    <Suspense fallback={<p className="dark:text-white">Memuat...</p>}>
+      <Search />
+    </Suspense>
   );
 }
