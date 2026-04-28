@@ -11,15 +11,22 @@ export async function sendResetOtp(email: string) {
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  await prisma.otp.create({
-    data: {
+  await prisma.otp.upsert({
+    where: { email },
+    update: {
+      code: otp,
+      expiresAt: new Date(Date.now() + 1 * 60 * 1000),
+      type: "FORGOT",
+    },
+    create: {
       email,
+      username: user.username,
+      password: user.password ?? undefined,
       code: otp,
       type: "FORGOT",
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      expiresAt: new Date(Date.now() + 1 * 60 * 1000),
     },
   });
-
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -57,4 +64,37 @@ export async function resetPasswordAction(
 
   await prisma.otp.deleteMany({ where: { email } });
   return { success: true };
+}
+
+export async function resendOtpAction(email: string) {
+  try {
+    const otpRecord = await prisma.otp.findUnique({ where: { email } });
+    if (!otpRecord) return { error: "Silakan daftar ulang dari awal." };
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    await prisma.otp.update({
+      where: { email },
+      data: {
+        code: otp,
+        expiresAt: new Date(Date.now() + 1 * 60 * 1000),
+      },
+    });
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_SERVER_USER,
+        pass: process.env.EMAIL_SERVER_PASSWORD,
+      },
+    });
+
+    await transporter.sendMail({
+      to: email,
+      from: process.env.EMAIL_FROM,
+      subject: "Kode Verifikasi Baru - Rulshop",
+      html: `<h2>Verifikasi Akun</h2><p>Kode OTP baru Anda adalah: <b>${otp}</b></p>`,
+    });
+    return { success: true };
+  } catch {
+    return { error: "Terjadi kesalahan sistem" };
+  }
 }

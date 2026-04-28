@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   sendResetOtp,
   resetPasswordAction,
+  resendOtpAction,
 } from "../../action/forgot-password";
 import { useRouter } from "next/navigation";
 
@@ -14,6 +15,15 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [timer, setTimer] = useState(100);
+
+  useEffect(() => {
+    const interval = setInterval(
+      () => setTimer((p) => (p > 0 ? p - 1 : 0)),
+      1000,
+    );
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
@@ -32,6 +42,19 @@ export default function ForgotPassword() {
       alert("Password berhasil diubah! Silakan login.");
       router.push("/auth/login");
     } else alert(res.error);
+    setLoading(false);
+  };
+
+  const handleResend = async () => {
+    setLoading(true);
+    const result = await resendOtpAction(email);
+    if (result.success) {
+      alert("Kode baru telah dikirim!");
+      setTimer(300);
+      setOtp("");
+    } else {
+      alert(result.error);
+    }
     setLoading(false);
   };
 
@@ -87,6 +110,25 @@ export default function ForgotPassword() {
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
+
+            {timer > 0 ? (
+              <p className="text-xs text-gray-400">
+                Berlaku hingga:{" "}
+                <span className="font-mono font-bold">
+                  {Math.floor(timer / 60)}:
+                  {(timer % 60).toString().padStart(2, "0")}
+                </span>
+              </p>
+            ) : (
+              <button
+                onClick={handleResend}
+                disabled={loading}
+                className="text-sm text-blue-600 font-bold hover:underline disabled:text-gray-300"
+              >
+                {loading ? "Mengirim ulang..." : "Kirim ulang kode OTP"}
+              </button>
+            )}
+
             <button
               disabled={loading}
               className="bg-green-500 text-white p-3 rounded-lg font-bold"

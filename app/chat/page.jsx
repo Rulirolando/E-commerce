@@ -8,7 +8,7 @@ import Navbar from "../../app/components/navbar";
 import { IoSend } from "react-icons/io5";
 
 function ChatContent() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const currentUser = session;
   const userId = session?.user?.id;
@@ -17,6 +17,7 @@ function ChatContent() {
   const [input, setInput] = useState("");
   const [showUserList, setShowUserList] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
+  console.log("chatHistory:", chatHistory);
   const bottomRef = useRef(null);
   const isInitialLoad = useRef(true);
   const chatContainerRef = useRef(null);
@@ -36,6 +37,23 @@ function ChatContent() {
       console.error(err);
     }
   }, [userId]);
+
+  useEffect(() => {
+    if (status === "authenticated" && userId) {
+      const fetchHistory = async () => {
+        if (!userId) return;
+        try {
+          const res = await fetch(`/api/chat?userId=${userId}`);
+          const data = await res.json();
+          setChatHistory(data);
+          setShowUserList(false);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+      fetchHistory();
+    }
+  }, [status, userId, fetchHistory]);
 
   useEffect(() => {
     if (!userId) return;
@@ -160,6 +178,13 @@ function ChatContent() {
       });
     }
   };
+  if (status === "loading") {
+    return (
+      <div className="flex h-screen items-center justify-center bg-blue-400 dark:bg-blue-900">
+        Loading session...
+      </div>
+    );
+  }
 
   return (
     <>
@@ -178,7 +203,9 @@ function ChatContent() {
               ←
             </button>
             <span className="truncate">
-              {showUserList ? "Semua Pesan" : `Chat Room: ${roomId}`}
+              {showUserList
+                ? "Semua Pesan"
+                : `${chatHistory.find((c) => c.roomId === roomId)?.otherUser || "?"}`}
             </span>
           </div>
 

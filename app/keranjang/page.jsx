@@ -120,16 +120,29 @@ export default function KeranjangPage() {
       }
       const data = await response.json();
 
-      window.snap.pay(data.token, {
-        onSuccess: function () {
-          alert("Pembayaran Berhasil!");
-
-          window.location.href = `/profile/${currentUser.user.id}`;
-        },
-        onPending: function () {
-          alert("Harap selesaikan pembayaran.");
-        },
-      });
+      if (data.token) {
+        // Pastikan window.snap tersedia
+        if (window.snap) {
+          window.snap.pay(data.token, {
+            onSuccess: function () {
+              alert("Pembayaran Berhasil!");
+              window.location.href = `/profile/${currentUser.user.id}`;
+            },
+            onPending: function () {
+              alert("Harap selesaikan pembayaran.");
+              window.location.href = `/profile/${currentUser.user.id}`;
+            },
+            onError: function () {
+              alert("Pembayaran Gagal!");
+            },
+            onClose: function () {
+              alert("Anda menutup popup tanpa menyelesaikan pembayaran.");
+            },
+          });
+        } else {
+          alert("Midtrans belum siap, silakan refresh halaman.");
+        }
+      }
 
       setSelectProduk([]);
     } catch (error) {

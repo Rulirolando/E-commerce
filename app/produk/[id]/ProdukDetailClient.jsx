@@ -103,6 +103,28 @@ export default function ProdukDetail({ produkChose }) {
     v.images?.some((img) => img.img === selectedImage),
   );
 
+  const updateStokManual = async () => {
+    try {
+      const res = await fetch(`/api/product/${produkChose.id}`);
+      const dataTerbaru = await res.json();
+
+      // Jika user sedang memilih warna tertentu, update stoknya di state
+      if (selectedProduk.warna) {
+        const variasiTerbaru = dataTerbaru.variations.find(
+          (v) => v.id === selectedProduk.produkId,
+        );
+        if (variasiTerbaru) {
+          setSelectedProduk((prev) => ({
+            ...prev,
+            stok: variasiTerbaru.stok,
+          }));
+        }
+      }
+    } catch (err) {
+      console.error("Gagal update stok:", err);
+    }
+  };
+
   const orderMutation = useMutation({
     mutationFn: async (orderPayload) => {
       const res = await fetch("/api/order", {
@@ -115,7 +137,8 @@ export default function ProdukDetail({ produkChose }) {
     },
     onSuccess: (data) => {
       window.snap.pay(data.token, {
-        onSuccess: () => {
+        onSuccess: async () => {
+          await updateStokManual();
           alert("Pembayaran Berhasil!");
           window.location.href = `/profile/${currentUser.user.id}`;
         },

@@ -1,16 +1,17 @@
 "use client";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { verifyOtpAction } from "../../action/register";
+import { verifyOtpAction, resendOtpAction } from "../../action/register";
 
 function VerifyContent() {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
+  const [resending, setResending] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const email = searchParams.get("email") || "";
-  const [timer, setTimer] = useState(300);
+  const [timer, setTimer] = useState(100);
 
   useEffect(() => {
     const interval = setInterval(
@@ -51,7 +52,6 @@ function VerifyContent() {
 
     setOtp(newOtp);
 
-    // Fokus ke input terakhir yang terisi atau input ke-6
     const lastIndex = Math.min(dataArray.length, 5);
     inputRefs.current[lastIndex]?.focus();
   };
@@ -66,6 +66,20 @@ function VerifyContent() {
       alert(result.error);
       setLoading(false);
     }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    const result = await resendOtpAction(email);
+    if (result.success) {
+      alert("Kode baru telah dikirim!");
+      setTimer(300); // Reset timer
+      setOtp(new Array(6).fill("")); // Kosongkan input
+      inputRefs.current[0]?.focus();
+    } else {
+      alert(result.error);
+    }
+    setResending(false);
   };
 
   return (
@@ -90,10 +104,25 @@ function VerifyContent() {
             />
           ))}
         </div>
-        <p className="text-xs mb-4">
-          Exp: {Math.floor(timer / 60)}:
-          {(timer % 60).toString().padStart(2, "0")}
-        </p>
+        <div className="mb-6">
+          {timer > 0 ? (
+            <p className="text-xs text-gray-400">
+              Berlaku hingga:{" "}
+              <span className="font-mono font-bold">
+                {Math.floor(timer / 60)}:
+                {(timer % 60).toString().padStart(2, "0")}
+              </span>
+            </p>
+          ) : (
+            <button
+              onClick={handleResend}
+              disabled={resending}
+              className="text-sm text-blue-600 font-bold hover:underline disabled:text-gray-300"
+            >
+              {resending ? "Mengirim ulang..." : "Kirim ulang kode OTP"}
+            </button>
+          )}
+        </div>
         <button
           onClick={handleVerify}
           disabled={otp.includes("") || loading}

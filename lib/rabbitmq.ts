@@ -9,7 +9,13 @@ export interface AppNotification {
 
 export const sendToRabbitMQ = async (queue: string, data: AppNotification) => {
   try {
-    const connection = await amqp.connect(`${process.env.CLOUDAMQP_URL}`);
+    const connection = process.env.CLOUDAMQP_URL
+      ? await amqp.connect(process.env.CLOUDAMQP_URL)
+      : await amqp.connect({
+          protocol: "amqp",
+          hostname: "localhost",
+          port: 5672,
+        });
     const channel = await connection.createChannel();
 
     await channel.assertQueue(queue, { durable: true });

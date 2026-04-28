@@ -124,6 +124,8 @@ export type AccountScalarFieldEnum = (typeof AccountScalarFieldEnum)[keyof typeo
 export const OtpScalarFieldEnum = {
   id: 'id',
   email: 'email',
+  username: 'username',
+  password: 'password',
   code: 'code',
   type: 'type',
   expiresAt: 'expiresAt',

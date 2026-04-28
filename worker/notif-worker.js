@@ -3,21 +3,26 @@ import "dotenv/config";
 
 import pg from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
-// Perhatikan path ini, pastikan sesuai dengan dokumentasi poin nomor 7
+
 import { PrismaClient } from "../generated/prisma/client.ts";
 
 // 1. Setup Database Connection
 const connectionString = `${process.env.DATABASE_URL}`;
-// Gunakan driver 'pg' secara native sesuai panduan Prisma Postgres
+
 const pool = new pg.Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 
-// 2. Inisialisasi Prisma dengan Adapter (Wajib!)
 const prisma = new PrismaClient({ adapter });
 
 async function startWorker() {
   try {
-    const connection = await amqp.connect(`${process.env.CLOUDAMQP_URL}`);
+    const connection = process.env.CLOUDAMQP_URL
+      ? await amqp.connect(process.env.CLOUDAMQP_URL)
+      : await amqp.connect({
+          protocol: "amqp",
+          hostname: "localhost",
+          port: 5672,
+        });
     const channel = await connection.createChannel();
     const queue = "app_notification_queue";
 

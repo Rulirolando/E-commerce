@@ -31,21 +31,30 @@ export async function registerUser(
       return { error: "Email sudah digunakan" };
     }
 
-    const hashedPassword = await bcrypt.hash(validated.password, 10);
-    await prisma.user.create({
-      data: {
-        username: validated.username,
-        email: validated.email,
-        password: hashedPassword,
-      },
+    const existingUsername = await prisma.user.findUnique({
+      where: { username: validated.username },
     });
 
+    if (existingUsername) {
+      return { error: "Username sudah digunakan" };
+    }
+
+    const hashedPassword = await bcrypt.hash(validated.password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    await prisma.otp.create({
-      data: {
+    await prisma.otp.upsert({
+      where: { email: validated.email },
+      update: {
+        username: validated.username,
+        password: hashedPassword,
+        code: otp,
+        expiresAt: new Date(Date.now() + 1 * 60 * 1000),
+      },
+      create: {
+        username: validated.username,
+        password: hashedPassword,
         email: validated.email,
         code: otp,
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 menit
+        expiresAt: new Date(Date.now() + 1 * 60 * 1000),
       },
     });
 
@@ -90,15 +99,59 @@ export async function verifyOtpAction(email: string, code: string) {
 
     if (!otpRecord) return { error: "Kode salah atau kedaluwarsa!" };
 
-    await prisma.user.update({
-      where: { email },
-      data: { emailVerified: new Date() },
-    });
-
-    await prisma.otp.deleteMany({ where: { email } });
+    await prisma.$transaction([
+      prisma.user.create({
+        data: {
+          username: otpRecord.username,
+          email: otpRecord.email,
+          password: otpRecord.password,
+          emailVerified: new Date(),
+        },
+      }),
+      prisma.otp.delete({ where: { email } }),
+    ]);
 
     return { success: true };
   } catch {
     return { error: "Terjadi kesalahan sistem" };
+  }
+}
+
+export async function resendOtpAction(email: string) {
+  try {
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) return { error: "Email sudah terverifikasi." };
+
+    const pendingUser = await prisma.otp.findUnique({ where: { email } });
+    if (!pendingUser) return { error: "Silakan daftar ulang dari awal." };
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await prisma.otp.update({
+      where: { email },
+      data: {
+        code: otp,
+        expiresAt: new Date(Date.now() + 1 * 60 * 1000),
+      },
+    });
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_SERVER_USER,
+        pass: process.env.EMAIL_SERVER_PASSWORD,
+      },
+    });
+
+    await transporter.sendMail({
+      to: email,
+      from: process.env.EMAIL_FROM,
+      subject: "Kode Verifikasi Baru - Rulshop",
+      html: `<h2>Verifikasi Akun</h2><p>Kode OTP baru Anda adalah: <b>${otp}</b></p>`,
+    });
+
+    return { success: true };
+  } catch {
+    return { error: "Gagal mengirim ulang OTP" };
   }
 }

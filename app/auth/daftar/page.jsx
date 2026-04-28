@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useActionState } from "react"; // Impor dari 'react'
+import { useState, useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { registerUser, googleSignIn } from "../../action/register";
 
-// Tombol Loading tetap menggunakan useFormStatus
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -22,8 +21,6 @@ export default function Daftar() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // GUNAKAN useActionState (Ganti useFormState)
-  // Argumen: (fungsi action, initial state)
   const [state, formAction] = useActionState(registerUser, null);
 
   return (
