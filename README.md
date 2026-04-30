@@ -8,7 +8,6 @@ Website e-commerce sederhana menggunakan **Next.js (App Router)** dengan fitur:
 - Kategori
 - Login
 - Love / Wishlist Produk
-- Penyimpanan data sementara (localStorage)
 - Jual
 - Logout
 - Daftar
@@ -20,7 +19,7 @@ Website e-commerce sederhana menggunakan **Next.js (App Router)** dengan fitur:
 - Next.js (App Router)
 - React
 - Tailwind CSS
-- LocalStorage (sementara)
+
 
 
 ---
@@ -28,10 +27,7 @@ Website e-commerce sederhana menggunakan **Next.js (App Router)** dengan fitur:
 ## 📦 Fitur Utama
 
 ### 1. Autentikasi User
-- Login user disimpan di `localStorage`
-- Data login digunakan untuk validasi aksi user 
 
----
 
 ### 2. Love / Wishlist Produk
 
