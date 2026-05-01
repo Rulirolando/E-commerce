@@ -39,8 +39,7 @@ export default function ChatButton({
   return (
     <button
       onClick={handleChatPenjual}
-      // Tambahkan class Tailwind di bawah ini
-      className="mt-4 ml-4 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors duration-200 cursor-pointer flex items-center gap-2"
+      className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors duration-200 cursor-pointer flex items-center gap-2"
     >
       <LuMessageSquareMore />
       Chat Penjual

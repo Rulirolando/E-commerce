@@ -1,14 +1,16 @@
 "use client";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/Footer";
 import { useSession } from "next-auth/react";
 import ChatSeller from "../../../lib/ui/ChatSeller";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { IoMdShare } from "react-icons/io";
 
-export default function ProdukDetail({ produkChose }) {
+export default function ProdukDetail({ id }) {
   const { data: session } = useSession();
+  const [produkChose, setProdukChose] = useState(null);
   const currentUser = session;
   console.log("produkChose", produkChose);
   const allImg =
@@ -25,7 +27,7 @@ export default function ProdukDetail({ produkChose }) {
   const [selectedProduk, setSelectedProduk] = useState({
     produkId: 0,
     warna: "",
-    nama: produkChose.nama || "",
+    nama: produkChose?.nama || "",
     ukuran: "",
     stok: 0,
     jumlah: 1,
@@ -39,10 +41,9 @@ export default function ProdukDetail({ produkChose }) {
   }
 
   const handlewarna = (warna, img, harga, idProdukVariasi) => {
-    const variasi = produkChose.variations.find(
+    const variasi = produkChose?.variations?.find(
       (p) => p.id === idProdukVariasi,
     );
-    // jika toggle off (klik warna yg sama), reset produkId & warna
     if (selectedProduk?.warna === warna) {
       setSelectedProduk((prev) => ({
         ...prev,
@@ -59,7 +60,7 @@ export default function ProdukDetail({ produkChose }) {
     // set pilihan variasi baru (letakkan ...prev dulu supaya tidak tertimpa)
     setSelectedProduk((prev) => ({
       ...prev,
-      id: produkChose.id,
+      id: produkChose?.id,
       produkId: idProdukVariasi,
       warna,
       ukuran: "",
@@ -67,7 +68,7 @@ export default function ProdukDetail({ produkChose }) {
       harga,
       stok: variasi?.stok || 0,
       jumlah: 1,
-      nama: produkChose.nama,
+      nama: produkChose?.nama,
     }));
 
     setSelectedImage(img);
@@ -99,13 +100,13 @@ export default function ProdukDetail({ produkChose }) {
     }));
   };
 
-  const produkIdChoose = produkChose.variations.find((v) =>
+  const produkIdChoose = produkChose?.variations?.find((v) =>
     v.images?.some((img) => img.img === selectedImage),
   );
 
   const updateStokManual = async () => {
     try {
-      const res = await fetch(`/api/product/${produkChose.id}`);
+      const res = await fetch(`/api/product/${produkChose?.id}`);
       const dataTerbaru = await res.json();
 
       // Jika user sedang memilih warna tertentu, update stoknya di state
@@ -236,12 +237,12 @@ export default function ProdukDetail({ produkChose }) {
 
   const resetSelection = () => {
     setSelectedProduk({
-      id: produkChose.id,
+      id: produkChose?.id,
       produkId: 0,
       gambar: allImg[0] || "",
-      ownerId: produkChose.ownerId,
-      harga: produkChose.variations[0]?.harga || 0,
-      nama: produkChose.nama,
+      ownerId: produkChose?.ownerId,
+      harga: produkChose?.variations[0]?.harga || 0,
+      nama: produkChose?.nama,
       warna: "",
       ukuran: "",
       jumlah: 1,
@@ -259,7 +260,35 @@ export default function ProdukDetail({ produkChose }) {
     enabled: !!currentUser?.user?.id,
   });
 
-  if (!produkChose || !selectedProduk) {
+  const handleShare = async () => {
+    const shareData = {
+      title: produkChose.nama,
+      text: `Cek produk keren ini: ${produkChose.nama}`,
+      url: window.location.href, // Mengambil URL produk saat ini
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("Link berhasil disalin ke clipboard!");
+      }
+    } catch (err) {
+      console.error("Gagal membagikan:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetch(`/api/product/${id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.error) setProdukChose(data);
+      })
+      .catch((err) => console.error(err));
+  }, [id]);
+
+  if (!produkChose) {
     return <div className="dark:text-white">Loading produk...</div>;
   }
 
@@ -407,7 +436,7 @@ export default function ProdukDetail({ produkChose }) {
 
           {/* tombol beli */}
 
-          <div className="flex">
+          <div className="flex gap-2">
             <button
               onClick={handleBeli}
               disabled={
@@ -422,9 +451,16 @@ export default function ProdukDetail({ produkChose }) {
 
             <button
               onClick={() => handleAddToCart()}
-              className="mt-4 ml-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200 cursor-pointer"
+              className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors duration-200 cursor-pointer"
             >
               Tambah ke Keranjang
+            </button>
+            <button
+              onClick={handleShare}
+              className=" mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 cursor-pointer"
+            >
+              <IoMdShare />
+              Bagikan
             </button>
             <ChatSeller
               sellerId={produkChose.ownerId}
