@@ -2,18 +2,35 @@
 import Link from "next/link";
 import { SlBasket } from "react-icons/sl";
 import SearchBar from "../components/SearchBar";
-import { useRouter } from "next/navigation";
-import { IoMoon, IoSunny } from "react-icons/io5";
+import { useRouter, usePathname } from "next/navigation";
+import { IoMoon, IoSunny, IoChatbubbleEllipses } from "react-icons/io5";
 import { FaRegBell } from "react-icons/fa";
 import useThemeStore from "../../store/useThemeStore";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useNotificationStore from "../../store/useNotificationStore";
-import { IoChatbubbleEllipses } from "react-icons/io5";
+import useChatStore from "../../store/useChatStore";
+import { socket } from "../../lib/socket";
 
 export default function Navbar({ className = "", currentUser }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+
+  // Menyimpan ref pathname agar callback socket selalu menggunakan nilai pathname terbaru tanpa re-subscribe socket effect
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
+
   const { isDarkMode, toggleDarkMode } = useThemeStore();
   const { unreadCount, setUnreadCount } = useNotificationStore();
+  const {
+    unreadChatCount,
+    setUnreadChatCount,
+    incrementUnreadChat,
+    resetUnreadChat,
+  } = useChatStore();
+
+  const userId = currentUser?.user?.id;
 
   useEffect(() => {
     if (isDarkMode) {
@@ -23,26 +40,72 @@ export default function Navbar({ className = "", currentUser }) {
     }
   }, [isDarkMode]);
 
+  // Fetch Notifikasi
   useEffect(() => {
-    if (currentUser) {
-      const fetchNotifications = async () => {
-        try {
-          const res = await fetch(
-            `/api/notifications?userId=${currentUser.user.id}`,
-          );
-          const data = await res.json();
-          const count = data.filter((n) => !n.isRead).length;
-          setUnreadCount(count);
-        } catch {
-          console.error("Gagal mengambil notifikasi");
-        }
-      };
+    if (!userId) return;
 
-      fetchNotifications();
-      const interval = setInterval(fetchNotifications, 120000);
-      return () => clearInterval(interval);
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch(`/api/notifications?userId=${userId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const count = Array.isArray(data)
+          ? data.filter((n) => !n.isRead).length
+          : 0;
+        setUnreadCount(count);
+      } catch (err) {
+        console.error("Gagal mengambil notifikasi:", err);
+      }
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 120000);
+
+    return () => clearInterval(interval);
+  }, [userId, setUnreadCount]);
+
+  // Fetch Unread Chat & Listener Socket Real-time
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchUnreadChats = async () => {
+      try {
+        const res = await fetch(`/api/chat?userId=${userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            const unreadTotal = data.filter((chat) => chat.isUnread).length;
+            setUnreadChatCount(unreadTotal);
+          }
+        }
+      } catch (err) {
+        console.error("Gagal mengambil unread chat count:", err);
+      }
+    };
+
+    fetchUnreadChats();
+
+    socket.emit("join-personal-room", userId);
+
+    const handleUpdateChatList = () => {
+      if (!pathnameRef.current.startsWith("/chat")) {
+        incrementUnreadChat();
+      }
+    };
+
+    socket.on("update-chat-list", handleUpdateChatList);
+
+    return () => {
+      socket.off("update-chat-list", handleUpdateChatList);
+    };
+  }, [userId, setUnreadChatCount, incrementUnreadChat]);
+
+  // Reset unread chat saat pengguna membuka halaman /chat
+  useEffect(() => {
+    if (pathname.startsWith("/chat")) {
+      resetUnreadChat();
     }
-  }, [currentUser, setUnreadCount]);
+  }, [pathname, resetUnreadChat]);
 
   function capitalizeFirst(text) {
     if (!text) return "";
@@ -51,7 +114,7 @@ export default function Navbar({ className = "", currentUser }) {
 
   return (
     <div
-      className={`w-full h-20 bg-[#3C467B] flex justify-between items-center px-10 text-white ${className} dark:bg-slate-900 dark:text-white transition-colors duration-300`}
+      className={`w-full h-20 bg-[#3C467B] flex justify-between items-center px-10 text-white dark:bg-slate-900 dark:text-white transition-colors duration-300 ${className}`}
     >
       <h1
         className="text-4xl font-semibold cursor-pointer"
@@ -66,14 +129,17 @@ export default function Navbar({ className = "", currentUser }) {
       {/* Theme toggle */}
       <button
         onClick={toggleDarkMode}
+        aria-label="Toggle Dark Mode"
         className="text-2xl p-2 rounded-full hover:bg-slate-700 transition-colors duration-300"
       >
         {isDarkMode ? <IoSunny /> : <IoMoon />}
       </button>
 
+      {/* Notification Icon */}
       {currentUser && (
         <Link
           href="/notifications"
+          aria-label="Notifikasi"
           className="relative p-2 hover:bg-slate-700 rounded-full transition-all"
         >
           <FaRegBell className="text-2xl" />
@@ -85,27 +151,33 @@ export default function Navbar({ className = "", currentUser }) {
         </Link>
       )}
 
+      {/* Chat Icon dengan Badge Unread */}
       {currentUser && (
         <Link
           href="/chat"
+          aria-label="Chat"
           className="relative p-2 hover:bg-slate-700 rounded-full transition-all"
         >
-          <IoChatbubbleEllipses />
+          <IoChatbubbleEllipses className="text-2xl" />
+          {unreadChatCount > 0 && (
+            <span className="absolute top-1 right-1 bg-red-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-[#3C467B] dark:border-slate-900">
+              {unreadChatCount > 9 ? "9+" : unreadChatCount}
+            </span>
+          )}
         </Link>
       )}
 
-      <Link href="/keranjang">
-        <SlBasket />
+      <Link href="/keranjang" aria-label="Keranjang Belanja">
+        <SlBasket className="text-2xl" />
       </Link>
 
       {currentUser && <Link href="/sell">Sell</Link>}
 
-      <div className="flex gap-6 text-sm">
+      <div className="flex gap-6 text-sm items-center">
         {currentUser ? (
           <>
             <Link href={`/order/${currentUser.user.id}`}>Kelola pesanan</Link>
             <Link href={`/profile/${currentUser.user.id}`}>
-              {" "}
               <p>{capitalizeFirst(currentUser.user.name)}</p>
             </Link>
           </>

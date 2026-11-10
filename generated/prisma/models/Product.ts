@@ -46,6 +46,9 @@ export type ProductMinAggregateOutputType = {
   ownerId: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  moderationStatus: string | null
+  moderationNote: string | null
+  moderatedAt: Date | null
   addressId: number | null
 }
 
@@ -59,6 +62,9 @@ export type ProductMaxAggregateOutputType = {
   ownerId: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  moderationStatus: string | null
+  moderationNote: string | null
+  moderatedAt: Date | null
   addressId: number | null
 }
 
@@ -72,6 +78,9 @@ export type ProductCountAggregateOutputType = {
   ownerId: number
   createdAt: number
   updatedAt: number
+  moderationStatus: number
+  moderationNote: number
+  moderatedAt: number
   addressId: number
   _all: number
 }
@@ -97,6 +106,9 @@ export type ProductMinAggregateInputType = {
   ownerId?: true
   createdAt?: true
   updatedAt?: true
+  moderationStatus?: true
+  moderationNote?: true
+  moderatedAt?: true
   addressId?: true
 }
 
@@ -110,6 +122,9 @@ export type ProductMaxAggregateInputType = {
   ownerId?: true
   createdAt?: true
   updatedAt?: true
+  moderationStatus?: true
+  moderationNote?: true
+  moderatedAt?: true
   addressId?: true
 }
 
@@ -123,6 +138,9 @@ export type ProductCountAggregateInputType = {
   ownerId?: true
   createdAt?: true
   updatedAt?: true
+  moderationStatus?: true
+  moderationNote?: true
+  moderatedAt?: true
   addressId?: true
   _all?: true
 }
@@ -223,6 +241,9 @@ export type ProductGroupByOutputType = {
   ownerId: string
   createdAt: Date
   updatedAt: Date
+  moderationStatus: string
+  moderationNote: string | null
+  moderatedAt: Date | null
   addressId: number | null
   _count: ProductCountAggregateOutputType | null
   _avg: ProductAvgAggregateOutputType | null
@@ -259,6 +280,9 @@ export type ProductWhereInput = {
   ownerId?: Prisma.StringFilter<"Product"> | string
   createdAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
+  moderationStatus?: Prisma.StringFilter<"Product"> | string
+  moderationNote?: Prisma.StringNullableFilter<"Product"> | string | null
+  moderatedAt?: Prisma.DateTimeNullableFilter<"Product"> | Date | string | null
   addressId?: Prisma.IntNullableFilter<"Product"> | number | null
   addressAuthor?: Prisma.XOR<Prisma.AddressNullableScalarRelationFilter, Prisma.AddressWhereInput> | null
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -277,6 +301,9 @@ export type ProductOrderByWithRelationInput = {
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  moderationNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  moderatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
   addressAuthor?: Prisma.AddressOrderByWithRelationInput
   owner?: Prisma.UserOrderByWithRelationInput
@@ -298,6 +325,9 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   ownerId?: Prisma.StringFilter<"Product"> | string
   createdAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
+  moderationStatus?: Prisma.StringFilter<"Product"> | string
+  moderationNote?: Prisma.StringNullableFilter<"Product"> | string | null
+  moderatedAt?: Prisma.DateTimeNullableFilter<"Product"> | Date | string | null
   addressId?: Prisma.IntNullableFilter<"Product"> | number | null
   addressAuthor?: Prisma.XOR<Prisma.AddressNullableScalarRelationFilter, Prisma.AddressWhereInput> | null
   owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -316,6 +346,9 @@ export type ProductOrderByWithAggregationInput = {
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  moderationNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  moderatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   addressId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ProductCountOrderByAggregateInput
   _avg?: Prisma.ProductAvgOrderByAggregateInput
@@ -337,6 +370,9 @@ export type ProductScalarWhereWithAggregatesInput = {
   ownerId?: Prisma.StringWithAggregatesFilter<"Product"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Product"> | Date | string
+  moderationStatus?: Prisma.StringWithAggregatesFilter<"Product"> | string
+  moderationNote?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
+  moderatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Product"> | Date | string | null
   addressId?: Prisma.IntNullableWithAggregatesFilter<"Product"> | number | null
 }
 
@@ -348,6 +384,9 @@ export type ProductCreateInput = {
   comment?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressAuthor?: Prisma.AddressCreateNestedOneWithoutProdukInput
   owner: Prisma.UserCreateNestedOneWithoutProductsInput
   variations?: Prisma.VariationCreateNestedManyWithoutProductInput
@@ -365,6 +404,9 @@ export type ProductUncheckedCreateInput = {
   ownerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressId?: number | null
   variations?: Prisma.VariationUncheckedCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutProductInput
@@ -379,6 +421,9 @@ export type ProductUpdateInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressAuthor?: Prisma.AddressUpdateOneWithoutProdukNestedInput
   owner?: Prisma.UserUpdateOneRequiredWithoutProductsNestedInput
   variations?: Prisma.VariationUpdateManyWithoutProductNestedInput
@@ -396,6 +441,9 @@ export type ProductUncheckedUpdateInput = {
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   variations?: Prisma.VariationUncheckedUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutProductNestedInput
@@ -412,6 +460,9 @@ export type ProductCreateManyInput = {
   ownerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressId?: number | null
 }
 
@@ -423,6 +474,9 @@ export type ProductUpdateManyMutationInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type ProductUncheckedUpdateManyInput = {
@@ -435,6 +489,9 @@ export type ProductUncheckedUpdateManyInput = {
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
@@ -458,6 +515,9 @@ export type ProductCountOrderByAggregateInput = {
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  moderationNote?: Prisma.SortOrder
+  moderatedAt?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
 }
 
@@ -476,6 +536,9 @@ export type ProductMaxOrderByAggregateInput = {
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  moderationNote?: Prisma.SortOrder
+  moderatedAt?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
 }
 
@@ -489,6 +552,9 @@ export type ProductMinOrderByAggregateInput = {
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  moderationNote?: Prisma.SortOrder
+  moderatedAt?: Prisma.SortOrder
   addressId?: Prisma.SortOrder
 }
 
@@ -636,6 +702,9 @@ export type ProductCreateWithoutOwnerInput = {
   comment?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressAuthor?: Prisma.AddressCreateNestedOneWithoutProdukInput
   variations?: Prisma.VariationCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveCreateNestedManyWithoutProductInput
@@ -651,6 +720,9 @@ export type ProductUncheckedCreateWithoutOwnerInput = {
   comment?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressId?: number | null
   variations?: Prisma.VariationUncheckedCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutProductInput
@@ -696,6 +768,9 @@ export type ProductScalarWhereInput = {
   ownerId?: Prisma.StringFilter<"Product"> | string
   createdAt?: Prisma.DateTimeFilter<"Product"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Product"> | Date | string
+  moderationStatus?: Prisma.StringFilter<"Product"> | string
+  moderationNote?: Prisma.StringNullableFilter<"Product"> | string | null
+  moderatedAt?: Prisma.DateTimeNullableFilter<"Product"> | Date | string | null
   addressId?: Prisma.IntNullableFilter<"Product"> | number | null
 }
 
@@ -707,6 +782,9 @@ export type ProductCreateWithoutAddressAuthorInput = {
   comment?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   owner: Prisma.UserCreateNestedOneWithoutProductsInput
   variations?: Prisma.VariationCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveCreateNestedManyWithoutProductInput
@@ -723,6 +801,9 @@ export type ProductUncheckedCreateWithoutAddressAuthorInput = {
   ownerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   variations?: Prisma.VariationUncheckedCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutProductInput
   review?: Prisma.ReviewUncheckedCreateNestedManyWithoutProductInput
@@ -762,6 +843,9 @@ export type ProductCreateWithoutVariationsInput = {
   comment?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressAuthor?: Prisma.AddressCreateNestedOneWithoutProdukInput
   owner: Prisma.UserCreateNestedOneWithoutProductsInput
   loves?: Prisma.LoveCreateNestedManyWithoutProductInput
@@ -778,6 +862,9 @@ export type ProductUncheckedCreateWithoutVariationsInput = {
   ownerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressId?: number | null
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutProductInput
   review?: Prisma.ReviewUncheckedCreateNestedManyWithoutProductInput
@@ -807,6 +894,9 @@ export type ProductUpdateWithoutVariationsInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressAuthor?: Prisma.AddressUpdateOneWithoutProdukNestedInput
   owner?: Prisma.UserUpdateOneRequiredWithoutProductsNestedInput
   loves?: Prisma.LoveUpdateManyWithoutProductNestedInput
@@ -823,6 +913,9 @@ export type ProductUncheckedUpdateWithoutVariationsInput = {
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   loves?: Prisma.LoveUncheckedUpdateManyWithoutProductNestedInput
   review?: Prisma.ReviewUncheckedUpdateManyWithoutProductNestedInput
@@ -836,6 +929,9 @@ export type ProductCreateWithoutLovesInput = {
   comment?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressAuthor?: Prisma.AddressCreateNestedOneWithoutProdukInput
   owner: Prisma.UserCreateNestedOneWithoutProductsInput
   variations?: Prisma.VariationCreateNestedManyWithoutProductInput
@@ -852,6 +948,9 @@ export type ProductUncheckedCreateWithoutLovesInput = {
   ownerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressId?: number | null
   variations?: Prisma.VariationUncheckedCreateNestedManyWithoutProductInput
   review?: Prisma.ReviewUncheckedCreateNestedManyWithoutProductInput
@@ -881,6 +980,9 @@ export type ProductUpdateWithoutLovesInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressAuthor?: Prisma.AddressUpdateOneWithoutProdukNestedInput
   owner?: Prisma.UserUpdateOneRequiredWithoutProductsNestedInput
   variations?: Prisma.VariationUpdateManyWithoutProductNestedInput
@@ -897,6 +999,9 @@ export type ProductUncheckedUpdateWithoutLovesInput = {
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   variations?: Prisma.VariationUncheckedUpdateManyWithoutProductNestedInput
   review?: Prisma.ReviewUncheckedUpdateManyWithoutProductNestedInput
@@ -910,6 +1015,9 @@ export type ProductCreateWithoutReviewInput = {
   comment?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressAuthor?: Prisma.AddressCreateNestedOneWithoutProdukInput
   owner: Prisma.UserCreateNestedOneWithoutProductsInput
   variations?: Prisma.VariationCreateNestedManyWithoutProductInput
@@ -926,6 +1034,9 @@ export type ProductUncheckedCreateWithoutReviewInput = {
   ownerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressId?: number | null
   variations?: Prisma.VariationUncheckedCreateNestedManyWithoutProductInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutProductInput
@@ -955,6 +1066,9 @@ export type ProductUpdateWithoutReviewInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressAuthor?: Prisma.AddressUpdateOneWithoutProdukNestedInput
   owner?: Prisma.UserUpdateOneRequiredWithoutProductsNestedInput
   variations?: Prisma.VariationUpdateManyWithoutProductNestedInput
@@ -971,6 +1085,9 @@ export type ProductUncheckedUpdateWithoutReviewInput = {
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   variations?: Prisma.VariationUncheckedUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutProductNestedInput
@@ -985,6 +1102,9 @@ export type ProductCreateManyOwnerInput = {
   comment?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
   addressId?: number | null
 }
 
@@ -996,6 +1116,9 @@ export type ProductUpdateWithoutOwnerInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressAuthor?: Prisma.AddressUpdateOneWithoutProdukNestedInput
   variations?: Prisma.VariationUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUpdateManyWithoutProductNestedInput
@@ -1011,6 +1134,9 @@ export type ProductUncheckedUpdateWithoutOwnerInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   variations?: Prisma.VariationUncheckedUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutProductNestedInput
@@ -1026,6 +1152,9 @@ export type ProductUncheckedUpdateManyWithoutOwnerInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   addressId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
@@ -1039,6 +1168,9 @@ export type ProductCreateManyAddressAuthorInput = {
   ownerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  moderationStatus?: string
+  moderationNote?: string | null
+  moderatedAt?: Date | string | null
 }
 
 export type ProductUpdateWithoutAddressAuthorInput = {
@@ -1049,6 +1181,9 @@ export type ProductUpdateWithoutAddressAuthorInput = {
   comment?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   owner?: Prisma.UserUpdateOneRequiredWithoutProductsNestedInput
   variations?: Prisma.VariationUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUpdateManyWithoutProductNestedInput
@@ -1065,6 +1200,9 @@ export type ProductUncheckedUpdateWithoutAddressAuthorInput = {
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   variations?: Prisma.VariationUncheckedUpdateManyWithoutProductNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutProductNestedInput
   review?: Prisma.ReviewUncheckedUpdateManyWithoutProductNestedInput
@@ -1080,6 +1218,9 @@ export type ProductUncheckedUpdateManyWithoutAddressAuthorInput = {
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  moderationStatus?: Prisma.StringFieldUpdateOperationsInput | string
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -1141,6 +1282,9 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   ownerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  moderationStatus?: boolean
+  moderationNote?: boolean
+  moderatedAt?: boolean
   addressId?: boolean
   addressAuthor?: boolean | Prisma.Product$addressAuthorArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1160,6 +1304,9 @@ export type ProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   ownerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  moderationStatus?: boolean
+  moderationNote?: boolean
+  moderatedAt?: boolean
   addressId?: boolean
   addressAuthor?: boolean | Prisma.Product$addressAuthorArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1175,6 +1322,9 @@ export type ProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   ownerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  moderationStatus?: boolean
+  moderationNote?: boolean
+  moderatedAt?: boolean
   addressId?: boolean
   addressAuthor?: boolean | Prisma.Product$addressAuthorArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1190,10 +1340,13 @@ export type ProductSelectScalar = {
   ownerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  moderationStatus?: boolean
+  moderationNote?: boolean
+  moderatedAt?: boolean
   addressId?: boolean
 }
 
-export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nama" | "kategori" | "deskripsi" | "lokasi" | "comment" | "ownerId" | "createdAt" | "updatedAt" | "addressId", ExtArgs["result"]["product"]>
+export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nama" | "kategori" | "deskripsi" | "lokasi" | "comment" | "ownerId" | "createdAt" | "updatedAt" | "moderationStatus" | "moderationNote" | "moderatedAt" | "addressId", ExtArgs["result"]["product"]>
 export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   addressAuthor?: boolean | Prisma.Product$addressAuthorArgs<ExtArgs>
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1230,6 +1383,9 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     ownerId: string
     createdAt: Date
     updatedAt: Date
+    moderationStatus: string
+    moderationNote: string | null
+    moderatedAt: Date | null
     addressId: number | null
   }, ExtArgs["result"]["product"]>
   composites: {}
@@ -1668,6 +1824,9 @@ export interface ProductFieldRefs {
   readonly ownerId: Prisma.FieldRef<"Product", 'String'>
   readonly createdAt: Prisma.FieldRef<"Product", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Product", 'DateTime'>
+  readonly moderationStatus: Prisma.FieldRef<"Product", 'String'>
+  readonly moderationNote: Prisma.FieldRef<"Product", 'String'>
+  readonly moderatedAt: Prisma.FieldRef<"Product", 'DateTime'>
   readonly addressId: Prisma.FieldRef<"Product", 'Int'>
 }
     

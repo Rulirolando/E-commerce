@@ -97,3 +97,13 @@ export type ChatRoom = Prisma.ChatRoomModel
  * 
  */
 export type Message = Prisma.MessageModel
+/**
+ * Model BankAccount
+ * 
+ */
+export type BankAccount = Prisma.BankAccountModel
+/**
+ * Model Payout
+ * 
+ */
+export type Payout = Prisma.PayoutModel

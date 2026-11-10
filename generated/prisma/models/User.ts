@@ -26,6 +26,7 @@ export type AggregateUser = {
 
 export type UserMinAggregateOutputType = {
   id: string | null
+  role: $Enums.Role | null
   username: string | null
   email: string | null
   password: string | null
@@ -41,6 +42,7 @@ export type UserMinAggregateOutputType = {
 
 export type UserMaxAggregateOutputType = {
   id: string | null
+  role: $Enums.Role | null
   username: string | null
   email: string | null
   password: string | null
@@ -56,6 +58,7 @@ export type UserMaxAggregateOutputType = {
 
 export type UserCountAggregateOutputType = {
   id: number
+  role: number
   username: number
   email: number
   password: number
@@ -73,6 +76,7 @@ export type UserCountAggregateOutputType = {
 
 export type UserMinAggregateInputType = {
   id?: true
+  role?: true
   username?: true
   email?: true
   password?: true
@@ -88,6 +92,7 @@ export type UserMinAggregateInputType = {
 
 export type UserMaxAggregateInputType = {
   id?: true
+  role?: true
   username?: true
   email?: true
   password?: true
@@ -103,6 +108,7 @@ export type UserMaxAggregateInputType = {
 
 export type UserCountAggregateInputType = {
   id?: true
+  role?: true
   username?: true
   email?: true
   password?: true
@@ -191,6 +197,7 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 
 export type UserGroupByOutputType = {
   id: string
+  role: $Enums.Role
   username: string
   email: string
   password: string | null
@@ -227,6 +234,7 @@ export type UserWhereInput = {
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   id?: Prisma.StringFilter<"User"> | string
+  role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   username?: Prisma.StringFilter<"User"> | string
   email?: Prisma.StringFilter<"User"> | string
   password?: Prisma.StringNullableFilter<"User"> | string | null
@@ -249,10 +257,13 @@ export type UserWhereInput = {
   chatRooms1?: Prisma.ChatRoomListRelationFilter
   chatRooms2?: Prisma.ChatRoomListRelationFilter
   messages?: Prisma.MessageListRelationFilter
+  bankAccount?: Prisma.XOR<Prisma.BankAccountNullableScalarRelationFilter, Prisma.BankAccountWhereInput> | null
+  payouts?: Prisma.PayoutListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   username?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -275,6 +286,8 @@ export type UserOrderByWithRelationInput = {
   chatRooms1?: Prisma.ChatRoomOrderByRelationAggregateInput
   chatRooms2?: Prisma.ChatRoomOrderByRelationAggregateInput
   messages?: Prisma.MessageOrderByRelationAggregateInput
+  bankAccount?: Prisma.BankAccountOrderByWithRelationInput
+  payouts?: Prisma.PayoutOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -284,6 +297,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
+  role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
   password?: Prisma.StringNullableFilter<"User"> | string | null
   emailVerified?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   nama?: Prisma.StringNullableFilter<"User"> | string | null
@@ -304,10 +318,13 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   chatRooms1?: Prisma.ChatRoomListRelationFilter
   chatRooms2?: Prisma.ChatRoomListRelationFilter
   messages?: Prisma.MessageListRelationFilter
+  bankAccount?: Prisma.XOR<Prisma.BankAccountNullableScalarRelationFilter, Prisma.BankAccountWhereInput> | null
+  payouts?: Prisma.PayoutListRelationFilter
 }, "id" | "username" | "email">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   username?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -329,6 +346,7 @@ export type UserScalarWhereWithAggregatesInput = {
   OR?: Prisma.UserScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserScalarWhereWithAggregatesInput | Prisma.UserScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"User"> | string
+  role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
   username?: Prisma.StringWithAggregatesFilter<"User"> | string
   email?: Prisma.StringWithAggregatesFilter<"User"> | string
   password?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
@@ -344,6 +362,7 @@ export type UserScalarWhereWithAggregatesInput = {
 
 export type UserCreateInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -366,10 +385,13 @@ export type UserCreateInput = {
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -392,10 +414,13 @@ export type UserUncheckedCreateInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -418,10 +443,13 @@ export type UserUpdateInput = {
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -444,10 +472,13 @@ export type UserUncheckedUpdateInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserCreateManyInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -463,6 +494,7 @@ export type UserCreateManyInput = {
 
 export type UserUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -478,6 +510,7 @@ export type UserUpdateManyMutationInput = {
 
 export type UserUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -493,6 +526,7 @@ export type UserUncheckedUpdateManyInput = {
 
 export type UserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   username?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
@@ -508,6 +542,7 @@ export type UserCountOrderByAggregateInput = {
 
 export type UserMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   username?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
@@ -523,6 +558,7 @@ export type UserMaxOrderByAggregateInput = {
 
 export type UserMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  role?: Prisma.SortOrder
   username?: Prisma.SortOrder
   email?: Prisma.SortOrder
   password?: Prisma.SortOrder
@@ -543,6 +579,10 @@ export type UserScalarRelationFilter = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type EnumRoleFieldUpdateOperationsInput = {
+  set?: $Enums.Role
 }
 
 export type NullableStringFieldUpdateOperationsInput = {
@@ -711,8 +751,37 @@ export type UserUpdateOneRequiredWithoutMessagesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutMessagesInput, Prisma.UserUpdateWithoutMessagesInput>, Prisma.UserUncheckedUpdateWithoutMessagesInput>
 }
 
+export type UserCreateNestedOneWithoutBankAccountInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBankAccountInput, Prisma.UserUncheckedCreateWithoutBankAccountInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBankAccountInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutBankAccountNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBankAccountInput, Prisma.UserUncheckedCreateWithoutBankAccountInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBankAccountInput
+  upsert?: Prisma.UserUpsertWithoutBankAccountInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBankAccountInput, Prisma.UserUpdateWithoutBankAccountInput>, Prisma.UserUncheckedUpdateWithoutBankAccountInput>
+}
+
+export type UserCreateNestedOneWithoutPayoutsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPayoutsInput, Prisma.UserUncheckedCreateWithoutPayoutsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPayoutsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutPayoutsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutPayoutsInput, Prisma.UserUncheckedCreateWithoutPayoutsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutPayoutsInput
+  upsert?: Prisma.UserUpsertWithoutPayoutsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPayoutsInput, Prisma.UserUpdateWithoutPayoutsInput>, Prisma.UserUncheckedUpdateWithoutPayoutsInput>
+}
+
 export type UserCreateWithoutAccountInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -734,10 +803,13 @@ export type UserCreateWithoutAccountInput = {
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutAccountInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -759,6 +831,8 @@ export type UserUncheckedCreateWithoutAccountInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutAccountInput = {
@@ -779,6 +853,7 @@ export type UserUpdateToOneWithWhereWithoutAccountInput = {
 
 export type UserUpdateWithoutAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -800,10 +875,13 @@ export type UserUpdateWithoutAccountInput = {
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -825,10 +903,13 @@ export type UserUncheckedUpdateWithoutAccountInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -850,10 +931,13 @@ export type UserCreateWithoutNotificationsInput = {
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -875,6 +959,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -895,6 +981,7 @@ export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
 
 export type UserUpdateWithoutNotificationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -916,10 +1003,13 @@ export type UserUpdateWithoutNotificationsInput = {
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -941,10 +1031,13 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserCreateWithoutAddressesInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -966,10 +1059,13 @@ export type UserCreateWithoutAddressesInput = {
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutAddressesInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -991,6 +1087,8 @@ export type UserUncheckedCreateWithoutAddressesInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutAddressesInput = {
@@ -1011,6 +1109,7 @@ export type UserUpdateToOneWithWhereWithoutAddressesInput = {
 
 export type UserUpdateWithoutAddressesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1032,10 +1131,13 @@ export type UserUpdateWithoutAddressesInput = {
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAddressesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1057,10 +1159,13 @@ export type UserUncheckedUpdateWithoutAddressesInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserCreateWithoutProductsInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1082,10 +1187,13 @@ export type UserCreateWithoutProductsInput = {
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutProductsInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1107,6 +1215,8 @@ export type UserUncheckedCreateWithoutProductsInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutProductsInput = {
@@ -1127,6 +1237,7 @@ export type UserUpdateToOneWithWhereWithoutProductsInput = {
 
 export type UserUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1148,10 +1259,13 @@ export type UserUpdateWithoutProductsInput = {
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1173,10 +1287,13 @@ export type UserUncheckedUpdateWithoutProductsInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserCreateWithoutLovesInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1198,10 +1315,13 @@ export type UserCreateWithoutLovesInput = {
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutLovesInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1223,6 +1343,8 @@ export type UserUncheckedCreateWithoutLovesInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutLovesInput = {
@@ -1243,6 +1365,7 @@ export type UserUpdateToOneWithWhereWithoutLovesInput = {
 
 export type UserUpdateWithoutLovesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1264,10 +1387,13 @@ export type UserUpdateWithoutLovesInput = {
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLovesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1289,10 +1415,13 @@ export type UserUncheckedUpdateWithoutLovesInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserCreateWithoutOrdersInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1314,10 +1443,13 @@ export type UserCreateWithoutOrdersInput = {
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutOrdersInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1339,6 +1471,8 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutOrdersInput = {
@@ -1359,6 +1493,7 @@ export type UserUpdateToOneWithWhereWithoutOrdersInput = {
 
 export type UserUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1380,10 +1515,13 @@ export type UserUpdateWithoutOrdersInput = {
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1405,10 +1543,13 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserCreateWithoutReviewInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1430,10 +1571,13 @@ export type UserCreateWithoutReviewInput = {
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutReviewInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1455,6 +1599,8 @@ export type UserUncheckedCreateWithoutReviewInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutReviewInput = {
@@ -1475,6 +1621,7 @@ export type UserUpdateToOneWithWhereWithoutReviewInput = {
 
 export type UserUpdateWithoutReviewInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1496,10 +1643,13 @@ export type UserUpdateWithoutReviewInput = {
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReviewInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1521,10 +1671,13 @@ export type UserUncheckedUpdateWithoutReviewInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserCreateWithoutCartsInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1546,10 +1699,13 @@ export type UserCreateWithoutCartsInput = {
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutCartsInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1571,6 +1727,8 @@ export type UserUncheckedCreateWithoutCartsInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutCartsInput = {
@@ -1591,6 +1749,7 @@ export type UserUpdateToOneWithWhereWithoutCartsInput = {
 
 export type UserUpdateWithoutCartsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1612,10 +1771,13 @@ export type UserUpdateWithoutCartsInput = {
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCartsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1637,10 +1799,13 @@ export type UserUncheckedUpdateWithoutCartsInput = {
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserCreateWithoutChatRooms1Input = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1662,10 +1827,13 @@ export type UserCreateWithoutChatRooms1Input = {
   review?: Prisma.ReviewCreateNestedManyWithoutUserInput
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutChatRooms1Input = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1687,6 +1855,8 @@ export type UserUncheckedCreateWithoutChatRooms1Input = {
   review?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutChatRooms1Input = {
@@ -1696,6 +1866,7 @@ export type UserCreateOrConnectWithoutChatRooms1Input = {
 
 export type UserCreateWithoutChatRooms2Input = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1717,10 +1888,13 @@ export type UserCreateWithoutChatRooms2Input = {
   review?: Prisma.ReviewCreateNestedManyWithoutUserInput
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutChatRooms2Input = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1742,6 +1916,8 @@ export type UserUncheckedCreateWithoutChatRooms2Input = {
   review?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutChatRooms2Input = {
@@ -1762,6 +1938,7 @@ export type UserUpdateToOneWithWhereWithoutChatRooms1Input = {
 
 export type UserUpdateWithoutChatRooms1Input = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1783,10 +1960,13 @@ export type UserUpdateWithoutChatRooms1Input = {
   review?: Prisma.ReviewUpdateManyWithoutUserNestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatRooms1Input = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1808,6 +1988,8 @@ export type UserUncheckedUpdateWithoutChatRooms1Input = {
   review?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUpsertWithoutChatRooms2Input = {
@@ -1823,6 +2005,7 @@ export type UserUpdateToOneWithWhereWithoutChatRooms2Input = {
 
 export type UserUpdateWithoutChatRooms2Input = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1844,10 +2027,13 @@ export type UserUpdateWithoutChatRooms2Input = {
   review?: Prisma.ReviewUpdateManyWithoutUserNestedInput
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatRooms2Input = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1869,10 +2055,13 @@ export type UserUncheckedUpdateWithoutChatRooms2Input = {
   review?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
 }
 
 export type UserCreateWithoutMessagesInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1894,10 +2083,13 @@ export type UserCreateWithoutMessagesInput = {
   review?: Prisma.ReviewCreateNestedManyWithoutUserInput
   chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
 }
 
 export type UserUncheckedCreateWithoutMessagesInput = {
   id?: string
+  role?: $Enums.Role
   username: string
   email: string
   password?: string | null
@@ -1919,6 +2111,8 @@ export type UserUncheckedCreateWithoutMessagesInput = {
   review?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
   chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
   chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
 }
 
 export type UserCreateOrConnectWithoutMessagesInput = {
@@ -1939,6 +2133,7 @@ export type UserUpdateToOneWithWhereWithoutMessagesInput = {
 
 export type UserUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1960,10 +2155,13 @@ export type UserUpdateWithoutMessagesInput = {
   review?: Prisma.ReviewUpdateManyWithoutUserNestedInput
   chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMessagesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
   username?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
   password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1985,6 +2183,264 @@ export type UserUncheckedUpdateWithoutMessagesInput = {
   review?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
   chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
   chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
+}
+
+export type UserCreateWithoutBankAccountInput = {
+  id?: string
+  role?: $Enums.Role
+  username: string
+  email: string
+  password?: string | null
+  emailVerified?: Date | string | null
+  nama?: string | null
+  noTelp?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tanggalLahir?: Date | string | null
+  jenisKelamin?: string | null
+  imgProfile?: string | null
+  products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  loves?: Prisma.LoveCreateNestedManyWithoutUserInput
+  carts?: Prisma.CartCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutBuyerInput
+  addresses?: Prisma.AddressCreateNestedManyWithoutUserInput
+  account?: Prisma.AccountCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  review?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
+  chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  payouts?: Prisma.PayoutCreateNestedManyWithoutSellerInput
+}
+
+export type UserUncheckedCreateWithoutBankAccountInput = {
+  id?: string
+  role?: $Enums.Role
+  username: string
+  email: string
+  password?: string | null
+  emailVerified?: Date | string | null
+  nama?: string | null
+  noTelp?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tanggalLahir?: Date | string | null
+  jenisKelamin?: string | null
+  imgProfile?: string | null
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
+  carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
+  addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput
+  account?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  review?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
+  chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  payouts?: Prisma.PayoutUncheckedCreateNestedManyWithoutSellerInput
+}
+
+export type UserCreateOrConnectWithoutBankAccountInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBankAccountInput, Prisma.UserUncheckedCreateWithoutBankAccountInput>
+}
+
+export type UserUpsertWithoutBankAccountInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBankAccountInput, Prisma.UserUncheckedUpdateWithoutBankAccountInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBankAccountInput, Prisma.UserUncheckedCreateWithoutBankAccountInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBankAccountInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBankAccountInput, Prisma.UserUncheckedUpdateWithoutBankAccountInput>
+}
+
+export type UserUpdateWithoutBankAccountInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nama?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noTelp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
+  carts?: Prisma.CartUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
+  addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput
+  account?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  review?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
+  chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  payouts?: Prisma.PayoutUpdateManyWithoutSellerNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBankAccountInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nama?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noTelp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
+  carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
+  addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput
+  account?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  review?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
+  chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  payouts?: Prisma.PayoutUncheckedUpdateManyWithoutSellerNestedInput
+}
+
+export type UserCreateWithoutPayoutsInput = {
+  id?: string
+  role?: $Enums.Role
+  username: string
+  email: string
+  password?: string | null
+  emailVerified?: Date | string | null
+  nama?: string | null
+  noTelp?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tanggalLahir?: Date | string | null
+  jenisKelamin?: string | null
+  imgProfile?: string | null
+  products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
+  loves?: Prisma.LoveCreateNestedManyWithoutUserInput
+  carts?: Prisma.CartCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderCreateNestedManyWithoutBuyerInput
+  addresses?: Prisma.AddressCreateNestedManyWithoutUserInput
+  account?: Prisma.AccountCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  review?: Prisma.ReviewCreateNestedManyWithoutUserInput
+  chatRooms1?: Prisma.ChatRoomCreateNestedManyWithoutUser1Input
+  chatRooms2?: Prisma.ChatRoomCreateNestedManyWithoutUser2Input
+  messages?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountCreateNestedOneWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutPayoutsInput = {
+  id?: string
+  role?: $Enums.Role
+  username: string
+  email: string
+  password?: string | null
+  emailVerified?: Date | string | null
+  nama?: string | null
+  noTelp?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tanggalLahir?: Date | string | null
+  jenisKelamin?: string | null
+  imgProfile?: string | null
+  products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
+  loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
+  carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
+  orders?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
+  addresses?: Prisma.AddressUncheckedCreateNestedManyWithoutUserInput
+  account?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  review?: Prisma.ReviewUncheckedCreateNestedManyWithoutUserInput
+  chatRooms1?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser1Input
+  chatRooms2?: Prisma.ChatRoomUncheckedCreateNestedManyWithoutUser2Input
+  messages?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  bankAccount?: Prisma.BankAccountUncheckedCreateNestedOneWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutPayoutsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutPayoutsInput, Prisma.UserUncheckedCreateWithoutPayoutsInput>
+}
+
+export type UserUpsertWithoutPayoutsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutPayoutsInput, Prisma.UserUncheckedUpdateWithoutPayoutsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutPayoutsInput, Prisma.UserUncheckedCreateWithoutPayoutsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutPayoutsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutPayoutsInput, Prisma.UserUncheckedUpdateWithoutPayoutsInput>
+}
+
+export type UserUpdateWithoutPayoutsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nama?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noTelp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
+  loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
+  carts?: Prisma.CartUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
+  addresses?: Prisma.AddressUpdateManyWithoutUserNestedInput
+  account?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  review?: Prisma.ReviewUpdateManyWithoutUserNestedInput
+  chatRooms1?: Prisma.ChatRoomUpdateManyWithoutUser1NestedInput
+  chatRooms2?: Prisma.ChatRoomUpdateManyWithoutUser2NestedInput
+  messages?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUpdateOneWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutPayoutsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nama?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noTelp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
+  loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
+  carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
+  orders?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
+  addresses?: Prisma.AddressUncheckedUpdateManyWithoutUserNestedInput
+  account?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  review?: Prisma.ReviewUncheckedUpdateManyWithoutUserNestedInput
+  chatRooms1?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser1NestedInput
+  chatRooms2?: Prisma.ChatRoomUncheckedUpdateManyWithoutUser2NestedInput
+  messages?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  bankAccount?: Prisma.BankAccountUncheckedUpdateOneWithoutUserNestedInput
 }
 
 
@@ -2004,6 +2460,7 @@ export type UserCountOutputType = {
   chatRooms1: number
   chatRooms2: number
   messages: number
+  payouts: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2018,6 +2475,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   chatRooms1?: boolean | UserCountOutputTypeCountChatRooms1Args
   chatRooms2?: boolean | UserCountOutputTypeCountChatRooms2Args
   messages?: boolean | UserCountOutputTypeCountMessagesArgs
+  payouts?: boolean | UserCountOutputTypeCountPayoutsArgs
 }
 
 /**
@@ -2107,9 +2565,17 @@ export type UserCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Types.E
   where?: Prisma.MessageWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountPayoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PayoutWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  role?: boolean
   username?: boolean
   email?: boolean
   password?: boolean
@@ -2132,11 +2598,14 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   chatRooms1?: boolean | Prisma.User$chatRooms1Args<ExtArgs>
   chatRooms2?: boolean | Prisma.User$chatRooms2Args<ExtArgs>
   messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
+  bankAccount?: boolean | Prisma.User$bankAccountArgs<ExtArgs>
+  payouts?: boolean | Prisma.User$payoutsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  role?: boolean
   username?: boolean
   email?: boolean
   password?: boolean
@@ -2152,6 +2621,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  role?: boolean
   username?: boolean
   email?: boolean
   password?: boolean
@@ -2167,6 +2637,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 
 export type UserSelectScalar = {
   id?: boolean
+  role?: boolean
   username?: boolean
   email?: boolean
   password?: boolean
@@ -2180,7 +2651,7 @@ export type UserSelectScalar = {
   imgProfile?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "username" | "email" | "password" | "emailVerified" | "nama" | "noTelp" | "createdAt" | "updatedAt" | "tanggalLahir" | "jenisKelamin" | "imgProfile", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "role" | "username" | "email" | "password" | "emailVerified" | "nama" | "noTelp" | "createdAt" | "updatedAt" | "tanggalLahir" | "jenisKelamin" | "imgProfile", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | Prisma.User$productsArgs<ExtArgs>
   loves?: boolean | Prisma.User$lovesArgs<ExtArgs>
@@ -2193,6 +2664,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   chatRooms1?: boolean | Prisma.User$chatRooms1Args<ExtArgs>
   chatRooms2?: boolean | Prisma.User$chatRooms2Args<ExtArgs>
   messages?: boolean | Prisma.User$messagesArgs<ExtArgs>
+  bankAccount?: boolean | Prisma.User$bankAccountArgs<ExtArgs>
+  payouts?: boolean | Prisma.User$payoutsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2212,9 +2685,12 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     chatRooms1: Prisma.$ChatRoomPayload<ExtArgs>[]
     chatRooms2: Prisma.$ChatRoomPayload<ExtArgs>[]
     messages: Prisma.$MessagePayload<ExtArgs>[]
+    bankAccount: Prisma.$BankAccountPayload<ExtArgs> | null
+    payouts: Prisma.$PayoutPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    role: $Enums.Role
     username: string
     email: string
     password: string | null
@@ -2631,6 +3107,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   chatRooms1<T extends Prisma.User$chatRooms1Args<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatRooms1Args<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatRoomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   chatRooms2<T extends Prisma.User$chatRooms2Args<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$chatRooms2Args<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatRoomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   messages<T extends Prisma.User$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bankAccount<T extends Prisma.User$bankAccountArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bankAccountArgs<ExtArgs>>): Prisma.Prisma__BankAccountClient<runtime.Types.Result.GetResult<Prisma.$BankAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  payouts<T extends Prisma.User$payoutsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$payoutsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PayoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2661,6 +3139,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
  */
 export interface UserFieldRefs {
   readonly id: Prisma.FieldRef<"User", 'String'>
+  readonly role: Prisma.FieldRef<"User", 'Role'>
   readonly username: Prisma.FieldRef<"User", 'String'>
   readonly email: Prisma.FieldRef<"User", 'String'>
   readonly password: Prisma.FieldRef<"User", 'String'>
@@ -3321,6 +3800,49 @@ export type User$messagesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.MessageScalarFieldEnum | Prisma.MessageScalarFieldEnum[]
+}
+
+/**
+ * User.bankAccount
+ */
+export type User$bankAccountArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BankAccount
+   */
+  select?: Prisma.BankAccountSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BankAccount
+   */
+  omit?: Prisma.BankAccountOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BankAccountInclude<ExtArgs> | null
+  where?: Prisma.BankAccountWhereInput
+}
+
+/**
+ * User.payouts
+ */
+export type User$payoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Payout
+   */
+  select?: Prisma.PayoutSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Payout
+   */
+  omit?: Prisma.PayoutOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PayoutInclude<ExtArgs> | null
+  where?: Prisma.PayoutWhereInput
+  orderBy?: Prisma.PayoutOrderByWithRelationInput | Prisma.PayoutOrderByWithRelationInput[]
+  cursor?: Prisma.PayoutWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PayoutScalarFieldEnum | Prisma.PayoutScalarFieldEnum[]
 }
 
 /**

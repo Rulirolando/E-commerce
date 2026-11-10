@@ -18,9 +18,9 @@ export async function POST(req: Request) {
     orderBy: { createdAt: "desc" },
   });
 
-  if (lastOtp && Date.now() - lastOtp.createdAt.getTime() < 60 * 1000) {
+  if (lastOtp && Date.now() - lastOtp.createdAt.getTime() < 120 * 1000) {
     return NextResponse.json(
-      { error: "Tunggu 1 menit sebelum minta OTP lagi" },
+      { error: "Tunggu 2 menit sebelum minta OTP lagi" },
       { status: 429 },
     );
   }
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     data: {
       email,
       code: otp,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+      expiresAt: new Date(Date.now() + 2 * 60 * 1000),
     },
   });
 
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     to: email,
     from: process.env.EMAIL_FROM,
     subject: "Kode OTP Login",
-    html: `<h2>Kode OTP Login</h2><p>Kode OTP kamu adalah: <b>${otp}</b></p><p>Berlaku 5 menit.</p>`,
+    html: `<h2>Kode OTP Login</h2><p>Kode OTP kamu adalah: <b>${otp}</b></p><p>Berlaku 2 menit.</p>`,
   });
 
   return NextResponse.json({ success: true });

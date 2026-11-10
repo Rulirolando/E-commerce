@@ -17,7 +17,7 @@ export default async function Profile({ params }) {
   const resolvedParams = await params;
   const userId = resolvedParams.id;
   const currentUser = session;
-  console.log("currentUser:", currentUser);
+  // console.log("currentUser:", currentUser);
   if (currentUser?.user?.id !== userId) {
     return (
       <div className="w-full h-screen flex items-center justify-center">

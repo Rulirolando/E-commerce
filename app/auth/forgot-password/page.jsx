@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import {
   sendResetOtp,
@@ -8,74 +9,191 @@ import {
 import { useRouter } from "next/navigation";
 
 export default function ForgotPassword() {
-  const [step, setStep] = useState(1); // 1: Email, 2: OTP & New Pass
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [timer, setTimer] = useState(100);
+  const [expiresAt, setExpiresAt] = useState(null);
+  const [remainingTime, setRemainingTime] = useState(0);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("error");
 
+  const router = useRouter();
+
+  // Timer dihitung berdasarkan waktu kedaluwarsa dari server.
   useEffect(() => {
-    const interval = setInterval(
-      () => setTimer((p) => (p > 0 ? p - 1 : 0)),
-      1000,
-    );
-    return () => clearInterval(interval);
-  }, []);
+    if (!expiresAt) {
+      setRemainingTime(0);
+      return;
+    }
 
+    const updateTimer = () => {
+      const seconds = Math.max(
+        0,
+        Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 1000),
+      );
+
+      setRemainingTime(seconds);
+    };
+
+    updateTimer();
+
+    const interval = setInterval(updateTimer, 250);
+
+    return () => clearInterval(interval);
+  }, [expiresAt]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  };
+
+  const showError = (text) => {
+    setMessage(text);
+    setMessageType("error");
+  };
+
+  const showSuccess = (text) => {
+    setMessage(text);
+    setMessageType("success");
+  };
+
+  // Kirim OTP pertama kali
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const res = await sendResetOtp(email);
-    if (res.success) setStep(2);
-    else alert(res.error);
-    setLoading(false);
+    setMessage("");
+
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      const result = await sendResetOtp(normalizedEmail);
+
+      if (result?.error) {
+        showError(result.error);
+        return;
+      }
+
+      setEmail(normalizedEmail);
+      setExpiresAt(result.expiresAt);
+      setOtp("");
+      setStep(2);
+      showSuccess("OTP berhasil dikirim. Silakan periksa email kamu.");
+    } catch (error) {
+      console.error(error);
+      showError("Terjadi kesalahan saat mengirim OTP.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Verifikasi OTP dan ubah password
   const handleReset = async (e) => {
     e.preventDefault();
+    setMessage("");
+
+    if (remainingTime <= 0) {
+      showError("OTP sudah kedaluwarsa. Silakan kirim ulang OTP.");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(otp.trim())) {
+      showError("OTP harus terdiri dari 6 angka.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      showError("Password baru minimal 8 karakter.");
+      return;
+    }
+
     setLoading(true);
-    const res = await resetPasswordAction(email, otp, newPassword);
-    if (res.success) {
-      alert("Password berhasil diubah! Silakan login.");
-      router.push("/auth/login");
-    } else alert(res.error);
-    setLoading(false);
+
+    try {
+      const result = await resetPasswordAction(email, otp.trim(), newPassword);
+
+      if (result?.error) {
+        if (result.blocked || result.expired) {
+          setExpiresAt(new Date().toISOString());
+          setOtp("");
+        }
+
+        showError(result.error);
+        return;
+      }
+
+      if (result?.success) {
+        setExpiresAt(null);
+        showSuccess(
+          "Password berhasil diubah! Mengalihkan ke halaman login...",
+        );
+
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 1200);
+      }
+    } catch (error) {
+      console.error(error);
+      showError("Terjadi kesalahan saat mengubah password.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Kirim ulang OTP setelah waktu habis
   const handleResend = async () => {
     setLoading(true);
-    const result = await resendOtpAction(email);
-    if (result.success) {
-      alert("Kode baru telah dikirim!");
-      setTimer(300);
+    setMessage("");
+
+    try {
+      const result = await resendOtpAction(email);
+
+      if (result?.error) {
+        showError(result.error);
+        return;
+      }
+
       setOtp("");
-    } else {
-      alert(result.error);
+      setNewPassword("");
+      setExpiresAt(result.expiresAt);
+      showSuccess("OTP baru berhasil dikirim. Gunakan kode terbaru.");
+    } catch (error) {
+      console.error(error);
+      showError("Terjadi kesalahan saat mengirim ulang OTP.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <div className="w-full h-screen flex justify-center items-center bg-blue-50 px-4">
-      <div className="w-full max-w-sm rounded-xl shadow-lg p-8 bg-white text-center">
-        <h2 className="text-2xl font-bold text-blue-500 mb-6">Lupa Password</h2>
+    <div className="flex min-h-screen items-center justify-center bg-blue-50 px-4 py-8">
+      <div className="w-full max-w-sm rounded-xl bg-white p-8 text-center shadow-lg">
+        <h2 className="mb-6 text-2xl font-bold text-blue-500">Lupa Password</h2>
 
         {step === 1 ? (
           <form onSubmit={handleSendOtp} className="flex flex-col gap-4">
-            <p className="text-sm text-gray-500">Masukkan email akun Anda</p>
+            <p className="text-sm text-gray-500">
+              Masukkan email yang terdaftar di akun Rulshop.
+            </p>
+
             <input
               type="email"
-              placeholder="Email"
-              required
-              className="p-3 border-2 border-blue-100 rounded-lg outline-none focus:border-blue-400"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
-            />
-            <button
+              placeholder="Email"
+              autoComplete="email"
+              required
               disabled={loading}
-              className="bg-blue-500 text-white p-3 rounded-lg font-bold"
+              className="rounded-lg border-2 border-blue-100 p-3 outline-none focus:border-blue-400"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-lg bg-blue-500 p-3 font-bold text-white disabled:bg-gray-300"
             >
               {loading ? "Mengirim..." : "Kirim Kode OTP"}
             </button>
@@ -83,59 +201,98 @@ export default function ForgotPassword() {
         ) : (
           <form onSubmit={handleReset} className="flex flex-col gap-4">
             <p className="text-sm text-gray-500">
-              Masukkan kode dari email dan password baru
+              Masukkan kode OTP dan password baru untuk akun:
             </p>
+
+            <p className="break-all rounded-lg bg-blue-50 p-3 text-sm font-semibold text-blue-600">
+              {email}
+            </p>
+
             <input
               type="text"
-              placeholder="Kode OTP (6 Digit)"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              value={otp}
+              onChange={(e) =>
+                setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              placeholder="Kode OTP (6 digit)"
               required
-              className="p-3 border-2 border-blue-100 rounded-lg outline-none focus:border-blue-400"
-              onChange={(e) => setOtp(e.target.value)}
+              disabled={loading || remainingTime <= 0}
+              className="rounded-lg border-2 border-blue-100 p-3 outline-none focus:border-blue-400 disabled:bg-gray-100"
             />
+
+            <div className="rounded-lg bg-blue-50 p-3">
+              <p className="text-xs text-gray-500">
+                {remainingTime > 0
+                  ? "OTP berlaku selama:"
+                  : "Waktu OTP telah habis"}
+              </p>
+
+              <p
+                className={`mt-1 font-mono text-2xl font-bold ${
+                  remainingTime <= 20 ? "text-red-600" : "text-blue-600"
+                }`}
+              >
+                {formatTime(remainingTime)}
+              </p>
+            </div>
 
             <div className="relative">
               <input
-                name="password"
                 type={showPassword ? "text" : "password"}
-                required
-                placeholder="Password Baru"
+                value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="p-2 border-2 border-blue-400 rounded-md w-full text-sm"
+                placeholder="Password Baru (minimal 8 karakter)"
+                autoComplete="new-password"
+                minLength={8}
+                required
+                disabled={loading || remainingTime <= 0}
+                className="w-full rounded-md border-2 border-blue-400 p-3 pr-16 text-sm disabled:bg-gray-100"
               />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-2 text-xs text-blue-500"
+                className="absolute right-3 top-3 text-xs text-blue-500"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
 
-            {timer > 0 ? (
-              <p className="text-xs text-gray-400">
-                Berlaku hingga:{" "}
-                <span className="font-mono font-bold">
-                  {Math.floor(timer / 60)}:
-                  {(timer % 60).toString().padStart(2, "0")}
-                </span>
-              </p>
+            {remainingTime > 0 ? (
+              <button
+                type="submit"
+                disabled={loading}
+                className="rounded-lg bg-green-500 p-3 font-bold text-white disabled:bg-gray-300"
+              >
+                {loading ? "Memproses..." : "Update Password"}
+              </button>
             ) : (
               <button
+                type="button"
                 onClick={handleResend}
                 disabled={loading}
-                className="text-sm text-blue-600 font-bold hover:underline disabled:text-gray-300"
+                className="rounded-lg bg-blue-500 p-3 font-bold text-white disabled:bg-gray-300"
               >
-                {loading ? "Mengirim ulang..." : "Kirim ulang kode OTP"}
+                {loading ? "Mengirim ulang..." : "Kirim Ulang OTP"}
               </button>
             )}
-
-            <button
-              disabled={loading}
-              className="bg-green-500 text-white p-3 rounded-lg font-bold"
-            >
-              {loading ? "Memproses..." : "Update Password"}
-            </button>
           </form>
+        )}
+
+        {message && (
+          <p
+            role="status"
+            className={`mt-4 wrap-break-words rounded-lg p-3 text-sm ${
+              messageType === "success"
+                ? "bg-green-50 text-green-700"
+                : "bg-red-50 text-red-600"
+            }`}
+          >
+            {message}
+          </p>
         )}
       </div>
     </div>

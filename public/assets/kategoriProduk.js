@@ -1,10 +1,10 @@
 import elektronik from "./img/elektronik.jpeg";
-import handphone from "./img/Handphone & Aksesoris.jpeg";
-import komputer from "./img/Komputer & Laptop.jpeg";
+import handphone from "./img/handphone.jpeg";
+import komputer from "./img/komputer.jpeg";
 import otomotif from "./img/Otomotif.jpeg";
 import fashion from "./img/fashion.png";
 import kecantikan from "./img/kecantikan.jpeg";
-import rumah from "./img/rumah tangga.jpeg";
+import rumah from "./img/rumah.jpeg";
 import kesehatan from "./img/kesehatan.jpeg";
 import perkakas from "./img/perkakas.jpeg";
 import olahraga from "./img/olahraga.jpeg";

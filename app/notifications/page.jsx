@@ -9,35 +9,20 @@ import {
 } from "react-icons/fa";
 import useNotificationStore from "../../store/useNotificationStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, Suspense } from "react";
 
-export default function NotificationPage() {
+const formatRupiah = (value) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0));
+
+function NotificationContent() {
   const { data: session, status } = useSession();
   const currentUser = session;
   const { decreaseCount } = useNotificationStore();
   const queryClient = useQueryClient();
-
-  const orderMutation = useMutation({
-    mutationFn: async (orderId) => {
-      const res = await fetch("/api/order", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: orderId, status: "Selesai" }),
-      });
-      if (!res.ok) throw new Error("Gagal update status");
-      return res.json();
-    },
-    onSuccess: () => {
-      alert("Pesanan selesai! Terima kasih telah berbelanja.");
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    },
-  });
-
-  const handleSelesaikanPesanan = async (orderId) => {
-    const confirm = window.confirm("Apakah Anda yakin barang sudah diterima?");
-    if (!confirm) return;
-
-    orderMutation.mutate(orderId);
-  };
 
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["notifications", currentUser?.user?.id],
@@ -67,6 +52,42 @@ export default function NotificationPage() {
     },
   });
 
+  const mutateReadAll = readAllMutation.mutate;
+  const isPending = readAllMutation.isPending;
+  const userId = currentUser?.user?.id;
+
+  useEffect(() => {
+    if (userId && notifications.length > 0) {
+      const hasUnread = notifications.some((n) => !n.isRead);
+      if (hasUnread && !isPending) {
+        mutateReadAll();
+      }
+    }
+  }, [userId, notifications, isPending, mutateReadAll]);
+
+  const orderMutation = useMutation({
+    mutationFn: async (orderId) => {
+      const res = await fetch("/api/order", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: orderId, status: "Selesai" }),
+      });
+      if (!res.ok) throw new Error("Gagal update status");
+      return res.json();
+    },
+    onSuccess: () => {
+      alert("Pesanan selesai! Terima kasih telah berbelanja.");
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
+  const handleSelesaikanPesanan = async (orderId) => {
+    const confirm = window.confirm("Apakah Anda yakin barang sudah diterima?");
+    if (!confirm) return;
+
+    orderMutation.mutate(orderId);
+  };
+
   if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
@@ -82,16 +103,18 @@ export default function NotificationPage() {
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <>
-      <Navbar currentUser={currentUser} />
-      <div className="min-h-screen p-6 dark:bg-slate-950 transition-colors duration-300">
+    <div className="w-full bg-blue-100 dark:bg-slate-950 transition-colors duration-300 min-h-screen">
+      <Navbar className="fixed z-50" currentUser={currentUser} />
+      <div className="pt-24 px-10 max-w-4xl mx-auto pb-10">
         <div className="flex justify-between items-end mb-6">
           <div>
             <h1 className="text-2xl font-bold dark:text-white">
               🔔 Notifikasi Saya
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Kamu punya {unreadCount} pesan belum dibaca
+              {unreadCount > 0
+                ? `Kamu punya ${unreadCount} pesan belum dibaca`
+                : "Semua pesan telah dibaca"}
             </p>
           </div>
 
@@ -99,7 +122,7 @@ export default function NotificationPage() {
             <button
               onClick={() => readAllMutation.mutate()}
               disabled={readAllMutation.isPending}
-              className="flex items-center gap-2 text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all font-semibold shadow-md"
+              className="flex items-center gap-2 text-sm bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all font-semibold shadow-md cursor-pointer"
             >
               <FaCheckDouble />
               {readAllMutation.isPending
@@ -109,7 +132,7 @@ export default function NotificationPage() {
           )}
         </div>
 
-        <div className="max-w-4xl">
+        <div>
           {!notifications || notifications.length === 0 ? (
             <div className="text-center py-20 border-2 border-dashed rounded-xl dark:border-slate-800">
               <p className="dark:text-gray-400">Belum ada notifikasi masuk</p>
@@ -117,15 +140,17 @@ export default function NotificationPage() {
           ) : (
             <div className="space-y-3">
               {notifications.map((n) => {
-                // LOGIKA SINKRONISASI: Cek apakah ada notifikasi lain dengan orderId sama yang sudah "Selesai"
-                const isOrderSelesai = notifications.some(
-                  (notif) =>
-                    notif.orderId === n.orderId &&
-                    notif.orderId !== null &&
-                    notif.title.toLowerCase().includes("selesai"),
-                );
+                const order = n.order;
+                // Cek apakah pesanan sudah selesai (dari status order di database atau notifikasi lain)
+                const isOrderSelesai =
+                  order?.status === "Selesai" ||
+                  notifications.some(
+                    (notif) =>
+                      notif.orderId === n.orderId &&
+                      notif.orderId !== null &&
+                      notif.title.toLowerCase().includes("selesai"),
+                  );
 
-                // Tampilkan tombol jika judul mengandung kata kunci pengiriman/tiba/selesai
                 const showActionButton =
                   (n.title.toLowerCase().includes("dikirim") ||
                     n.title.toLowerCase().includes("tiba") ||
@@ -138,11 +163,15 @@ export default function NotificationPage() {
                     className={`flex gap-4 border p-4 rounded-xl items-start transition-all duration-300 ${
                       !n.isRead
                         ? "bg-white border-blue-200 shadow-sm dark:bg-slate-900 dark:border-blue-900 dark:text-white"
-                        : "bg-gray-50 border-gray-100 opacity-70 dark:bg-slate-900/40 dark:border-slate-800 dark:text-gray-400"
+                        : "bg-gray-50 border-gray-100 opacity-80 dark:bg-slate-900/40 dark:border-slate-800 dark:text-gray-400"
                     }`}
                   >
                     <div
-                      className={`mt-1 p-2 rounded-lg ${!n.isRead ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50" : "bg-gray-200 text-gray-400 dark:bg-slate-800"}`}
+                      className={`mt-1 p-2 rounded-lg ${
+                        !n.isRead
+                          ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50"
+                          : "bg-gray-200 text-gray-400 dark:bg-slate-800"
+                      }`}
                     >
                       {!n.isRead ? (
                         <FaRegEnvelope size={20} />
@@ -154,7 +183,11 @@ export default function NotificationPage() {
                     <div className="flex-1">
                       <div className="flex justify-between items-center">
                         <h3
-                          className={`font-bold ${!n.isRead ? "text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400"}`}
+                          className={`font-bold ${
+                            !n.isRead
+                              ? "text-slate-900 dark:text-white"
+                              : "text-slate-600 dark:text-slate-400"
+                          }`}
                         >
                           {n.title}
                         </h3>
@@ -169,6 +202,28 @@ export default function NotificationPage() {
                         {n.message}
                       </p>
 
+                      {/* Detail Informasi Produk, Ukuran, Jumlah, dan Total Harga */}
+                      {order && (
+                        <div className="mt-3 p-3 rounded-lg bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
+                          <p className="font-semibold text-slate-800 dark:text-slate-200">
+                            📦 Produk: {order.nama}
+                          </p>
+                          <div className="flex flex-wrap gap-x-4 text-slate-600 dark:text-slate-300">
+                            <span>Ukuran: {order.ukuran || "-"}</span>
+                            <span>Jumlah: {order.jumlah} pcs</span>
+                            <span>
+                              Total Harga:{" "}
+                              <strong className="text-blue-600 dark:text-blue-400">
+                                {formatRupiah(
+                                  order.totalHarga ||
+                                    order.harga * order.jumlah,
+                                )}
+                              </strong>
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
                       {showActionButton && (
                         <div
                           className={`mt-3 p-3 rounded-lg border transition-colors ${
@@ -178,25 +233,31 @@ export default function NotificationPage() {
                           }`}
                         >
                           <p
-                            className={`text-xs mb-2 font-medium italic ${isOrderSelesai ? "text-green-700 dark:text-green-400" : "text-blue-800 dark:text-blue-300"}`}
+                            className={`text-xs mb-2 font-medium italic ${
+                              isOrderSelesai
+                                ? "text-green-700 dark:text-green-400"
+                                : "text-blue-800 dark:text-blue-300"
+                            }`}
                           >
                             {isOrderSelesai
-                              ? "✅ Pesanan ini telah dinyatakan selesai:"
+                              ? "✅ Pesanan ini telah dikonfirmasi diterima:"
                               : "Klik tombol di bawah jika paket sudah sampai:"}
                           </p>
                           <button
                             type="button"
-                            disabled={isOrderSelesai}
+                            disabled={isOrderSelesai || orderMutation.isPending}
                             onClick={() => handleSelesaikanPesanan(n.orderId)}
                             className={`text-xs px-4 py-2 rounded-lg transition-all font-bold shadow-sm ${
                               isOrderSelesai
-                                ? "bg-green-500 text-white cursor-default opacity-90"
+                                ? "bg-green-600 text-white cursor-default opacity-100 select-none"
                                 : "bg-blue-600 text-white hover:bg-blue-700 active:scale-95 cursor-pointer"
                             }`}
                           >
                             {isOrderSelesai
-                              ? "✅ Pesanan Selesai"
-                              : "Barang Sudah Saya Terima"}
+                              ? "✅ Sudah Diterima"
+                              : orderMutation.isPending
+                                ? "Memproses..."
+                                : "Barang Sudah Saya Terima"}
                           </button>
                         </div>
                       )}
@@ -214,6 +275,20 @@ export default function NotificationPage() {
           )}
         </div>
       </div>
-    </>
+    </div>
+  );
+}
+
+export default function NotificationPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white dark:bg-slate-950 p-6">
+          <p className="dark:text-gray-400">Memuat halaman...</p>
+        </div>
+      }
+    >
+      <NotificationContent />
+    </Suspense>
   );
 }

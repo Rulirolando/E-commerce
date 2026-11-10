@@ -28,19 +28,19 @@ app.prepare().then(() => {
   });
 
   io.on("connection", (socket) => {
-    console.log("User terhubung:", socket.id);
+    // console.log("User terhubung:", socket.id);
     const offset = socket.handshake.auth.serverOffset;
 
     if (offset) {
-      console.log(`User kembali online. Mengirim pesan setelah ID: ${offset}`);
+      // console.log(`User kembali online. Mengirim pesan setelah ID: ${offset}`);
     }
     socket.on("join-personal-room", (userId) => {
       socket.join(userId);
-      console.log(`Socket ${socket.id} bergabung ke personal room: ${userId}`);
+      // console.log(`Socket ${socket.id} bergabung ke personal room: ${userId}`);
     });
     socket.on("join-room", (room) => {
       socket.join(room);
-      console.log(`User ${socket.id} joined room: ${room}`);
+      // console.log(`User ${socket.id} joined room: ${room}`);
     });
 
     socket.on("sendMessage", ({ room, message, receiverId }) => {
@@ -61,7 +61,7 @@ app.prepare().then(() => {
     });
 
     socket.on("disconnect", () => {
-      console.log("User terputus");
+      // console.log("User terputus");
     });
   });
 
@@ -71,6 +71,6 @@ app.prepare().then(() => {
       process.exit(1);
     })
     .listen(port, () => {
-      console.log(`> Ready on http://${hostname}:${port}`);
+    console.log(`> Ready on http://${hostname}:${port}`);
     });
 });

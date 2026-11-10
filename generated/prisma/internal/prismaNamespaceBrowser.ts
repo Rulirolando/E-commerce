@@ -66,7 +66,9 @@ export const ModelName = {
   Cart: 'Cart',
   CartItem: 'CartItem',
   ChatRoom: 'ChatRoom',
-  Message: 'Message'
+  Message: 'Message',
+  BankAccount: 'BankAccount',
+  Payout: 'Payout'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -87,6 +89,7 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const UserScalarFieldEnum = {
   id: 'id',
+  role: 'role',
   username: 'username',
   email: 'email',
   password: 'password',
@@ -129,7 +132,9 @@ export const OtpScalarFieldEnum = {
   code: 'code',
   type: 'type',
   expiresAt: 'expiresAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  attempts: 'attempts',
+  blocked: 'blocked'
 } as const
 
 export type OtpScalarFieldEnum = (typeof OtpScalarFieldEnum)[keyof typeof OtpScalarFieldEnum]
@@ -173,6 +178,9 @@ export const ProductScalarFieldEnum = {
   ownerId: 'ownerId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  moderationStatus: 'moderationStatus',
+  moderationNote: 'moderationNote',
+  moderatedAt: 'moderatedAt',
   addressId: 'addressId'
 } as const
 
@@ -301,6 +309,45 @@ export const MessageScalarFieldEnum = {
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const BankAccountScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  bankCode: 'bankCode',
+  bankName: 'bankName',
+  accountNumberEnc: 'accountNumberEnc',
+  accountNumberLast4: 'accountNumberLast4',
+  accountName: 'accountName',
+  isVerified: 'isVerified',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BankAccountScalarFieldEnum = (typeof BankAccountScalarFieldEnum)[keyof typeof BankAccountScalarFieldEnum]
+
+
+export const PayoutScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  sellerId: 'sellerId',
+  amount: 'amount',
+  fee: 'fee',
+  netAmount: 'netAmount',
+  status: 'status',
+  referenceId: 'referenceId',
+  providerId: 'providerId',
+  failureReason: 'failureReason',
+  bankCode: 'bankCode',
+  bankName: 'bankName',
+  accountNumberEnc: 'accountNumberEnc',
+  accountName: 'accountName',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PayoutScalarFieldEnum = (typeof PayoutScalarFieldEnum)[keyof typeof PayoutScalarFieldEnum]
 
 
 export const SortOrder = {

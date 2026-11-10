@@ -4,8 +4,8 @@ import DragDropUploader from "./DragDropUploader";
 import { useState } from "react";
 
 export default function ProfileEditModal({ user, setUser, onClose }) {
-  console.log("onclose", onClose);
-  console.log("user", user);
+  // console.log("onclose", onClose);
+  // console.log("user", user);
 
   const [nama, setNama] = useState(user?.nama || "");
   const [email, setEmail] = useState(user?.email || "");

@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import redis from "@/lib/redis";
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const q = searchParams.get("q") || "";
-    const redisKey = `ecom:search:${q.toLowerCase()}`;
+    const q = (searchParams.get("q") || "").trim();
+    const redisKey = `ecom:search:v2:${q.toLowerCase()}`;
 
+    // Ambil data dari Redis jika tersedia (waktu cache dipangkas agar data tidak stale/kedaluwarsa terlalu lama)
     const cachedData = await redis.get(redisKey);
 
     if (cachedData) {
@@ -17,24 +19,53 @@ export async function GET(req: Request) {
 
     const products = await prisma.product.findMany({
       where: {
-        OR: q
-          ? [
-              { nama: { contains: q, mode: "insensitive" } },
-              { kategori: { contains: q, mode: "insensitive" } },
-              { deskripsi: { contains: q, mode: "insensitive" } },
-            ]
-          : undefined,
+        moderationStatus: "ACTIVE",
+        ...(q
+          ? {
+              OR: [
+                {
+                  nama: {
+                    contains: q,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  kategori: {
+                    contains: q,
+                    mode: "insensitive",
+                  },
+                },
+                {
+                  deskripsi: {
+                    contains: q,
+                    mode: "insensitive",
+                  },
+                },
+              ],
+            }
+          : {}),
       },
       include: {
         variations: {
           include: {
-            images: { select: { img: true } },
+            images: {
+              select: {
+                img: true,
+              },
+            },
             sizes: {
-              select: { size: true },
+              select: {
+                size: true,
+              },
             },
           },
         },
-        loves: true,
+        loves: {
+          select: {
+            userId: true,
+            status: true,
+          },
+        },
         owner: {
           select: {
             id: true,
@@ -47,16 +78,22 @@ export async function GET(req: Request) {
       },
     });
 
-    await redis.set(redisKey, JSON.stringify(products), "EX", 3600);
+    // Simpan cache selama 60 detik saja agar perubahan stok langsung sinkron dengan database
+    await redis.set(redisKey, JSON.stringify(products), "EX", 60);
 
     return NextResponse.json(products, {
       status: 200,
     });
   } catch (error) {
-    console.error(error);
+    console.error("Gagal mengambil produk:", error);
+
     return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 },
+      {
+        message: "Gagal mengambil data produk",
+      },
+      {
+        status: 500,
+      },
     );
   }
 }

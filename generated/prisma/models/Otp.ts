@@ -20,8 +20,18 @@ export type OtpModel = runtime.Types.Result.DefaultSelection<Prisma.$OtpPayload>
 
 export type AggregateOtp = {
   _count: OtpCountAggregateOutputType | null
+  _avg: OtpAvgAggregateOutputType | null
+  _sum: OtpSumAggregateOutputType | null
   _min: OtpMinAggregateOutputType | null
   _max: OtpMaxAggregateOutputType | null
+}
+
+export type OtpAvgAggregateOutputType = {
+  attempts: number | null
+}
+
+export type OtpSumAggregateOutputType = {
+  attempts: number | null
 }
 
 export type OtpMinAggregateOutputType = {
@@ -33,6 +43,8 @@ export type OtpMinAggregateOutputType = {
   type: string | null
   expiresAt: Date | null
   createdAt: Date | null
+  attempts: number | null
+  blocked: boolean | null
 }
 
 export type OtpMaxAggregateOutputType = {
@@ -44,6 +56,8 @@ export type OtpMaxAggregateOutputType = {
   type: string | null
   expiresAt: Date | null
   createdAt: Date | null
+  attempts: number | null
+  blocked: boolean | null
 }
 
 export type OtpCountAggregateOutputType = {
@@ -55,9 +69,19 @@ export type OtpCountAggregateOutputType = {
   type: number
   expiresAt: number
   createdAt: number
+  attempts: number
+  blocked: number
   _all: number
 }
 
+
+export type OtpAvgAggregateInputType = {
+  attempts?: true
+}
+
+export type OtpSumAggregateInputType = {
+  attempts?: true
+}
 
 export type OtpMinAggregateInputType = {
   id?: true
@@ -68,6 +92,8 @@ export type OtpMinAggregateInputType = {
   type?: true
   expiresAt?: true
   createdAt?: true
+  attempts?: true
+  blocked?: true
 }
 
 export type OtpMaxAggregateInputType = {
@@ -79,6 +105,8 @@ export type OtpMaxAggregateInputType = {
   type?: true
   expiresAt?: true
   createdAt?: true
+  attempts?: true
+  blocked?: true
 }
 
 export type OtpCountAggregateInputType = {
@@ -90,6 +118,8 @@ export type OtpCountAggregateInputType = {
   type?: true
   expiresAt?: true
   createdAt?: true
+  attempts?: true
+  blocked?: true
   _all?: true
 }
 
@@ -131,6 +161,18 @@ export type OtpAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: OtpAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: OtpSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: OtpMinAggregateInputType
@@ -161,6 +203,8 @@ export type OtpGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   take?: number
   skip?: number
   _count?: OtpCountAggregateInputType | true
+  _avg?: OtpAvgAggregateInputType
+  _sum?: OtpSumAggregateInputType
   _min?: OtpMinAggregateInputType
   _max?: OtpMaxAggregateInputType
 }
@@ -174,7 +218,11 @@ export type OtpGroupByOutputType = {
   type: string
   expiresAt: Date
   createdAt: Date
+  attempts: number
+  blocked: boolean
   _count: OtpCountAggregateOutputType | null
+  _avg: OtpAvgAggregateOutputType | null
+  _sum: OtpSumAggregateOutputType | null
   _min: OtpMinAggregateOutputType | null
   _max: OtpMaxAggregateOutputType | null
 }
@@ -206,6 +254,8 @@ export type OtpWhereInput = {
   type?: Prisma.StringFilter<"Otp"> | string
   expiresAt?: Prisma.DateTimeFilter<"Otp"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Otp"> | Date | string
+  attempts?: Prisma.IntFilter<"Otp"> | number
+  blocked?: Prisma.BoolFilter<"Otp"> | boolean
 }
 
 export type OtpOrderByWithRelationInput = {
@@ -217,6 +267,8 @@ export type OtpOrderByWithRelationInput = {
   type?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  attempts?: Prisma.SortOrder
+  blocked?: Prisma.SortOrder
 }
 
 export type OtpWhereUniqueInput = Prisma.AtLeast<{
@@ -231,6 +283,8 @@ export type OtpWhereUniqueInput = Prisma.AtLeast<{
   type?: Prisma.StringFilter<"Otp"> | string
   expiresAt?: Prisma.DateTimeFilter<"Otp"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Otp"> | Date | string
+  attempts?: Prisma.IntFilter<"Otp"> | number
+  blocked?: Prisma.BoolFilter<"Otp"> | boolean
 }, "id" | "email">
 
 export type OtpOrderByWithAggregationInput = {
@@ -242,9 +296,13 @@ export type OtpOrderByWithAggregationInput = {
   type?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  attempts?: Prisma.SortOrder
+  blocked?: Prisma.SortOrder
   _count?: Prisma.OtpCountOrderByAggregateInput
+  _avg?: Prisma.OtpAvgOrderByAggregateInput
   _max?: Prisma.OtpMaxOrderByAggregateInput
   _min?: Prisma.OtpMinOrderByAggregateInput
+  _sum?: Prisma.OtpSumOrderByAggregateInput
 }
 
 export type OtpScalarWhereWithAggregatesInput = {
@@ -259,6 +317,8 @@ export type OtpScalarWhereWithAggregatesInput = {
   type?: Prisma.StringWithAggregatesFilter<"Otp"> | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"Otp"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Otp"> | Date | string
+  attempts?: Prisma.IntWithAggregatesFilter<"Otp"> | number
+  blocked?: Prisma.BoolWithAggregatesFilter<"Otp"> | boolean
 }
 
 export type OtpCreateInput = {
@@ -270,6 +330,8 @@ export type OtpCreateInput = {
   type?: string
   expiresAt: Date | string
   createdAt?: Date | string
+  attempts?: number
+  blocked?: boolean
 }
 
 export type OtpUncheckedCreateInput = {
@@ -281,6 +343,8 @@ export type OtpUncheckedCreateInput = {
   type?: string
   expiresAt: Date | string
   createdAt?: Date | string
+  attempts?: number
+  blocked?: boolean
 }
 
 export type OtpUpdateInput = {
@@ -292,6 +356,8 @@ export type OtpUpdateInput = {
   type?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  blocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type OtpUncheckedUpdateInput = {
@@ -303,6 +369,8 @@ export type OtpUncheckedUpdateInput = {
   type?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  blocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type OtpCreateManyInput = {
@@ -314,6 +382,8 @@ export type OtpCreateManyInput = {
   type?: string
   expiresAt: Date | string
   createdAt?: Date | string
+  attempts?: number
+  blocked?: boolean
 }
 
 export type OtpUpdateManyMutationInput = {
@@ -325,6 +395,8 @@ export type OtpUpdateManyMutationInput = {
   type?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  blocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type OtpUncheckedUpdateManyInput = {
@@ -336,6 +408,8 @@ export type OtpUncheckedUpdateManyInput = {
   type?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  attempts?: Prisma.IntFieldUpdateOperationsInput | number
+  blocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type OtpCountOrderByAggregateInput = {
@@ -347,6 +421,12 @@ export type OtpCountOrderByAggregateInput = {
   type?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  attempts?: Prisma.SortOrder
+  blocked?: Prisma.SortOrder
+}
+
+export type OtpAvgOrderByAggregateInput = {
+  attempts?: Prisma.SortOrder
 }
 
 export type OtpMaxOrderByAggregateInput = {
@@ -358,6 +438,8 @@ export type OtpMaxOrderByAggregateInput = {
   type?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  attempts?: Prisma.SortOrder
+  blocked?: Prisma.SortOrder
 }
 
 export type OtpMinOrderByAggregateInput = {
@@ -369,6 +451,24 @@ export type OtpMinOrderByAggregateInput = {
   type?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  attempts?: Prisma.SortOrder
+  blocked?: Prisma.SortOrder
+}
+
+export type OtpSumOrderByAggregateInput = {
+  attempts?: Prisma.SortOrder
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 
@@ -382,6 +482,8 @@ export type OtpSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   type?: boolean
   expiresAt?: boolean
   createdAt?: boolean
+  attempts?: boolean
+  blocked?: boolean
 }, ExtArgs["result"]["otp"]>
 
 export type OtpSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -393,6 +495,8 @@ export type OtpSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   type?: boolean
   expiresAt?: boolean
   createdAt?: boolean
+  attempts?: boolean
+  blocked?: boolean
 }, ExtArgs["result"]["otp"]>
 
 export type OtpSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -404,6 +508,8 @@ export type OtpSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   type?: boolean
   expiresAt?: boolean
   createdAt?: boolean
+  attempts?: boolean
+  blocked?: boolean
 }, ExtArgs["result"]["otp"]>
 
 export type OtpSelectScalar = {
@@ -415,9 +521,11 @@ export type OtpSelectScalar = {
   type?: boolean
   expiresAt?: boolean
   createdAt?: boolean
+  attempts?: boolean
+  blocked?: boolean
 }
 
-export type OtpOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "code" | "type" | "expiresAt" | "createdAt", ExtArgs["result"]["otp"]>
+export type OtpOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "username" | "password" | "code" | "type" | "expiresAt" | "createdAt" | "attempts" | "blocked", ExtArgs["result"]["otp"]>
 
 export type $OtpPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Otp"
@@ -431,6 +539,8 @@ export type $OtpPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     type: string
     expiresAt: Date
     createdAt: Date
+    attempts: number
+    blocked: boolean
   }, ExtArgs["result"]["otp"]>
   composites: {}
 }
@@ -862,6 +972,8 @@ export interface OtpFieldRefs {
   readonly type: Prisma.FieldRef<"Otp", 'String'>
   readonly expiresAt: Prisma.FieldRef<"Otp", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Otp", 'DateTime'>
+  readonly attempts: Prisma.FieldRef<"Otp", 'Int'>
+  readonly blocked: Prisma.FieldRef<"Otp", 'Boolean'>
 }
     
 

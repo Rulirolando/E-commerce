@@ -1,8 +1,20 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "../../auth";
 
 export async function POST(req: Request) {
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const user = session?.user?.id;
   try {
+    if (!user) {
+      return NextResponse.json(
+        { message: "Silakan login terlebih dahulu." },
+        { status: 401 },
+      );
+    }
     const body = await req.json();
     const { userId, variantId, ukuran, jumlah } = body;
 
@@ -53,8 +65,13 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const userId = searchParams.get("userId");
+  const session = await auth();
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const user = session?.user?.id;
 
-  if (!userId) {
+  if (!userId || userId !== user) {
     return NextResponse.json(
       { message: "UserId tidak valid" },
       { status: 400 },

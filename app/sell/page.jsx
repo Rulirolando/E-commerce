@@ -13,7 +13,7 @@ export default function JualPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const currentUser = session;
-  console.log("currentUser:", currentUser);
+  // console.log("currentUser:", currentUser);
   const queryClient = useQueryClient();
 
   const [form, setForm] = useState(() => ({

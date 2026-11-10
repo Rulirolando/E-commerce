@@ -1,7 +1,7 @@
 import DragDropUploader from "./DragDropUploader";
 import { useState } from "react";
 export default function EditProdukModal({ produk, onClose }) {
-  console.log("produk di edit:", produk);
+  // console.log("produk di edit:", produk);
   const [harga, setHarga] = useState(produk?.harga || 0);
   const [stok, setStok] = useState(produk?.stok || 0);
   const [ukuran, setUkuran] = useState(

@@ -500,14 +500,6 @@ export type AddressUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.AddressScalarWhereInput | Prisma.AddressScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type AddressCreateNestedOneWithoutProdukInput = {
   create?: Prisma.XOR<Prisma.AddressCreateWithoutProdukInput, Prisma.AddressUncheckedCreateWithoutProdukInput>
   connectOrCreate?: Prisma.AddressCreateOrConnectWithoutProdukInput

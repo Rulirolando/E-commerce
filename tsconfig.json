@@ -31,7 +31,9 @@
     "**/*.mts",
     ".next\\dev/types/**/*.ts",
     ".next\\dev/types/**/*.ts",
-    "app/auth/verify/page.jsx"
-, "worker/notif-worker.js"  ],
+    "app/auth/verify/page.jsx",
+    "worker/notif-worker.js",
+    "app/order/[id]/OrderDetailClient.jsx"
+  ],
   "exclude": ["node_modules"]
 }

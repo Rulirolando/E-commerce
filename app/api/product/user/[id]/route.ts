@@ -8,7 +8,7 @@ export async function GET(
     const { id } = await params;
 
     const product = await prisma.product.findMany({
-      where: { ownerId: id },
+      where: { ownerId: id, moderationStatus: "ACTIVE" },
       include: {
         review: true,
         owner: { select: { username: true, id: true } },

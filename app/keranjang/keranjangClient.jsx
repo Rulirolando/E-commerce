@@ -8,7 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 export default function KeranjangPage() {
   const [selectProduk, setSelectProduk] = useState([]);
 
-  console.log("selectProduk", selectProduk);
+  // console.log("selectProduk", selectProduk);
   const { data: session, status } = useSession();
   const currentUser = session;
   const queryClient = useQueryClient();
@@ -18,7 +18,7 @@ export default function KeranjangPage() {
     queryFn: async () => {
       const res = await fetch(`/api/keranjang?userId=${currentUser.user.id}`);
       const data = await res.json();
-      console.log("data keranjang:", data);
+      // console.log("data keranjang:", data);
       return data;
     },
     enabled: !!currentUser?.user?.id,
@@ -97,7 +97,7 @@ export default function KeranjangPage() {
         author: item.variant.product.ownerId,
       }));
 
-      console.log("Payload yang dikirim ke API:", itemsForDb);
+      // console.log("Payload yang dikirim ke API:", itemsForDb);
       const response = await fetch("/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

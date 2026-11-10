@@ -64,6 +64,9 @@ export async function POST(req: Request) {
 export async function GET() {
   try {
     const products = await prisma.product.findMany({
+      where: {
+        moderationStatus: "ACTIVE",
+      },
       include: {
         variations: {
           include: {

@@ -59,7 +59,7 @@ export async function PATCH(
     const keys = await redis.keys("ecom:search:*");
     if (keys.length > 0) {
       await redis.del(...keys);
-      console.log(`Redis: Berhasil menghapus ${keys.length} cache search.`);
+      // console.log(`Redis: Berhasil menghapus ${keys.length} cache search.`);
     }
 
     return NextResponse.json({ success: true });

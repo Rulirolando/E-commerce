@@ -9,6 +9,7 @@ datasource db {
 
 model User {
   id          String      @id @default(uuid())
+  role Role @default(USER)
   username    String   @unique
   email       String   @unique
   password    String?
@@ -32,6 +33,8 @@ model User {
   chatRooms1 ChatRoom[] @relation("User1")
 chatRooms2 ChatRoom[] @relation("User2")
 messages   Message[]
+bankAccount BankAccount?
+payouts     Payout[]
 }
 
 model Account {
@@ -62,7 +65,8 @@ model Otp {
   type      String   @default("REGISTER")
   expiresAt DateTime
   createdAt DateTime @default(now())
-
+  attempts  Int      @default(0)
+  blocked   Boolean  @default(false)
   @@index([email])
 }
 
@@ -102,6 +106,10 @@ model Product {
   ownerId     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  moderationStatus String   @default("ACTIVE")
+  moderationNote   String?
+  moderatedAt      DateTime?
   
  addressId     Int?     
   addressAuthor Address? @relation(fields: [addressId], references: [id])
@@ -184,6 +192,7 @@ model Order {
 
    produkId     Int?
   produk      Variation?  @relation("ProdukInOrders", fields: [produkId], references: [id], onDelete: SetNull)
+payout Payout?
 
   @@index([buyerId])
 }
@@ -251,4 +260,50 @@ model Message {
 
   sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
   room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+}
+
+model BankAccount {
+  id                Int      @id @default(autoincrement())
+  userId            String   @unique
+  bankCode          String
+  bankName          String
+  accountNumberEnc  String   @db.Text
+  accountNumberLast4 String
+  accountName       String
+  isVerified        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Payout {
+  id                 String   @id @default(uuid())
+  orderId            Int      @unique
+  sellerId           String
+  amount             Int
+  fee                Int      @default(0)
+  netAmount          Int
+  status             String   @default("MENUNGGU_REKENING")
+  referenceId        String   @unique
+  providerId         String?
+  failureReason      String?
+  bankCode           String?
+  bankName           String?
+  accountNumberEnc   String?  @db.Text
+  accountName        String?
+  processedAt        DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  seller User  @relation(fields: [sellerId], references: [id])
+  order  Order @relation(fields: [orderId], references: [id])
+
+  @@index([sellerId, status])
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
 }

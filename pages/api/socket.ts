@@ -37,7 +37,7 @@ export default function SocketHandler(
   res: NextApiResponseWithSocket,
 ) {
   if (res.socket.server.io) {
-    console.log("Socket server already running");
+    // console.log("Socket server already running");
     res.end();
     return;
   }
@@ -54,7 +54,7 @@ export default function SocketHandler(
   io.on("connection", (socket) => {
     socket.on("join-room", (room) => {
       socket.join(room);
-      console.log(`User ${socket.id} joined room: ${room}`);
+      // console.log(`User ${socket.id} joined room: ${room}`);
     });
 
     socket.on("send-message", ({ room, message }) => {
@@ -63,6 +63,6 @@ export default function SocketHandler(
     });
   });
 
-  console.log("Socket server initialized");
+  // console.log("Socket server initialized");
   res.end();
 }

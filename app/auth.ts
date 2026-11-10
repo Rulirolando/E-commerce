@@ -65,16 +65,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (!token.name && token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { username: true, nama: true, imgProfile: true },
+          select: { username: true, nama: true, imgProfile: true, role: true },
         });
         if (dbUser) {
           token.name = dbUser.username || dbUser.nama;
           token.picture = dbUser.imgProfile;
+          token.role = dbUser.role;
         }
       }
 
       if (trigger === "update" && session) {
-        token.name = session.name;
+        if (typeof session.name === "string") {
+          token.name = session.name;
+        }
       }
 
       return token;
@@ -84,6 +87,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.id as string;
         session.user.name = token.name as string; // Paksa name masuk ke session klien
         session.user.image = token.picture as string;
+        session.user.role = token.role as "USER" | "ADMIN" | "SUPER_ADMIN";
       }
 
       return session;

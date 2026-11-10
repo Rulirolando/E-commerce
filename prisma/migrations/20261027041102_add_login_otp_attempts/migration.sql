@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Otp" ADD COLUMN     "attempts" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "blocked" BOOLEAN NOT NULL DEFAULT false;

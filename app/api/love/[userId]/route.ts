@@ -21,7 +21,7 @@ export async function GET(
     const cachedData = await redis.get(redisKey);
 
     if (cachedData) {
-      console.log("Redis Hit: Mengambil data favorit dari cache");
+      // console.log("Redis Hit: Mengambil data favorit dari cache");
       return NextResponse.json(JSON.parse(cachedData));
     }
 

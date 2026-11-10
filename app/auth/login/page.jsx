@@ -1,4 +1,4 @@
-"use client"; // Wajib untuk Client Side
+"use client";
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
@@ -11,34 +11,35 @@ export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
-  // Handler untuk Login Credentials (Email/Password)
   const handleCredentialsLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email");
     const password = formData.get("password");
 
+    sessionStorage.setItem("temp_pass", password);
+
     try {
-      // Kita panggil signIn credentials bawaan NextAuth
-      const res = await signIn("credentials", {
-        email,
-        password,
-        redirect: false, // Supaya kita bisa tangkap error manual
+      // 1. Minta OTP ke server
+      const res = await fetch("/api/auth/send-login-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (res?.error) {
-        // Cek jika error-nya adalah "EMAIL_NOT_VERIFIED" (dari auth.ts)
-        if (res.error.includes("EMAIL_NOT_VERIFIED")) {
-          router.push(`/auth/verify?email=${encodeURIComponent(email)}`);
-        } else {
-          setError("Email atau password salah");
-        }
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Email atau password salah");
+        sessionStorage.removeItem("temp_pass");
       } else {
-        // Login Berhasil
-        router.push("/");
-        router.refresh();
+        // 2. Jika OTP terkirim, redirect ke halaman verifikasi OTP
+        router.push(
+          `/auth/verify?email=${encodeURIComponent(email)}&purpose=login`,
+        );
       }
     } catch {
       setError("Terjadi kesalahan sistem");
@@ -47,24 +48,25 @@ export default function LoginPage() {
     }
   };
 
-  // Handler untuk Google Login
   const handleGoogleLogin = async () => {
     await signIn("google", { callbackUrl: "/" });
   };
 
   return (
     <div className="w-full h-screen flex justify-center items-center bg-blue-50">
-      <div className="w-64 h-3/4 rounded-lg shadow-lg flex flex-col p-4 bg-white">
+      <div className="w-80 rounded-lg shadow-lg flex flex-col p-6 bg-white">
         <div className="flex justify-center">
           <p className="text-blue-400 text-3xl font-bold">Rulshop</p>
         </div>
 
         <p className="text-blue-400 text-xl font-bold mt-4">Masuk</p>
+
         {error && (
-          <div className="bg-red-50 text-red-500 text-xs p-3 rounded-lg mb-4 border border-red-100 text-center font-medium">
+          <div className="bg-red-50 text-red-500 text-xs p-3 rounded-lg my-2 border border-red-100 text-center font-medium">
             ⚠️ {error}
           </div>
         )}
+
         <form
           onSubmit={handleCredentialsLogin}
           className="flex flex-col gap-3 mt-4"
@@ -72,8 +74,9 @@ export default function LoginPage() {
           <input
             name="email"
             type="email"
+            required
             placeholder="Email"
-            className="p-2 border-2 border-blue-400 rounded-md"
+            className="p-2 border-2 border-blue-400 rounded-md text-sm"
           />
 
           <div className="relative">
@@ -93,7 +96,6 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* LINK LUPA PASSWORD */}
           <div className="flex justify-end">
             <Link
               href="/auth/forgot-password"
@@ -106,26 +108,28 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="p-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 disabled:bg-gray-300"
+            className="p-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 disabled:bg-gray-300 font-semibold"
           >
-            {loading ? "Proses..." : "Masuk"}
+            {loading ? "Mengirim OTP..." : "Masuk"}
           </button>
         </form>
 
         <div className="my-4 text-center text-sm text-gray-400">atau</div>
 
-        {/* GOOGLE LOGIN */}
         <button
           onClick={handleGoogleLogin}
           type="button"
-          className="p-2 border border-blue-400 rounded-md text-blue-500 hover:bg-blue-50 w-full"
+          className="p-2 border border-blue-400 rounded-md text-blue-500 hover:bg-blue-50 w-full text-sm font-semibold"
         >
           Masuk dengan Google
         </button>
 
-        <p className="text-blue-400 text-sm mt-4">
+        <p className="text-blue-400 text-sm mt-4 text-center">
           Belum punya akun?{" "}
-          <a href="/auth/daftar" className="text-blue-500">
+          <a
+            href="/auth/daftar"
+            className="text-blue-500 font-semibold underline"
+          >
             Daftar
           </a>
         </p>
