@@ -105,8 +105,13 @@ export default function ForgotPassword() {
       return;
     }
 
-    if (newPassword.length < 8) {
-      showError("Password baru minimal 8 karakter.");
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,}$/;
+
+    if (!passwordRegex.test(newPassword)) {
+      showError(
+        "Password minimal 8 karakter dan harus mengandung huruf kecil, huruf besar, angka, serta simbol.",
+      );
       return;
     }
 
@@ -244,7 +249,7 @@ export default function ForgotPassword() {
                 type={showPassword ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Password Baru (minimal 8 karakter)"
+                placeholder="Password Baru"
                 autoComplete="new-password"
                 minLength={8}
                 required
@@ -259,6 +264,21 @@ export default function ForgotPassword() {
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
+            </div>
+
+            {/* Ketentuan password baru */}
+            <div className="text-left text-[11px] text-gray-500 -mt-2 space-y-1">
+              <p className="font-semibold">
+                Password harus memenuhi ketentuan:
+              </p>
+
+              <ul className="list-disc pl-5 space-y-1">
+                <li>Minimal 8 karakter</li>
+                <li>Mengandung minimal 1 huruf kecil (a-z)</li>
+                <li>Mengandung minimal 1 huruf besar (A-Z)</li>
+                <li>Mengandung minimal 1 angka (0-9)</li>
+                <li>Mengandung minimal 1 simbol (@, #, $, !, dan lainnya)</li>
+              </ul>
             </div>
 
             {remainingTime > 0 ? (

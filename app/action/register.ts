@@ -21,6 +21,23 @@ export async function registerUser(
   let userEmail = "";
   try {
     const data = Object.fromEntries(formData.entries());
+
+    // ======================================
+    // VALIDASI PASSWORD
+    // ======================================
+
+    const password = typeof data.password === "string" ? data.password : "";
+
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      return {
+        error:
+          "Password minimal 8 karakter dan harus mengandung huruf kecil, huruf besar, angka, serta simbol.",
+      };
+    }
+
     const validated = registerSchema.parse(data);
     userEmail = validated.email;
 

@@ -20,8 +20,18 @@ export type UserModel = runtime.Types.Result.DefaultSelection<Prisma.$UserPayloa
 
 export type AggregateUser = {
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
+}
+
+export type UserAvgAggregateOutputType = {
+  failedLoginAttempts: number | null
+}
+
+export type UserSumAggregateOutputType = {
+  failedLoginAttempts: number | null
 }
 
 export type UserMinAggregateOutputType = {
@@ -38,6 +48,8 @@ export type UserMinAggregateOutputType = {
   tanggalLahir: Date | null
   jenisKelamin: string | null
   imgProfile: string | null
+  failedLoginAttempts: number | null
+  loginLockedUntil: Date | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -54,6 +66,8 @@ export type UserMaxAggregateOutputType = {
   tanggalLahir: Date | null
   jenisKelamin: string | null
   imgProfile: string | null
+  failedLoginAttempts: number | null
+  loginLockedUntil: Date | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -70,9 +84,19 @@ export type UserCountAggregateOutputType = {
   tanggalLahir: number
   jenisKelamin: number
   imgProfile: number
+  failedLoginAttempts: number
+  loginLockedUntil: number
   _all: number
 }
 
+
+export type UserAvgAggregateInputType = {
+  failedLoginAttempts?: true
+}
+
+export type UserSumAggregateInputType = {
+  failedLoginAttempts?: true
+}
 
 export type UserMinAggregateInputType = {
   id?: true
@@ -88,6 +112,8 @@ export type UserMinAggregateInputType = {
   tanggalLahir?: true
   jenisKelamin?: true
   imgProfile?: true
+  failedLoginAttempts?: true
+  loginLockedUntil?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -104,6 +130,8 @@ export type UserMaxAggregateInputType = {
   tanggalLahir?: true
   jenisKelamin?: true
   imgProfile?: true
+  failedLoginAttempts?: true
+  loginLockedUntil?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -120,6 +148,8 @@ export type UserCountAggregateInputType = {
   tanggalLahir?: true
   jenisKelamin?: true
   imgProfile?: true
+  failedLoginAttempts?: true
+  loginLockedUntil?: true
   _all?: true
 }
 
@@ -161,6 +191,18 @@ export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: UserAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: UserSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: UserMinAggregateInputType
@@ -191,6 +233,8 @@ export type UserGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: UserCountAggregateInputType | true
+  _avg?: UserAvgAggregateInputType
+  _sum?: UserSumAggregateInputType
   _min?: UserMinAggregateInputType
   _max?: UserMaxAggregateInputType
 }
@@ -209,7 +253,11 @@ export type UserGroupByOutputType = {
   tanggalLahir: Date | null
   jenisKelamin: string | null
   imgProfile: string | null
+  failedLoginAttempts: number
+  loginLockedUntil: Date | null
   _count: UserCountAggregateOutputType | null
+  _avg: UserAvgAggregateOutputType | null
+  _sum: UserSumAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
 }
@@ -246,6 +294,8 @@ export type UserWhereInput = {
   tanggalLahir?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   jenisKelamin?: Prisma.StringNullableFilter<"User"> | string | null
   imgProfile?: Prisma.StringNullableFilter<"User"> | string | null
+  failedLoginAttempts?: Prisma.IntFilter<"User"> | number
+  loginLockedUntil?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   products?: Prisma.ProductListRelationFilter
   loves?: Prisma.LoveListRelationFilter
   carts?: Prisma.CartListRelationFilter
@@ -275,6 +325,8 @@ export type UserOrderByWithRelationInput = {
   tanggalLahir?: Prisma.SortOrderInput | Prisma.SortOrder
   jenisKelamin?: Prisma.SortOrderInput | Prisma.SortOrder
   imgProfile?: Prisma.SortOrderInput | Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  loginLockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   products?: Prisma.ProductOrderByRelationAggregateInput
   loves?: Prisma.LoveOrderByRelationAggregateInput
   carts?: Prisma.CartOrderByRelationAggregateInput
@@ -307,6 +359,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   tanggalLahir?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   jenisKelamin?: Prisma.StringNullableFilter<"User"> | string | null
   imgProfile?: Prisma.StringNullableFilter<"User"> | string | null
+  failedLoginAttempts?: Prisma.IntFilter<"User"> | number
+  loginLockedUntil?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   products?: Prisma.ProductListRelationFilter
   loves?: Prisma.LoveListRelationFilter
   carts?: Prisma.CartListRelationFilter
@@ -336,9 +390,13 @@ export type UserOrderByWithAggregationInput = {
   tanggalLahir?: Prisma.SortOrderInput | Prisma.SortOrder
   jenisKelamin?: Prisma.SortOrderInput | Prisma.SortOrder
   imgProfile?: Prisma.SortOrderInput | Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  loginLockedUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
+  _avg?: Prisma.UserAvgOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
+  _sum?: Prisma.UserSumOrderByAggregateInput
 }
 
 export type UserScalarWhereWithAggregatesInput = {
@@ -358,6 +416,8 @@ export type UserScalarWhereWithAggregatesInput = {
   tanggalLahir?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   jenisKelamin?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   imgProfile?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  failedLoginAttempts?: Prisma.IntWithAggregatesFilter<"User"> | number
+  loginLockedUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
 }
 
 export type UserCreateInput = {
@@ -374,6 +434,8 @@ export type UserCreateInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -403,6 +465,8 @@ export type UserUncheckedCreateInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -432,6 +496,8 @@ export type UserUpdateInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -461,6 +527,8 @@ export type UserUncheckedUpdateInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -490,6 +558,8 @@ export type UserCreateManyInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
 }
 
 export type UserUpdateManyMutationInput = {
@@ -506,6 +576,8 @@ export type UserUpdateManyMutationInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -522,6 +594,8 @@ export type UserUncheckedUpdateManyInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -538,6 +612,12 @@ export type UserCountOrderByAggregateInput = {
   tanggalLahir?: Prisma.SortOrder
   jenisKelamin?: Prisma.SortOrder
   imgProfile?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  loginLockedUntil?: Prisma.SortOrder
+}
+
+export type UserAvgOrderByAggregateInput = {
+  failedLoginAttempts?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -554,6 +634,8 @@ export type UserMaxOrderByAggregateInput = {
   tanggalLahir?: Prisma.SortOrder
   jenisKelamin?: Prisma.SortOrder
   imgProfile?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  loginLockedUntil?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -570,6 +652,12 @@ export type UserMinOrderByAggregateInput = {
   tanggalLahir?: Prisma.SortOrder
   jenisKelamin?: Prisma.SortOrder
   imgProfile?: Prisma.SortOrder
+  failedLoginAttempts?: Prisma.SortOrder
+  loginLockedUntil?: Prisma.SortOrder
+}
+
+export type UserSumOrderByAggregateInput = {
+  failedLoginAttempts?: Prisma.SortOrder
 }
 
 export type UserScalarRelationFilter = {
@@ -595,6 +683,14 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type UserCreateNestedOneWithoutAccountInput = {
@@ -793,6 +889,8 @@ export type UserCreateWithoutAccountInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -821,6 +919,8 @@ export type UserUncheckedCreateWithoutAccountInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -865,6 +965,8 @@ export type UserUpdateWithoutAccountInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -893,6 +995,8 @@ export type UserUncheckedUpdateWithoutAccountInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -921,6 +1025,8 @@ export type UserCreateWithoutNotificationsInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -949,6 +1055,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -993,6 +1101,8 @@ export type UserUpdateWithoutNotificationsInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -1021,6 +1131,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -1049,6 +1161,8 @@ export type UserCreateWithoutAddressesInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -1077,6 +1191,8 @@ export type UserUncheckedCreateWithoutAddressesInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -1121,6 +1237,8 @@ export type UserUpdateWithoutAddressesInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -1149,6 +1267,8 @@ export type UserUncheckedUpdateWithoutAddressesInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -1177,6 +1297,8 @@ export type UserCreateWithoutProductsInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutBuyerInput
@@ -1205,6 +1327,8 @@ export type UserUncheckedCreateWithoutProductsInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
@@ -1249,6 +1373,8 @@ export type UserUpdateWithoutProductsInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
@@ -1277,6 +1403,8 @@ export type UserUncheckedUpdateWithoutProductsInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
@@ -1305,6 +1433,8 @@ export type UserCreateWithoutLovesInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutBuyerInput
@@ -1333,6 +1463,8 @@ export type UserUncheckedCreateWithoutLovesInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
@@ -1377,6 +1509,8 @@ export type UserUpdateWithoutLovesInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
@@ -1405,6 +1539,8 @@ export type UserUncheckedUpdateWithoutLovesInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
@@ -1433,6 +1569,8 @@ export type UserCreateWithoutOrdersInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -1461,6 +1599,8 @@ export type UserUncheckedCreateWithoutOrdersInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -1505,6 +1645,8 @@ export type UserUpdateWithoutOrdersInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -1533,6 +1675,8 @@ export type UserUncheckedUpdateWithoutOrdersInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -1561,6 +1705,8 @@ export type UserCreateWithoutReviewInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -1589,6 +1735,8 @@ export type UserUncheckedCreateWithoutReviewInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -1633,6 +1781,8 @@ export type UserUpdateWithoutReviewInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -1661,6 +1811,8 @@ export type UserUncheckedUpdateWithoutReviewInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -1689,6 +1841,8 @@ export type UserCreateWithoutCartsInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderCreateNestedManyWithoutBuyerInput
@@ -1717,6 +1871,8 @@ export type UserUncheckedCreateWithoutCartsInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutBuyerInput
@@ -1761,6 +1917,8 @@ export type UserUpdateWithoutCartsInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUpdateManyWithoutBuyerNestedInput
@@ -1789,6 +1947,8 @@ export type UserUncheckedUpdateWithoutCartsInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   orders?: Prisma.OrderUncheckedUpdateManyWithoutBuyerNestedInput
@@ -1817,6 +1977,8 @@ export type UserCreateWithoutChatRooms1Input = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -1845,6 +2007,8 @@ export type UserUncheckedCreateWithoutChatRooms1Input = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -1878,6 +2042,8 @@ export type UserCreateWithoutChatRooms2Input = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -1906,6 +2072,8 @@ export type UserUncheckedCreateWithoutChatRooms2Input = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -1950,6 +2118,8 @@ export type UserUpdateWithoutChatRooms1Input = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -1978,6 +2148,8 @@ export type UserUncheckedUpdateWithoutChatRooms1Input = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -2017,6 +2189,8 @@ export type UserUpdateWithoutChatRooms2Input = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -2045,6 +2219,8 @@ export type UserUncheckedUpdateWithoutChatRooms2Input = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -2073,6 +2249,8 @@ export type UserCreateWithoutMessagesInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -2101,6 +2279,8 @@ export type UserUncheckedCreateWithoutMessagesInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -2145,6 +2325,8 @@ export type UserUpdateWithoutMessagesInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -2173,6 +2355,8 @@ export type UserUncheckedUpdateWithoutMessagesInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -2201,6 +2385,8 @@ export type UserCreateWithoutBankAccountInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -2229,6 +2415,8 @@ export type UserUncheckedCreateWithoutBankAccountInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -2273,6 +2461,8 @@ export type UserUpdateWithoutBankAccountInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -2301,6 +2491,8 @@ export type UserUncheckedUpdateWithoutBankAccountInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -2329,6 +2521,8 @@ export type UserCreateWithoutPayoutsInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveCreateNestedManyWithoutUserInput
   carts?: Prisma.CartCreateNestedManyWithoutUserInput
@@ -2357,6 +2551,8 @@ export type UserUncheckedCreateWithoutPayoutsInput = {
   tanggalLahir?: Date | string | null
   jenisKelamin?: string | null
   imgProfile?: string | null
+  failedLoginAttempts?: number
+  loginLockedUntil?: Date | string | null
   products?: Prisma.ProductUncheckedCreateNestedManyWithoutOwnerInput
   loves?: Prisma.LoveUncheckedCreateNestedManyWithoutUserInput
   carts?: Prisma.CartUncheckedCreateNestedManyWithoutUserInput
@@ -2401,6 +2597,8 @@ export type UserUpdateWithoutPayoutsInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUpdateManyWithoutUserNestedInput
@@ -2429,6 +2627,8 @@ export type UserUncheckedUpdateWithoutPayoutsInput = {
   tanggalLahir?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   jenisKelamin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imgProfile?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  failedLoginAttempts?: Prisma.IntFieldUpdateOperationsInput | number
+  loginLockedUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   products?: Prisma.ProductUncheckedUpdateManyWithoutOwnerNestedInput
   loves?: Prisma.LoveUncheckedUpdateManyWithoutUserNestedInput
   carts?: Prisma.CartUncheckedUpdateManyWithoutUserNestedInput
@@ -2587,6 +2787,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   tanggalLahir?: boolean
   jenisKelamin?: boolean
   imgProfile?: boolean
+  failedLoginAttempts?: boolean
+  loginLockedUntil?: boolean
   products?: boolean | Prisma.User$productsArgs<ExtArgs>
   loves?: boolean | Prisma.User$lovesArgs<ExtArgs>
   carts?: boolean | Prisma.User$cartsArgs<ExtArgs>
@@ -2617,6 +2819,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   tanggalLahir?: boolean
   jenisKelamin?: boolean
   imgProfile?: boolean
+  failedLoginAttempts?: boolean
+  loginLockedUntil?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -2633,6 +2837,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   tanggalLahir?: boolean
   jenisKelamin?: boolean
   imgProfile?: boolean
+  failedLoginAttempts?: boolean
+  loginLockedUntil?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -2649,9 +2855,11 @@ export type UserSelectScalar = {
   tanggalLahir?: boolean
   jenisKelamin?: boolean
   imgProfile?: boolean
+  failedLoginAttempts?: boolean
+  loginLockedUntil?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "role" | "username" | "email" | "password" | "emailVerified" | "nama" | "noTelp" | "createdAt" | "updatedAt" | "tanggalLahir" | "jenisKelamin" | "imgProfile", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "role" | "username" | "email" | "password" | "emailVerified" | "nama" | "noTelp" | "createdAt" | "updatedAt" | "tanggalLahir" | "jenisKelamin" | "imgProfile" | "failedLoginAttempts" | "loginLockedUntil", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   products?: boolean | Prisma.User$productsArgs<ExtArgs>
   loves?: boolean | Prisma.User$lovesArgs<ExtArgs>
@@ -2702,6 +2910,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     tanggalLahir: Date | null
     jenisKelamin: string | null
     imgProfile: string | null
+    failedLoginAttempts: number
+    loginLockedUntil: Date | null
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -3151,6 +3361,8 @@ export interface UserFieldRefs {
   readonly tanggalLahir: Prisma.FieldRef<"User", 'DateTime'>
   readonly jenisKelamin: Prisma.FieldRef<"User", 'String'>
   readonly imgProfile: Prisma.FieldRef<"User", 'String'>
+  readonly failedLoginAttempts: Prisma.FieldRef<"User", 'Int'>
+  readonly loginLockedUntil: Prisma.FieldRef<"User", 'DateTime'>
 }
     
 

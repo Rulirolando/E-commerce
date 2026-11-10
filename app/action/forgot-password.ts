@@ -127,8 +127,14 @@ export async function resetPasswordAction(
       return { error: "Masukkan email dan OTP 6 angka yang valid." };
     }
 
-    if (typeof newPass !== "string" || newPass.length < 8) {
-      return { error: "Password baru minimal 8 karakter." };
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9\s]).{8,}$/;
+
+    if (typeof newPass !== "string" || !passwordRegex.test(newPass)) {
+      return {
+        error:
+          "Password minimal 8 karakter dan harus mengandung huruf kecil, huruf besar, angka, serta simbol.",
+      };
     }
 
     const otpRecord = await prisma.otp.findUnique({

@@ -1,7 +1,7 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -10,6 +10,17 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [lockSeconds, setLockSeconds] = useState(0);
+
+  useEffect(() => {
+    if (lockSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      setLockSeconds((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [lockSeconds]);
 
   const handleCredentialsLogin = async (e) => {
     e.preventDefault();
@@ -33,10 +44,13 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || "Email atau password salah");
+        setError(data.error || "Email atau password salah.");
         sessionStorage.removeItem("temp_pass");
+
+        if (data.locked) {
+          setLockSeconds(data.remainingSeconds || 120);
+        }
       } else {
-        // 2. Jika OTP terkirim, redirect ke halaman verifikasi OTP
         router.push(
           `/auth/verify?email=${encodeURIComponent(email)}&purpose=login`,
         );
@@ -107,10 +121,16 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || lockSeconds > 0}
             className="p-2 bg-blue-400 text-white rounded-md hover:bg-blue-500 disabled:bg-gray-300 font-semibold"
           >
-            {loading ? "Mengirim OTP..." : "Masuk"}
+            {loading
+              ? "Mengirim OTP..."
+              : lockSeconds > 0
+                ? `Tunggu ${Math.floor(lockSeconds / 60)}:${String(
+                    lockSeconds % 60,
+                  ).padStart(2, "0")}`
+                : "Masuk"}
           </button>
         </form>
 

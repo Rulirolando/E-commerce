@@ -21,6 +21,8 @@ model User {
   tanggalLahir DateTime?
   jenisKelamin String?
   imgProfile  String?
+  failedLoginAttempts Int         @default(0)
+  loginLockedUntil    DateTime?
 
   products    Product[]
   loves     Love[]

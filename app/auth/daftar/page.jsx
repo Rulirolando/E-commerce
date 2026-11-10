@@ -74,6 +74,8 @@ export default function Daftar() {
               name="password"
               type={showPassword ? "text" : "password"}
               required
+              minLength={8}
+              autoComplete="new-password"
               placeholder="Password"
               className="p-2 border-2 border-blue-400 rounded-md w-full text-sm"
             />
@@ -84,6 +86,17 @@ export default function Daftar() {
             >
               {showPassword ? "Hide" : "Show"}
             </button>
+          </div>
+          <div className="text-[11px] text-gray-500 -mt-2 space-y-1">
+            <p>Password harus memenuhi ketentuan:</p>
+
+            <ul className="list-disc pl-5">
+              <li>Minimal 8 karakter</li>
+              <li>Mengandung minimal 1 huruf kecil (a-z)</li>
+              <li>Mengandung minimal 1 huruf besar (A-Z)</li>
+              <li>Mengandung minimal 1 angka (0-9)</li>
+              <li>Mengandung minimal 1 simbol (@, #, $, !, dan lainnya)</li>
+            </ul>
           </div>
 
           <div className="relative">
