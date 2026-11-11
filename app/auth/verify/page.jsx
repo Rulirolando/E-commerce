@@ -6,12 +6,11 @@ import { signIn } from "next-auth/react";
 import {
   verifyOtpAction,
   resendOtpAction,
-  verifyLoginOtpAction,
   resendLoginOtpAction,
 } from "../../action/register";
 
 const OTP_DURATION = 120;
-const RESEND_COOLDOWN = 30; // Detik sebelum tombol kirim ulang bisa diklik kembali
+const RESEND_COOLDOWN = 30;
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -27,32 +26,25 @@ function VerifyContent() {
   const [resendCooldown, setResendCooldown] = useState(RESEND_COOLDOWN);
   const [isPending, startTransition] = useTransition();
 
-  // Timer utama untuk masa berlaku OTP
   useEffect(() => {
     if (remainingTime <= 0 || success) return;
-
     const timer = setTimeout(() => {
       setRemainingTime((prev) => Math.max(0, prev - 1));
     }, 1000);
-
     return () => clearTimeout(timer);
   }, [remainingTime, success]);
 
-  // Timer cooldown untuk tombol kirim ulang OTP
   useEffect(() => {
     if (resendCooldown <= 0 || success) return;
-
     const cooldownTimer = setTimeout(() => {
       setResendCooldown((prev) => Math.max(0, prev - 1));
     }, 1000);
-
     return () => clearTimeout(cooldownTimer);
   }, [resendCooldown, success]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-
     return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
@@ -85,37 +77,19 @@ function VerifyContent() {
 
     startTransition(async () => {
       try {
-        const result =
-          purpose === "login"
-            ? await verifyLoginOtpAction(email, code.trim())
-            : await verifyOtpAction(email, code.trim());
-
-        if (result?.blocked || result?.expired) {
-          setMessage(result.error);
-          setRemainingTime(0);
-          return;
-        }
-
-        if (result?.error) {
-          setMessage(result.error);
-          return;
-        }
-
-        if (!result?.success) {
-          setMessage("Verifikasi gagal. Silakan coba lagi.");
-          return;
-        }
-
+        // ===== ALUR LOGIN: OTP diverifikasi di dalam authorize() =====
         if (purpose === "login") {
           const loginResult = await signIn("credentials", {
             email,
             password,
+            otp: code.trim(),
             redirect: false,
           });
 
-          if (loginResult?.error || !loginResult?.ok) {
-            sessionStorage.removeItem("temp_pass");
-            setMessage("OTP benar, tetapi login gagal. Silakan login kembali.");
+          if (!loginResult || loginResult.error || !loginResult.ok) {
+            setMessage(
+              "OTP salah, kedaluwarsa, atau diblokir. Coba lagi atau kirim ulang OTP.",
+            );
             return;
           }
 
@@ -127,6 +101,19 @@ function VerifyContent() {
           return;
         }
 
+        // ===== ALUR REGISTER =====
+        const result = await verifyOtpAction(email, code.trim());
+
+        if (result?.error) {
+          setMessage(result.error);
+          return;
+        }
+
+        if (!result?.success) {
+          setMessage("Verifikasi gagal. Silakan coba lagi.");
+          return;
+        }
+
         setSuccess(true);
         setMessage(
           "Registrasi dan verifikasi berhasil! Silakan login dengan akun kamu.",
@@ -134,7 +121,7 @@ function VerifyContent() {
         router.replace("/auth/login?verified=1");
       } catch (error) {
         console.error("Verify OTP error:", error);
-        setMessage("Terjadi kesalahan. Silakan coba lagi.");
+        setMessage(`Error: ${error?.message || error}`);
       }
     });
   }
@@ -254,7 +241,6 @@ function VerifyContent() {
           </p>
         )}
 
-        {/* Tombol Kirim Ulang OTP Tunggal dengan Cooldown */}
         <div className="text-center mt-1">
           <button
             type="button"

@@ -208,9 +208,18 @@ export async function resendLoginOtpAction(email: string) {
     });
 
     if (!user) {
-      return {
-        error: "Akun dengan email tersebut tidak ditemukan.",
-      };
+      return { error: "Akun dengan email tersebut tidak ditemukan." };
+    }
+
+    // Cooldown server: OTP dikirim = expiresAt - 2 menit
+    const existing = await prisma.otp.findUnique({
+      where: { email: normalizedEmail },
+    });
+    if (existing && existing.type === "LOGIN") {
+      const sentAt = existing.expiresAt.getTime() - 2 * 60 * 1000;
+      if (Date.now() - sentAt < 30 * 1000) {
+        return { error: "Tunggu sebentar sebelum meminta OTP baru." };
+      }
     }
 
     const otp = randomInt(100000, 1000000).toString();
@@ -249,7 +258,6 @@ export async function resendLoginOtpAction(email: string) {
       subject: "Kode OTP Login Baru - Rulshop",
       html: `
         <h2>Verifikasi Login Rulshop</h2>
-        <p>Halo ${user.username || "User"},</p>
         <p>Kode OTP login baru Anda: <b>${otp}</b></p>
         <p>Kode berlaku selama 2 menit dan diblokir setelah 3 kali percobaan salah.</p>
       `,
@@ -261,7 +269,6 @@ export async function resendLoginOtpAction(email: string) {
     return { error: "Gagal mengirim ulang OTP login." };
   }
 }
-
 export async function verifyOtpAction(email: string, code: string) {
   try {
     const normalizedEmail = email.trim().toLowerCase();

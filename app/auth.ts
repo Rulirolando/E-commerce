@@ -5,6 +5,7 @@ import { loginSchema } from "../lib/zod";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { PrismaAdapter } from "@auth/prisma-adapter";
+import { timingSafeEqual } from "crypto";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -21,7 +22,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return {
           id: profile.sub,
           username: emailPrefix,
-          nama: profile.nama || emailPrefix,
+          nama: profile.name || emailPrefix,
           email: profile.email,
           imgProfile: profile.picture,
           emailVerified: new Date(),
@@ -29,21 +30,62 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
     Credentials({
-      credentials: { email: {}, password: {} },
+      credentials: { email: {}, password: {}, otp: {} },
       async authorize(credentials) {
-        const parsedCredentials = await loginSchema.safeParseAsync(credentials);
-        if (!parsedCredentials.success) return null;
+        const parsed = await loginSchema.safeParseAsync(credentials);
+        if (!parsed.success) return null;
 
-        const { email, password } = parsedCredentials.data;
+        const email = parsed.data.email.trim().toLowerCase();
+        const password = parsed.data.password;
+        const otp =
+          typeof credentials?.otp === "string" ? credentials.otp.trim() : "";
+
+        if (!/^\d{6}$/.test(otp)) return null;
+
         const user = await prisma.user.findUnique({ where: { email } });
+        if (!user || !user.password || !user.emailVerified) return null;
 
-        if (!user || !user.password) return null;
-        if (!user.emailVerified) {
-          throw new Error("EMAIL_NOT_VERIFIED");
+        // Akun sedang terkunci
+        if (user.loginLockedUntil && user.loginLockedUntil > new Date()) {
+          return null;
         }
 
-        const valid = await bcrypt.compare(password, user.password);
-        if (!valid) return null;
+        // 1. Cek password
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) return null;
+
+        // 2. Cek OTP (satu-satunya tempat OTP login diverifikasi)
+        const rec = await prisma.otp.findUnique({ where: { email } });
+
+        if (
+          !rec ||
+          rec.type !== "LOGIN" ||
+          rec.blocked ||
+          rec.attempts >= 3 ||
+          rec.expiresAt <= new Date()
+        ) {
+          return null;
+        }
+
+        const a = Buffer.from(rec.code);
+        const b = Buffer.from(otp);
+        const otpMatch = a.length === b.length && timingSafeEqual(a, b);
+
+        if (!otpMatch) {
+          const attempts = rec.attempts + 1;
+          await prisma.otp.update({
+            where: { id: rec.id },
+            data: { attempts, blocked: attempts >= 3 },
+          });
+          return null;
+        }
+
+        // 3. Semua benar: hapus OTP & reset counter login
+        await prisma.otp.delete({ where: { id: rec.id } });
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { failedLoginAttempts: 0, loginLockedUntil: null },
+        });
 
         return {
           id: user.id,
@@ -57,7 +99,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   session: { strategy: "jwt" },
   pages: {
-    signIn: "/auth/login", // Sesuaikan dengan route login anda
+    signIn: "/auth/login",
     error: "/auth/login",
   },
   callbacks: {
@@ -98,19 +140,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
-        session.user.name = token.name as string; // Paksa name masuk ke session klien
+        session.user.name = token.name as string;
         session.user.image = token.picture as string;
         session.user.role = token.role as "USER" | "ADMIN" | "SUPER_ADMIN";
       }
 
       return session;
     },
-    async signIn({ account }) {
-      // Jika login via Google, pastikan emailVerified terisi otomatis di DB
-      if (account?.provider === "google") {
-        return true;
-      }
-
+    async signIn() {
       return true;
     },
   },
