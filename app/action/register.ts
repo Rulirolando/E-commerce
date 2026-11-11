@@ -117,6 +117,7 @@ export async function loginWithOtpAction(
   password: string,
   otp: string,
 ) {
+  console.log("[loginWithOtpAction] dipanggil", { email });
   try {
     await signIn("credentials", {
       email,
@@ -134,90 +135,6 @@ export async function loginWithOtpAction(
     }
     console.error("loginWithOtpAction error:", error);
     return { error: "Terjadi kesalahan pada server." };
-  }
-}
-
-export async function verifyLoginOtpAction(email: string, code: string) {
-  try {
-    const normalizedEmail = email.trim().toLowerCase();
-    const normalizedCode = code.trim();
-
-    if (!normalizedEmail || !/^\d{6}$/.test(normalizedCode)) {
-      return { error: "Masukkan OTP yang terdiri dari 6 angka." };
-    }
-
-    const otpRecord = await prisma.otp.findUnique({
-      where: { email: normalizedEmail },
-    });
-
-    if (!otpRecord) {
-      return {
-        error: "OTP login tidak ditemukan. Silakan kirim ulang OTP.",
-        expired: true,
-      };
-    }
-
-    if (otpRecord.type !== "LOGIN") {
-      await prisma.otp.update({
-        where: { id: otpRecord.id },
-        data: { type: "LOGIN" },
-      });
-    }
-
-    if (otpRecord.blocked || otpRecord.attempts >= 3) {
-      return {
-        error: "OTP diblokir karena 3 kali salah. Silakan minta kode OTP baru.",
-        blocked: true,
-      };
-    }
-
-    if (otpRecord.expiresAt <= new Date()) {
-      return {
-        error: "OTP sudah kedaluwarsa. Silakan minta kode OTP baru.",
-        expired: true,
-      };
-    }
-
-    if (otpRecord.code !== normalizedCode) {
-      const nextAttempts = otpRecord.attempts + 1;
-      const isBlocked = nextAttempts >= 3;
-
-      await prisma.otp.update({
-        where: { id: otpRecord.id },
-        data: {
-          attempts: nextAttempts,
-          ...(isBlocked
-            ? {
-                blocked: true,
-              }
-            : {}),
-        },
-      });
-
-      if (isBlocked) {
-        return {
-          error:
-            "OTP diblokir karena 3 kali salah. Silakan minta kode OTP baru.",
-          blocked: true,
-        };
-      }
-
-      return {
-        error: `OTP salah. Percobaan ${nextAttempts} dari 3.`,
-        attempts: nextAttempts,
-      };
-    }
-
-    await prisma.otp.delete({
-      where: { id: otpRecord.id },
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error("Verify Login OTP Error:", error);
-    return {
-      error: "Gagal memverifikasi OTP. Silakan coba lagi.",
-    };
   }
 }
 
