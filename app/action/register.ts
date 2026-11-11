@@ -22,10 +22,6 @@ export async function registerUser(
   try {
     const data = Object.fromEntries(formData.entries());
 
-    // ======================================
-    // VALIDASI PASSWORD
-    // ======================================
-
     const password = typeof data.password === "string" ? data.password : "";
 
     const passwordRegex =
@@ -59,6 +55,7 @@ export async function registerUser(
 
     const hashedPassword = await bcrypt.hash(validated.password, 10);
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     await prisma.otp.upsert({
       where: { email: validated.email },
       update: {
@@ -100,7 +97,6 @@ export async function registerUser(
       return { error: error.issues[0].message };
     }
 
-    // Penting untuk Auth.js agar redirect tetap jalan
     if (error instanceof Error && error.message === "NEXT_REDIRECT") {
       throw error;
     }
@@ -128,25 +124,30 @@ export async function verifyLoginOtpAction(email: string, code: string) {
       where: { email: normalizedEmail },
     });
 
-    if (!otpRecord || otpRecord.type !== "LOGIN") {
+    if (!otpRecord) {
       return {
-        error: "OTP login tidak ditemukan. Silakan login kembali.",
+        error: "OTP login tidak ditemukan. Silakan kirim ulang OTP.",
         expired: true,
       };
     }
 
+    if (otpRecord.type !== "LOGIN") {
+      await prisma.otp.update({
+        where: { id: otpRecord.id },
+        data: { type: "LOGIN" },
+      });
+    }
+
     if (otpRecord.blocked || otpRecord.attempts >= 3) {
       return {
-        error:
-          "OTP diblokir karena 3 kali salah. Silakan login kembali untuk mendapatkan OTP baru.",
+        error: "OTP diblokir karena 3 kali salah. Silakan minta kode OTP baru.",
         blocked: true,
       };
     }
 
     if (otpRecord.expiresAt <= new Date()) {
       return {
-        error:
-          "OTP sudah kedaluwarsa. Silakan login kembali untuk mendapatkan OTP baru.",
+        error: "OTP sudah kedaluwarsa. Silakan minta kode OTP baru.",
         expired: true,
       };
     }
@@ -155,39 +156,22 @@ export async function verifyLoginOtpAction(email: string, code: string) {
       const nextAttempts = otpRecord.attempts + 1;
       const isBlocked = nextAttempts >= 3;
 
-      // Hanya menambah percobaan jika OTP belum berubah,
-      // belum diblokir, dan masih berlaku.
-      const updated = await prisma.otp.updateMany({
-        where: {
-          id: otpRecord.id,
-          type: "LOGIN",
-          code: otpRecord.code,
-          attempts: otpRecord.attempts,
-          blocked: false,
-          expiresAt: { gt: new Date() },
-        },
+      await prisma.otp.update({
+        where: { id: otpRecord.id },
         data: {
-          attempts: { increment: 1 },
+          attempts: nextAttempts,
           ...(isBlocked
             ? {
                 blocked: true,
-                expiresAt: new Date(),
               }
             : {}),
         },
       });
 
-      if (updated.count === 0) {
-        return {
-          error:
-            "OTP sudah berubah atau tidak berlaku. Silakan periksa kembali.",
-        };
-      }
-
       if (isBlocked) {
         return {
           error:
-            "OTP diblokir karena 3 kali salah. Silakan login kembali untuk mendapatkan OTP baru.",
+            "OTP diblokir karena 3 kali salah. Silakan minta kode OTP baru.",
           blocked: true,
         };
       }
@@ -198,24 +182,9 @@ export async function verifyLoginOtpAction(email: string, code: string) {
       };
     }
 
-    // Pastikan OTP masih sama dan belum diblokir saat dihapus.
-    const deleted = await prisma.otp.deleteMany({
-      where: {
-        id: otpRecord.id,
-        type: "LOGIN",
-        code: normalizedCode,
-        blocked: false,
-        attempts: { lt: 3 },
-        expiresAt: { gt: new Date() },
-      },
+    await prisma.otp.delete({
+      where: { id: otpRecord.id },
     });
-
-    if (deleted.count === 0) {
-      return {
-        error: "OTP sudah tidak berlaku. Silakan login kembali.",
-        expired: true,
-      };
-    }
 
     return { success: true };
   } catch (error) {
@@ -238,14 +207,13 @@ export async function resendLoginOtpAction(email: string) {
       where: { email: normalizedEmail },
     });
 
-    if (!user?.password) {
+    if (!user) {
       return {
-        error: "Silakan login kembali menggunakan email dan password.",
+        error: "Akun dengan email tersebut tidak ditemukan.",
       };
     }
 
     const otp = randomInt(100000, 1000000).toString();
-
     const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
 
     await prisma.otp.upsert({
@@ -281,7 +249,7 @@ export async function resendLoginOtpAction(email: string) {
       subject: "Kode OTP Login Baru - Rulshop",
       html: `
         <h2>Verifikasi Login Rulshop</h2>
-        <p>Halo ${user.username},</p>
+        <p>Halo ${user.username || "User"},</p>
         <p>Kode OTP login baru Anda: <b>${otp}</b></p>
         <p>Kode berlaku selama 2 menit dan diblokir setelah 3 kali percobaan salah.</p>
       `,
@@ -327,7 +295,6 @@ export async function verifyOtpAction(email: string, code: string) {
     });
 
     if (existingUser) {
-      // Jika akun sudah ada, tandai email sebagai terverifikasi.
       await prisma.user.update({
         where: { email: normalizedEmail },
         data: {
@@ -335,7 +302,6 @@ export async function verifyOtpAction(email: string, code: string) {
         },
       });
     } else {
-      // Akun pendaftaran belum dibuat sebelum OTP berhasil.
       if (!otpRecord.username || !otpRecord.password) {
         return {
           error: "Data pendaftaran tidak ditemukan. Silakan daftar kembali.",
@@ -362,7 +328,6 @@ export async function verifyOtpAction(email: string, code: string) {
       });
     }
 
-    // Hapus OTP setelah verifikasi berhasil.
     await prisma.otp.delete({
       where: { id: otpRecord.id },
     });
@@ -378,24 +343,27 @@ export async function resendOtpAction(email: string) {
   try {
     if (!email) return { error: "Email tidak ditemukan" };
 
-    // Generate kode OTP 6 angka baru
     const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Simpan / Perbarui OTP ke database (berlaku 2 menit)
     await prisma.otp.upsert({
       where: { email },
       update: {
         code: newOtp,
-        expiresAt: new Date(Date.now() + 2 * 60 * 1000), // 2 menit
+        type: "REGISTER",
+        expiresAt: new Date(Date.now() + 2 * 60 * 1000),
+        attempts: 0,
+        blocked: false,
       },
       create: {
         email,
         code: newOtp,
-        expiresAt: new Date(Date.now() + 2 * 60 * 1000), // 2 menit
+        type: "REGISTER",
+        expiresAt: new Date(Date.now() + 2 * 60 * 1000),
+        attempts: 0,
+        blocked: false,
       },
     });
 
-    // Kirim ulang via Nodemailer
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -407,8 +375,8 @@ export async function resendOtpAction(email: string) {
     await transporter.sendMail({
       to: email,
       from: process.env.EMAIL_FROM,
-      subject: "Kode OTP Login Baru - Rulshop",
-      html: `<h2>Verifikasi Login Rulshop</h2><p>Kode OTP baru Anda: <b>${newOtp}</b></p><p>Kode ini berlaku selama 2 menit.</p>`,
+      subject: "Kode Verifikasi Baru - Rulshop",
+      html: `<h2>Verifikasi Akun Rulshop</h2><p>Kode OTP baru Anda: <b>${newOtp}</b></p><p>Kode ini berlaku selama 2 menit.</p>`,
     });
 
     return { success: true };
