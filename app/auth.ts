@@ -44,7 +44,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           console.log("[authorize] input tidak valid", {
             email: !!email,
             password: !!password,
-            otp,
+            otpLength: otp.length,
           });
           return null;
         }
@@ -67,6 +67,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const rec = await prisma.otp.findUnique({ where: { email } });
+
+        console.log("[authorize] Cek data OTP:", {
+          ditemukan: !!rec,
+          typeDb: rec?.type,
+          codeDb: rec?.code,
+          codeInput: otp,
+          expiresAt: rec?.expiresAt,
+          sekarang: new Date(),
+        });
+
         if (
           !rec ||
           rec.type !== "LOGIN" ||
