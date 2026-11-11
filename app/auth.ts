@@ -10,8 +10,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
       allowDangerousEmailAccountLinking: true,
       profile(profile) {
         const emailPrefix = profile.email
@@ -23,7 +23,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           username: emailPrefix,
           nama: profile.nama || emailPrefix,
           email: profile.email,
-          imageProfile: profile.picture,
+          imgProfile: profile.picture,
           emailVerified: new Date(),
         };
       },
