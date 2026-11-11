@@ -11,6 +11,7 @@ import {
 } from "../../action/register";
 
 const OTP_DURATION = 120;
+const RESEND_COOLDOWN = 30; // Detik sebelum tombol kirim ulang bisa diklik kembali
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -23,8 +24,10 @@ function VerifyContent() {
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
   const [remainingTime, setRemainingTime] = useState(OTP_DURATION);
+  const [resendCooldown, setResendCooldown] = useState(RESEND_COOLDOWN);
   const [isPending, startTransition] = useTransition();
 
+  // Timer utama untuk masa berlaku OTP
   useEffect(() => {
     if (remainingTime <= 0 || success) return;
 
@@ -34,6 +37,17 @@ function VerifyContent() {
 
     return () => clearTimeout(timer);
   }, [remainingTime, success]);
+
+  // Timer cooldown untuk tombol kirim ulang OTP
+  useEffect(() => {
+    if (resendCooldown <= 0 || success) return;
+
+    const cooldownTimer = setTimeout(() => {
+      setResendCooldown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearTimeout(cooldownTimer);
+  }, [resendCooldown, success]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -61,8 +75,6 @@ function VerifyContent() {
       return;
     }
 
-    // Untuk login, pastikan password sementara masih tersedia
-    // sebelum OTP diverifikasi dan dihapus dari database.
     const password =
       purpose === "login" ? sessionStorage.getItem("temp_pass") : null;
 
@@ -95,7 +107,6 @@ function VerifyContent() {
         }
 
         if (purpose === "login") {
-          // OTP benar, lanjutkan autentikasi NextAuth
           const loginResult = await signIn("credentials", {
             email,
             password,
@@ -116,7 +127,6 @@ function VerifyContent() {
           return;
         }
 
-        // Alur registrasi: setelah akun dibuat, masuk ke halaman login.
         setSuccess(true);
         setMessage(
           "Registrasi dan verifikasi berhasil! Silakan login dengan akun kamu.",
@@ -130,6 +140,7 @@ function VerifyContent() {
   }
 
   function handleResend() {
+    if (resendCooldown > 0) return;
     setMessage("");
 
     if (!email) {
@@ -151,6 +162,7 @@ function VerifyContent() {
 
         setCode("");
         setRemainingTime(OTP_DURATION);
+        setResendCooldown(RESEND_COOLDOWN);
         setMessage("OTP baru berhasil dikirim. Gunakan kode terbaru.");
       } catch (error) {
         console.error("Resend OTP error:", error);
@@ -166,8 +178,8 @@ function VerifyContent() {
           Rulshop
         </h1>
 
-        <h2 className="text-center text-xl font-semibold">
-          {purpose === "login" ? (
+        <div className="text-center">
+          {purpose === "login" && (
             <button
               type="button"
               onClick={() => router.replace("/auth/login")}
@@ -175,17 +187,8 @@ function VerifyContent() {
             >
               Kembali ke halaman login
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={isPending || success || !email}
-              className="text-sm font-semibold text-blue-600 underline disabled:cursor-not-allowed disabled:text-gray-400"
-            >
-              Kirim ulang OTP
-            </button>
           )}
-        </h2>
+        </div>
 
         <p className="text-center text-sm text-gray-600">
           Masukkan kode 6 angka yang dikirim ke email:
@@ -228,7 +231,7 @@ function VerifyContent() {
             placeholder="Masukkan 6 angka OTP"
             required
             disabled={isPending || success || remainingTime <= 0}
-            className="w-full rounded-md border-2 border-blue-400 p-3 text-center  tracking-[0.4em] outline-none focus:border-blue-600 disabled:bg-gray-100"
+            className="w-full rounded-md border-2 border-blue-400 p-3 text-center tracking-[0.4em] outline-none focus:border-blue-600 disabled:bg-gray-100"
           />
 
           <button
@@ -251,14 +254,19 @@ function VerifyContent() {
           </p>
         )}
 
-        <button
-          type="button"
-          onClick={handleResend}
-          disabled={isPending || success || !email}
-          className="text-sm font-semibold text-blue-600 underline disabled:cursor-not-allowed disabled:text-gray-400"
-        >
-          Kirim ulang OTP
-        </button>
+        {/* Tombol Kirim Ulang OTP Tunggal dengan Cooldown */}
+        <div className="text-center mt-1">
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={isPending || success || !email || resendCooldown > 0}
+            className="text-sm font-semibold text-blue-600 underline disabled:cursor-not-allowed disabled:text-gray-400"
+          >
+            {resendCooldown > 0
+              ? `Kirim ulang OTP dalam ${resendCooldown} detik`
+              : "Kirim ulang OTP"}
+          </button>
+        </div>
       </div>
     </div>
   );
