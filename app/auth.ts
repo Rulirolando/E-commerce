@@ -18,11 +18,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           ? profile.email.split("@")[0]
           : "google";
 
-        const uniqueUsername = `${emailPrefix.replace(/[^a-zA-Z0-9_]/g, "_")}_${profile.sub.slice(-6)}`;
-
         return {
           id: profile.sub,
-          username: uniqueUsername,
+          username: emailPrefix,
           nama: profile.nama || emailPrefix,
           email: profile.email,
           imageProfile: profile.picture,
