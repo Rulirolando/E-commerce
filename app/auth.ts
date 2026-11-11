@@ -174,7 +174,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
       return session;
     },
-    async signIn() {
+    // Pastikan signIn callback bersih seperti ini
+    async signIn({ user }) {
+      if (!user) return false;
       return true;
     },
   },
