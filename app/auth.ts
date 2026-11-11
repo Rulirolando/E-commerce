@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
-import { loginSchema } from "../lib/zod";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { PrismaAdapter } from "@auth/prisma-adapter";
@@ -32,31 +31,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({
       credentials: { email: {}, password: {}, otp: {} },
       async authorize(credentials) {
-        const parsed = await loginSchema.safeParseAsync(credentials);
-        if (!parsed.success) return null;
-
-        const email = parsed.data.email.trim().toLowerCase();
-        const password = parsed.data.password;
+        const email =
+          typeof credentials?.email === "string"
+            ? credentials.email.trim().toLowerCase()
+            : "";
+        const password =
+          typeof credentials?.password === "string" ? credentials.password : "";
         const otp =
           typeof credentials?.otp === "string" ? credentials.otp.trim() : "";
 
-        if (!/^\d{6}$/.test(otp)) return null;
-
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user || !user.password || !user.emailVerified) return null;
-
-        // Akun sedang terkunci
-        if (user.loginLockedUntil && user.loginLockedUntil > new Date()) {
+        if (!email || !password || !/^\d{6}$/.test(otp)) {
+          console.log("[authorize] input tidak valid", {
+            email: !!email,
+            password: !!password,
+            otp,
+          });
           return null;
         }
 
-        // 1. Cek password
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user || !user.password || !user.emailVerified) {
+          console.log("[authorize] user tidak ada / belum verifikasi");
+          return null;
+        }
+
+        if (user.loginLockedUntil && user.loginLockedUntil > new Date()) {
+          console.log("[authorize] akun terkunci");
+          return null;
+        }
+
         const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) return null;
+        if (!validPassword) {
+          console.log("[authorize] password salah");
+          return null;
+        }
 
-        // 2. Cek OTP (satu-satunya tempat OTP login diverifikasi)
         const rec = await prisma.otp.findUnique({ where: { email } });
-
         if (
           !rec ||
           rec.type !== "LOGIN" ||
@@ -64,6 +74,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           rec.attempts >= 3 ||
           rec.expiresAt <= new Date()
         ) {
+          console.log("[authorize] record OTP bermasalah", {
+            ada: !!rec,
+            type: rec?.type,
+            blocked: rec?.blocked,
+            attempts: rec?.attempts,
+            expiresAt: rec?.expiresAt,
+          });
           return null;
         }
 
@@ -72,6 +89,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const otpMatch = a.length === b.length && timingSafeEqual(a, b);
 
         if (!otpMatch) {
+          console.log("[authorize] OTP tidak cocok");
           const attempts = rec.attempts + 1;
           await prisma.otp.update({
             where: { id: rec.id },
@@ -80,7 +98,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        // 3. Semua benar: hapus OTP & reset counter login
         await prisma.otp.delete({ where: { id: rec.id } });
         await prisma.user.update({
           where: { id: user.id },

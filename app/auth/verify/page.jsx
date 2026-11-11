@@ -2,11 +2,11 @@
 
 import { useState, useTransition, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
 import {
   verifyOtpAction,
   resendOtpAction,
   resendLoginOtpAction,
+  loginWithOtpAction,
 } from "../../action/register";
 
 const OTP_DURATION = 120;
@@ -79,17 +79,14 @@ function VerifyContent() {
       try {
         // ===== ALUR LOGIN: OTP diverifikasi di dalam authorize() =====
         if (purpose === "login") {
-          const loginResult = await signIn("credentials", {
+          const loginResult = await loginWithOtpAction(
             email,
             password,
-            otp: code.trim(),
-            redirect: false,
-          });
+            code.trim(),
+          );
 
-          if (!loginResult || loginResult.error || !loginResult.ok) {
-            setMessage(
-              "OTP salah, kedaluwarsa, atau diblokir. Coba lagi atau kirim ulang OTP.",
-            );
+          if (loginResult?.error) {
+            setMessage(loginResult.error);
             return;
           }
 

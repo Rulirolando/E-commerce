@@ -1,5 +1,6 @@
 "use server";
 
+import { AuthError } from "next-auth";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signIn } from "../auth";
@@ -109,6 +110,31 @@ export async function registerUser(
 
 export async function googleSignIn() {
   await signIn("google", { redirectTo: "/" });
+}
+
+export async function loginWithOtpAction(
+  email: string,
+  password: string,
+  otp: string,
+) {
+  try {
+    await signIn("credentials", {
+      email,
+      password,
+      otp,
+      redirect: false,
+    });
+    return { success: true };
+  } catch (error) {
+    if (error instanceof AuthError) {
+      return {
+        error:
+          "OTP salah, kedaluwarsa, atau diblokir. Coba lagi atau kirim ulang OTP.",
+      };
+    }
+    console.error("loginWithOtpAction error:", error);
+    return { error: "Terjadi kesalahan pada server." };
+  }
 }
 
 export async function verifyLoginOtpAction(email: string, code: string) {
