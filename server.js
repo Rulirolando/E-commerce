@@ -23,7 +23,7 @@ app.prepare().then(() => {
     connectionStateRecovery: {},
     adapter: createAdapter(pubClient, subClient),
     cors: {
-      origin: "http://localhost:3000",
+      origin: "https://rulshop.tech",
     },
   });
 
@@ -71,6 +71,6 @@ app.prepare().then(() => {
       process.exit(1);
     })
     .listen(port, () => {
-    console.log(`> Ready on http://${hostname}:${port}`);
+      console.log(`> Ready on http://${hostname}:${port}`);
     });
 });

@@ -124,8 +124,8 @@ export default function JualPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300 w-full p-3">
-        <Navbar currentUser={currentUser} />
+      <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300 w-full">
+        <Navbar className="fixed z-50" currentUser={currentUser} />
         <div className="p-6 max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-4 dark:text-white">{`Jual produk kamu ${capitalizeFirst(
             currentUser.user.name,

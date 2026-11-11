@@ -182,96 +182,98 @@ export default function KeranjangPage() {
 
   return (
     <>
-      <Navbar currentUser={currentUser} />
-      <div className="min-h-screen p-6 dark:bg-slate-950 transition-colors duration-300">
-        <h1 className="text-2xl font-bold mb-4 dark:text-white">
-          🛒 Keranjang Belanja
-        </h1>
+      <div className="w-full bg-blue-100 dark:bg-slate-950 transition-colors duration-300 min-h-screen">
+        <Navbar currentUser={currentUser} />
+        <div className="pt-24 px-10 max-w-4xl mx-auto pb-10">
+          <h1 className="text-2xl font-bold mb-4 dark:text-white">
+            🛒 Keranjang Belanja
+          </h1>
 
-        {!keranjang || keranjang.items?.length === 0 ? (
-          <p className="dark:text-gray-400">Keranjang kosong</p>
-        ) : (
-          <>
-            {keranjang?.items?.map((item) => (
-              <div
-                key={item.id}
-                className="grid grid-cols-7 gap-4 border p-4 mb-3 rounded-lg items-center dark:border-slate-700 dark:bg-slate-900 dark:text-white transition-colors"
-              >
-                <div className="col-span-2 flex gap-3">
+          {!keranjang || keranjang.items?.length === 0 ? (
+            <p className="dark:text-gray-400">Keranjang kosong</p>
+          ) : (
+            <>
+              {keranjang?.items?.map((item) => (
+                <div
+                  key={item.id}
+                  className="grid grid-cols-7 gap-4 border p-4 mb-3 rounded-lg items-center dark:border-slate-700 dark:bg-slate-900 dark:text-white transition-colors"
+                >
+                  <div className="col-span-2 flex gap-3">
+                    <input
+                      type="checkbox"
+                      checked={isSelected(item)}
+                      onChange={(e) => handleSelect(item, e.target.checked)}
+                    />
+                    <Image
+                      src={item.variant.images[0].img}
+                      alt={item.variant.product.nama}
+                      width={64}
+                      height={64}
+                      className="rounded"
+                    />
+                    <p className="font-semibold">{item.variant.product.nama}</p>
+                  </div>
+
+                  <div className="text-sm dark:text-gray-300">
+                    Warna: {item.variant.warna}
+                    <br />
+                    Ukuran: {item.ukuran}
+                  </div>
+
+                  <div className="text-center">
+                    Rp {item.variant.harga.toLocaleString("id-ID")}
+                  </div>
+
+                  <div className="text-center">{item.jumlah}</div>
+
+                  <div className="text-center font-bold dark:text-blue-400">
+                    Rp{" "}
+                    {(item.variant.harga * item.jumlah).toLocaleString("id-ID")}
+                  </div>
+
+                  <div className="text-center">
+                    <button
+                      onClick={() => handleHapus(item.id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded"
+                    >
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Footer */}
+              <div className="flex justify-between items-center border p-4 rounded bg-gray-100 sticky bottom-2 dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-colors">
+                <div>
                   <input
                     type="checkbox"
-                    checked={isSelected(item)}
-                    onChange={(e) => handleSelect(item, e.target.checked)}
+                    checked={
+                      keranjang?.items?.length > 0 &&
+                      selectProduk.length === keranjang.items.length
+                    }
+                    onChange={(e) => handleSelectAll(e.target.checked)}
                   />
-                  <Image
-                    src={item.variant.images[0].img}
-                    alt={item.variant.product.nama}
-                    width={64}
-                    height={64}
-                    className="rounded"
-                  />
-                  <p className="font-semibold">{item.variant.product.nama}</p>
+                  Pilih Semua
                 </div>
 
-                <div className="text-sm dark:text-gray-300">
-                  Warna: {item.variant.warna}
-                  <br />
-                  Ukuran: {item.ukuran}
-                </div>
-
-                <div className="text-center">
-                  Rp {item.variant.harga.toLocaleString("id-ID")}
-                </div>
-
-                <div className="text-center">{item.jumlah}</div>
-
-                <div className="text-center font-bold dark:text-blue-400">
-                  Rp{" "}
-                  {(item.variant.harga * item.jumlah).toLocaleString("id-ID")}
-                </div>
-
-                <div className="text-center">
+                <div className="flex gap-4 items-center">
+                  <p className="dark:text-gray-300">
+                    Total ({selectProduk.length})
+                  </p>
+                  <p className="font-bold text-xl text-blue-700 dark:text-blue-400">
+                    Rp {totalHarga.toLocaleString("id-ID")}
+                  </p>
                   <button
-                    onClick={() => handleHapus(item.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded"
+                    onClick={handleCheckout}
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
                   >
-                    Hapus
+                    Checkout
                   </button>
                 </div>
               </div>
-            ))}
-
-            {/* Footer */}
-            <div className="flex justify-between items-center border p-4 rounded bg-gray-100 sticky bottom-2 dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-colors">
-              <div>
-                <input
-                  type="checkbox"
-                  checked={
-                    keranjang?.items?.length > 0 &&
-                    selectProduk.length === keranjang.items.length
-                  }
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                />
-                Pilih Semua
-              </div>
-
-              <div className="flex gap-4 items-center">
-                <p className="dark:text-gray-300">
-                  Total ({selectProduk.length})
-                </p>
-                <p className="font-bold text-xl text-blue-700 dark:text-blue-400">
-                  Rp {totalHarga.toLocaleString("id-ID")}
-                </p>
-                <button
-                  onClick={handleCheckout}
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Checkout
-                </button>
-              </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </>
   );

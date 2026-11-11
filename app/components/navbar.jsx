@@ -30,7 +30,9 @@ export default function Navbar({ className = "", currentUser }) {
     resetUnreadChat,
   } = useChatStore();
 
-  const userId = currentUser?.user?.id;
+  const user = currentUser?.user;
+  const userId = user?.id;
+  const isLoggedIn = Boolean(userId);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -136,7 +138,7 @@ export default function Navbar({ className = "", currentUser }) {
       </button>
 
       {/* Notification Icon */}
-      {currentUser && (
+      {isLoggedIn && (
         <Link
           href="/notifications"
           aria-label="Notifikasi"
@@ -152,7 +154,7 @@ export default function Navbar({ className = "", currentUser }) {
       )}
 
       {/* Chat Icon dengan Badge Unread */}
-      {currentUser && (
+      {isLoggedIn && (
         <Link
           href="/chat"
           aria-label="Chat"
@@ -171,14 +173,14 @@ export default function Navbar({ className = "", currentUser }) {
         <SlBasket className="text-2xl" />
       </Link>
 
-      {currentUser && <Link href="/sell">Sell</Link>}
+      {isLoggedIn && <Link href="/sell">Sell</Link>}
 
       <div className="flex gap-6 text-sm items-center">
-        {currentUser ? (
+        {isLoggedIn ? (
           <>
-            <Link href={`/order/${currentUser.user.id}`}>Kelola pesanan</Link>
-            <Link href={`/profile/${currentUser.user.id}`}>
-              <p>{capitalizeFirst(currentUser.user.name)}</p>
+            <Link href={`/order/${userId}`}>Kelola pesanan</Link>
+            <Link href={`/profile/${userId}`}>
+              <p>{capitalizeFirst(user.name)}</p>
             </Link>
           </>
         ) : (

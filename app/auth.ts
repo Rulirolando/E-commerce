@@ -14,11 +14,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       allowDangerousEmailAccountLinking: true,
       profile(profile) {
+        const emailPrefix = profile.email
+          ? profile.email.split("@")[0]
+          : "google";
+
+        const uniqueUsername = `${emailPrefix.replace(/[^a-zA-Z0-9_]/g, "_")}_${profile.sub.slice(-6)}`;
+
         return {
           id: profile.sub,
-          username: profile.name,
+          username: uniqueUsername,
+          nama: profile.nama || emailPrefix,
           email: profile.email,
-          imgProfile: profile.picture,
+          imageProfile: profile.picture,
           emailVerified: new Date(),
         };
       },
@@ -45,6 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: user.username || user.nama,
           image: user.imgProfile,
+          role: user.role,
         };
       },
     }),
@@ -56,20 +64,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      if (user) {
+      if (user?.id) {
         token.id = user.id;
-        token.name = user.name;
-        token.picture = user.image;
       }
 
-      if (!token.name && token.id) {
+      if (token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { username: true, nama: true, imgProfile: true, role: true },
+          select: {
+            id: true,
+            username: true,
+            nama: true,
+            imgProfile: true,
+            role: true,
+            email: true,
+          },
         });
         if (dbUser) {
-          token.name = dbUser.username || dbUser.nama;
-          token.picture = dbUser.imgProfile;
+          token.id = dbUser.id;
+          token.email = dbUser.email;
+          token.name = dbUser.username || dbUser.nama || "";
+          token.picture = dbUser.imgProfile || "";
           token.role = dbUser.role;
         }
       }
