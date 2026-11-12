@@ -96,6 +96,7 @@ function ChatContent() {
         if (res.ok) {
           const data = await res.json();
           setMessages(Array.isArray(data) ? data : []);
+          isInitialLoad.current = true;
         }
       } catch (err) {
         console.error("Gagal memuat pesan:", err);
@@ -118,18 +119,26 @@ function ChatContent() {
     return () => socket.off("newMessage");
   }, [roomId]);
 
-  // Auto Scroll
+  // Auto Scroll yang disempurnakan agar langsung berada di bawah
   useEffect(() => {
-    if (roomId && bottomRef.current) {
+    if (roomId && messages.length > 0) {
       const scrollToBottom = () => {
-        bottomRef.current?.scrollIntoView({
-          behavior: isInitialLoad.current ? "auto" : "smooth",
-        });
-        isInitialLoad.current = false;
+        if (bottomRef.current) {
+          bottomRef.current.scrollIntoView({
+            behavior: isInitialLoad.current ? "auto" : "smooth",
+          });
+          isInitialLoad.current = false;
+        }
       };
 
-      const timeoutId = setTimeout(scrollToBottom, 50);
-      return () => clearTimeout(timeoutId);
+      // Jalankan dua kali untuk memastikan render elemen/gambar selesai sempurna
+      const timer1 = setTimeout(scrollToBottom, 50);
+      const timer2 = setTimeout(scrollToBottom, 200);
+
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+      };
     }
   }, [messages, roomId]);
 
@@ -191,10 +200,10 @@ function ChatContent() {
   return (
     <>
       <Navbar className="fixed z-50" currentUser={currentUser} />
-      <div className="pt-20 h-full bg-blue-400 dark:bg-blue-900 dark:text-white transition-colors">
-        <div className="flex flex-col h-full max-w-2xl mx-auto shadow-lg">
+      <div className="pt-20 h-screen flex flex-col bg-blue-400 dark:bg-blue-900 dark:text-white transition-colors">
+        <div className="flex flex-col flex-1 max-w-2xl w-full mx-auto shadow-lg overflow-hidden">
           {/* HEADER */}
-          <div className="w-full font-bold flex items-center gap-3 sticky top-20 z-20 bg-blue-500 dark:bg-blue-950 p-4 border-blue-100 border-b">
+          <div className="w-full font-bold flex items-center gap-3 bg-blue-500 dark:bg-blue-950 p-4 border-blue-100 border-b shrink-0">
             <button
               onClick={() => {
                 router.push("/chat");
@@ -217,10 +226,10 @@ function ChatContent() {
 
           <div
             ref={chatContainerRef}
-            className="min-h-screen flex-1 relative bg-blue-600 dark:bg-blue-950 transition-colors"
+            className="flex-1 overflow-y-auto relative bg-blue-600 dark:bg-blue-950 transition-colors p-4"
           >
             {showUserList ? (
-              <div className="absolute inset-0 bg-blue-200 dark:bg-blue-950 z-10">
+              <div className="absolute inset-0 bg-blue-200 dark:bg-blue-950 z-10 overflow-y-auto">
                 {chatHistory.length > 0 ? (
                   chatHistory.map((chat) => (
                     <div
@@ -256,7 +265,7 @@ function ChatContent() {
                 )}
               </div>
             ) : (
-              <div className="p-4 flex flex-col w-full">
+              <div className="flex flex-col w-full">
                 {messages.map((msg) => (
                   <div
                     key={msg.id || Math.random()}
@@ -290,7 +299,7 @@ function ChatContent() {
           </div>
 
           {!showUserList && (
-            <div className="p-4 bg-blue-500 dark:bg-blue-950 border-t flex gap-2 transition-colors sticky bottom-0 w-full max-w-2xl mx-auto">
+            <div className="p-4 bg-blue-500 dark:bg-blue-950 border-t flex gap-2 transition-colors shrink-0">
               <input
                 className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-indigo-500 transition bg-blue-600 text-white dark:bg-blue-900"
                 placeholder="Ketik pesan..."

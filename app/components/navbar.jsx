@@ -16,7 +16,6 @@ export default function Navbar({ className = "", currentUser }) {
   const pathname = usePathname();
   const pathnameRef = useRef(pathname);
 
-  // Menyimpan ref pathname agar callback socket selalu menggunakan nilai pathname terbaru tanpa re-subscribe socket effect
   useEffect(() => {
     pathnameRef.current = pathname;
   }, [pathname]);
@@ -95,10 +94,19 @@ export default function Navbar({ className = "", currentUser }) {
       }
     };
 
+    const handleNewMessage = (msg) => {
+      // Jika pesan masuk dari orang lain dan user sedang tidak di halaman chat room tersebut
+      if (msg.senderId !== userId && !pathnameRef.current.startsWith("/chat")) {
+        incrementUnreadChat();
+      }
+    };
+
     socket.on("update-chat-list", handleUpdateChatList);
+    socket.on("newMessage", handleNewMessage);
 
     return () => {
       socket.off("update-chat-list", handleUpdateChatList);
+      socket.off("newMessage", handleNewMessage);
     };
   }, [userId, setUnreadChatCount, incrementUnreadChat]);
 

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "../components/navbar";
 import { useSession } from "next-auth/react";
@@ -7,18 +7,29 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function KeranjangPage() {
   const [selectProduk, setSelectProduk] = useState([]);
-
-  // console.log("selectProduk", selectProduk);
   const { data: session, status } = useSession();
   const currentUser = session;
   const queryClient = useQueryClient();
 
-  const { data: keranjang = { items: [] }, isLoading } = useQuery({
+  // Memuat Script Midtrans Snap secara dinamis agar window.snap selalu tersedia
+  useEffect(() => {
+    const midtransUrl = "https://app.sandbox.midtrans.com/snap/snap.js";
+    const clientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY || "";
+
+    if (document.querySelector(`script[src="${midtransUrl}"]`)) return;
+
+    const script = document.createElement("script");
+    script.src = midtransUrl;
+    script.setAttribute("data-client-key", clientKey);
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const { data: keranjang = { items: [] } } = useQuery({
     queryKey: ["cart", currentUser?.user?.id],
     queryFn: async () => {
       const res = await fetch(`/api/keranjang?userId=${currentUser.user.id}`);
       const data = await res.json();
-      // console.log("data keranjang:", data);
       return data;
     },
     enabled: !!currentUser?.user?.id,
@@ -29,12 +40,59 @@ export default function KeranjangPage() {
       await fetch(`/api/keranjang/${id}`, { method: "DELETE" });
     },
     onSuccess: () => {
-      // Refresh data keranjang otomatis
       queryClient.invalidateQueries({
         queryKey: ["cart", currentUser?.user?.id],
       });
-
       setSelectProduk([]);
+    },
+  });
+
+  // Mutasi untuk menangani Checkout sekaligus loading state
+  const checkoutMutation = useMutation({
+    mutationFn: async (orderPayload) => {
+      const response = await fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderPayload),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Gagal membuat pesanan");
+      }
+      return data;
+    },
+    onSuccess: (data) => {
+      if (window.snap && data.token) {
+        window.snap.pay(data.token, {
+          onSuccess: function () {
+            alert("Pembayaran Berhasil!");
+            window.location.href = `/profile/${currentUser.user.id}`;
+          },
+          onPending: function () {
+            alert("Harap selesaikan pembayaran.");
+            window.location.href = `/profile/${currentUser.user.id}`;
+          },
+          onError: function () {
+            alert("Pembayaran Gagal!");
+          },
+          onClose: function () {
+            alert("Anda menutup popup tanpa menyelesaikan pembayaran.");
+          },
+        });
+      } else {
+        alert(
+          "Token pembayaran Midtrans tidak ditemukan atau Snap belum siap.",
+        );
+      }
+      setSelectProduk([]);
+      queryClient.invalidateQueries({
+        queryKey: ["cart", currentUser?.user?.id],
+      });
+    },
+    onError: (error) => {
+      console.error("Checkout Error:", error);
+      alert(error.message || "Terjadi kesalahan saat memproses pesanan.");
     },
   });
 
@@ -73,84 +131,40 @@ export default function KeranjangPage() {
   };
 
   const handleCheckout = async () => {
-    if (selectProduk.length === 0) return alert("Pilih produk!");
+    if (selectProduk.length === 0)
+      return alert("Pilih produk terlebih dahulu!");
 
-    const alamatUtama = addressList.find((addr) => addr.status === true);
-    if (!alamatUtama) return alert("Atur alamat utama dahulu!");
+    const alamatUtama =
+      addressList.find((addr) => addr.status === true) || addressList[0];
+    if (!alamatUtama)
+      return alert("Atur alamat pengiriman terlebih dahulu di halaman profil!");
 
-    if (!confirm("Yakin checkout?")) return;
-
-    const alamat = confirm(
-      `Kirim ke alamat:\n${alamatUtama.alamat}\nTelepon: ${alamatUtama.telepon}\nKalau tidak silahkan atur di halaman profile.`,
+    const confirmation = confirm(
+      `Konfirmasi Pengiriman:\nKirim ke: ${alamatUtama.alamat}\nPenerima: ${currentUser.user.name || alamatUtama.nama}\nTelepon: ${alamatUtama.telepon}\n\nLanjutkan pembayaran?`,
     );
-    if (!alamat) return;
+    if (!confirmation) return;
 
-    try {
-      const itemsForDb = selectProduk.map((item) => ({
-        variantId: item.variant.id,
-        name: item.variant.product.nama,
-        warna: item.variant.warna,
-        ukuran: item.ukuran,
-        price: item.variant.harga,
-        quantity: item.jumlah,
-        gambar: item.variant.images[0]?.img || "",
-        author: item.variant.product.ownerId,
-      }));
+    const itemsForDb = selectProduk.map((item) => ({
+      variantId: item.variant.id,
+      name: item.variant.product.nama,
+      warna: item.variant.warna,
+      ukuran: item.ukuran,
+      price: item.variant.harga,
+      quantity: item.jumlah,
+      gambar: item.variant.images[0]?.img || "",
+      author: item.variant.product.ownerId,
+    }));
 
-      // console.log("Payload yang dikirim ke API:", itemsForDb);
-      const response = await fetch("/api/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: itemsForDb,
-          totalHarga: totalHarga,
-          buyerId: currentUser.user.id,
-          customerDetails: {
-            namaPenerima: currentUser.user.name,
-            telepon: alamatUtama.telepon,
-            alamat: alamatUtama.alamat,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Server Error Response:", errorText);
-        throw new Error("Gagal membuat pesanan");
-      }
-      const data = await response.json();
-
-      if (data.token) {
-        // Pastikan window.snap tersedia
-        if (window.snap) {
-          window.snap.pay(data.token, {
-            onSuccess: function () {
-              alert("Pembayaran Berhasil!");
-              window.location.href = `/profile/${currentUser.user.id}`;
-            },
-            onPending: function () {
-              alert("Harap selesaikan pembayaran.");
-              window.location.href = `/profile/${currentUser.user.id}`;
-            },
-            onError: function () {
-              alert("Pembayaran Gagal!");
-            },
-            onClose: function () {
-              alert("Anda menutup popup tanpa menyelesaikan pembayaran.");
-            },
-          });
-        } else {
-          alert("Midtrans belum siap, silakan refresh halaman.");
-        }
-      }
-
-      setSelectProduk([]);
-    } catch (error) {
-      console.error("Checkout Error:", error);
-      alert(
-        "Terjadi kesalahan. Cek terminal VS Code untuk detail error Prisma.",
-      );
-    }
+    checkoutMutation.mutate({
+      items: itemsForDb,
+      totalHarga: totalHarga,
+      buyerId: currentUser.user.id,
+      customerDetails: {
+        namaPenerima: currentUser.user.name || alamatUtama.nama || "Pelanggan",
+        telepon: String(alamatUtama.telepon),
+        alamat: String(alamatUtama.alamat),
+      },
+    });
   };
 
   const { data: addressList = [] } = useQuery({
@@ -163,7 +177,7 @@ export default function KeranjangPage() {
     enabled: !!currentUser?.user?.id,
   });
 
-  if (status === "loading" || isLoading) {
+  if (status === "loading") {
     return (
       <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300">
         <Navbar currentUser={currentUser} />
@@ -198,7 +212,7 @@ export default function KeranjangPage() {
                   key={item.id}
                   className="grid grid-cols-7 gap-4 border p-4 mb-3 rounded-lg items-center dark:border-slate-700 dark:bg-slate-900 dark:text-white transition-colors"
                 >
-                  <div className="col-span-2 flex gap-3">
+                  <div className="col-span-2 flex gap-3 items-center">
                     <input
                       type="checkbox"
                       checked={isSelected(item)}
@@ -209,7 +223,7 @@ export default function KeranjangPage() {
                       alt={item.variant.product.nama}
                       width={64}
                       height={64}
-                      className="rounded"
+                      className="rounded object-cover w-16 h-16"
                     />
                     <p className="font-semibold">{item.variant.product.nama}</p>
                   </div>
@@ -234,7 +248,7 @@ export default function KeranjangPage() {
                   <div className="text-center">
                     <button
                       onClick={() => handleHapus(item.id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded"
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors"
                     >
                       Hapus
                     </button>
@@ -243,8 +257,8 @@ export default function KeranjangPage() {
               ))}
 
               {/* Footer */}
-              <div className="flex justify-between items-center border p-4 rounded bg-gray-100 sticky bottom-2 dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-colors">
-                <div>
+              <div className="flex justify-between items-center border p-4 rounded bg-gray-100 sticky bottom-2 dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-colors shadow-md">
+                <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={
@@ -253,7 +267,7 @@ export default function KeranjangPage() {
                     }
                     onChange={(e) => handleSelectAll(e.target.checked)}
                   />
-                  Pilih Semua
+                  <span>Pilih Semua</span>
                 </div>
 
                 <div className="flex gap-4 items-center">
@@ -263,11 +277,37 @@ export default function KeranjangPage() {
                   <p className="font-bold text-xl text-blue-700 dark:text-blue-400">
                     Rp {totalHarga.toLocaleString("id-ID")}
                   </p>
+
                   <button
                     onClick={handleCheckout}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    disabled={
+                      checkoutMutation.isPending || selectProduk.length === 0
+                    }
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-semibold shadow-md"
                   >
-                    Checkout
+                    {checkoutMutation.isPending && (
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v8H4z"
+                        ></path>
+                      </svg>
+                    )}
+                    {checkoutMutation.isPending ? "Memproses..." : "Checkout"}
                   </button>
                 </div>
               </div>

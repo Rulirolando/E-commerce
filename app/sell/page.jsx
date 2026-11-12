@@ -124,7 +124,7 @@ export default function JualPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300 w-full">
+      <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-300 w-full pb-10">
         <Navbar className="fixed z-50" currentUser={currentUser} />
         <div className="p-6 max-w-3xl mx-auto">
           <h1 className="text-2xl font-bold mb-4 dark:text-white">{`Jual produk kamu ${capitalizeFirst(
@@ -248,7 +248,6 @@ export default function JualPage() {
 
           {/* Preview gambar setelah upload */}
           {variasi.gambar && (
-            // use native img tag for base64 to avoid Next/Image processing
             <Image
               src={variasi.gambar}
               alt="Preview"
@@ -258,7 +257,7 @@ export default function JualPage() {
             />
           )}
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-3">
             <button
               onClick={tambahVariasi}
               className="bg-blue-700 text-white px-3 py-2 rounded"
@@ -285,44 +284,73 @@ export default function JualPage() {
 
         {/* LIST VARIASI */}
         {variasiList.length > 0 && (
-          <div className="mt-3 dark:bg-slate-900 dark:border-slate-800 w-1/2 flex justify-self-center">
-            <h3 className="font-bold dark:text-white">Variasi Ditambahkan:</h3>
-            <ul className="list-disc ml-5">
-              {variasiList.map((v, index) => (
-                <li
-                  key={index}
-                  className="flex items-center gap-3 dark:bg-slate-800"
-                >
-                  <div className="flex-1 dark:text-blue-400">
-                    {v.warna} — Rp{v.harga.toLocaleString()} — stok {v.stok}
-                  </div>
-                  {v.gambar?.[0] && (
-                    <Image
-                      src={v.gambar[0]}
-                      alt={v.warna}
-                      width={100}
-                      height={100}
-                      className="w-12 h-12 object-cover rounded"
-                    />
-                  )}
-                  <button
-                    className="text-sm text-red-500 hover:text-red-700"
-                    onClick={() => hapusVariasi(index)}
+          <div className="mt-3 dark:bg-slate-900 dark:border-slate-800 w-1/2 flex justify-self-center p-4 rounded-xl border">
+            <div>
+              <h3 className="font-bold dark:text-white mb-2">
+                Variasi Ditambahkan:
+              </h3>
+              <ul className="list-disc ml-5 space-y-2">
+                {variasiList.map((v, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center gap-3 dark:text-blue-400"
                   >
-                    Hapus
-                  </button>
-                </li>
-              ))}
-            </ul>
+                    <div className="flex-1">
+                      {v.warna} — Rp{v.harga.toLocaleString()} — stok {v.stok}
+                    </div>
+                    {v.gambar?.[0] && (
+                      <Image
+                        src={v.gambar[0]}
+                        alt={v.warna}
+                        width={100}
+                        height={100}
+                        className="w-12 h-12 object-cover rounded"
+                      />
+                    )}
+                    <button
+                      className="text-sm text-red-500 hover:text-red-700"
+                      onClick={() => hapusVariasi(index)}
+                    >
+                      Hapus
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         )}
 
-        <button
-          onClick={simpanProduk}
-          className="mt-4 w-1/2 bg-green-600 text-white p-3 rounded-xl flex justify-self-center justify-center"
-        >
-          Simpan Produk
-        </button>
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={simpanProduk}
+            disabled={mutation.isPending}
+            className="w-1/2 bg-green-600 hover:bg-green-700 text-white p-3 rounded-xl flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-semibold shadow-md"
+          >
+            {mutation.isPending && (
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8H4z"
+                ></path>
+              </svg>
+            )}
+            {mutation.isPending ? "Menyimpan Produk..." : "Simpan Produk"}
+          </button>
+        </div>
       </div>
     </>
   );
