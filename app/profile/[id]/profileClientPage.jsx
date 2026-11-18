@@ -6,7 +6,6 @@ import Image from "next/image";
 import Navbar from "../../components/navbar";
 import { MdAccountCircle } from "react-icons/md";
 import { IoBasket } from "react-icons/io5";
-import { TbBrandProducthunt } from "react-icons/tb";
 import { FaHeart } from "react-icons/fa";
 import { FaLocationDot } from "react-icons/fa6";
 import { IoIosSettings } from "react-icons/io";
@@ -20,7 +19,6 @@ import { PiNewspaperThin } from "react-icons/pi";
 import ProfileEditModal from "../../components/ProfileEditModal";
 import AddAdressModal from "../../components/AddressAddModal";
 import Link from "next/link";
-import EditProdukModal from "../../components/EditProduk";
 import { signOut } from "next-auth/react";
 import { format, formatDistanceToNow, isValid } from "date-fns";
 import { id } from "date-fns/locale";
@@ -39,9 +37,6 @@ export default function ProfilePage({ userId, currentUser }) {
   const [isEditAddress, setIsEditAddress] = useState(null);
   const [editAddress, setEditAddress] = useState(null);
   const [produkBeli, setProdukBeli] = useState([]);
-  const [isEdit, setIsEdit] = useState(false);
-  const [onEdit, setOnEdit] = useState({});
-  const [myProduks, setMyProduks] = useState(null);
   const [addressList, setAddressList] = useState([]);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -152,28 +147,6 @@ export default function ProfilePage({ userId, currentUser }) {
     }
   };
 
-  async function handleHapusProduk(variationId) {
-    const confirmDelete = window.confirm("Yakin ingin menghapus variasi ini?");
-    if (!confirmDelete) return;
-
-    try {
-      const res = await fetch(`/api/product/${variationId}`, {
-        method: "DELETE",
-      });
-
-      if (res.ok) {
-        alert("Produk terhapus!");
-        window.location.reload();
-      } else {
-        const errorData = await res.json();
-        alert(errorData.error);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Terjadi kesalahan koneksi");
-    }
-  }
-
   const fetchAddresses = useCallback(async () => {
     if (!userId) return;
 
@@ -241,21 +214,6 @@ export default function ProfilePage({ userId, currentUser }) {
   }, [userId]);
 
   useEffect(() => {
-    async function fetchMyProduk() {
-      try {
-        const myProduk = await fetch(`/api/product/user/${userId}`);
-        const myProdukData = await myProduk.json();
-        setMyProduks(myProdukData);
-      } catch {
-        setMyProduks(null);
-      }
-    }
-    if (userId) {
-      fetchMyProduk();
-    }
-  }, [userId, isEdit]);
-
-  useEffect(() => {
     try {
       async function fetchProdukBeli() {
         const allProduk = await fetch(`/api/order/${userId}`);
@@ -281,12 +239,6 @@ export default function ProfilePage({ userId, currentUser }) {
       label: "Pesanan saya",
       icon: <IoBasket size={30} />,
       show: currentUser?.user.id === userId,
-    },
-    {
-      id: "produk",
-      label: `Produk ${currentUser?.user.id === userId ? "saya" : username}`,
-      icon: <TbBrandProducthunt size={30} />,
-      show: true,
     },
     {
       id: "favorit",
@@ -596,90 +548,6 @@ export default function ProfilePage({ userId, currentUser }) {
                 (produk) =>
                   produk.status === "Selesai" && produk.buyerId === userId,
               )}
-          </div>
-        )}
-
-        {activeMenu === "produk" && (
-          <div className="w-[800px] h-full bg-blue-200 border-gray-100 ml-2 mt-14 rounded-2xl p-4 shadow-2xl dark:bg-slate-800 dark:border-slate-700 transition-colors duration-300">
-            <div className="flex space-x-4 p-2 dark:border-slate-800">
-              <Image
-                src={user.foto || "/no-image.png"}
-                width={100}
-                height={100}
-                alt="logo"
-                className="object-cover w-30 h-30 rounded-full dark:border-slate-600"
-              />
-              <div className="flex flex-col">
-                <h1 className="text-xl font-bold dark:text-white">
-                  Toko kelontong
-                </h1>
-                <p className="font-light text-sm dark:text-slate-300">
-                  {user.username}
-                </p>
-                <p className="font-light text-sm dark:text-slate-300">
-                  {user.email}
-                </p>
-                <p className="font-light text-sm dark:text-slate-300">
-                  {user.alamat}
-                </p>
-                <p className="font-light text-sm dark:text-slate-300">
-                  {user.no_hp}
-                </p>
-                <p className="font-light text-sm text-yellow-300">★★★★★</p>
-              </div>
-            </div>
-            <div className="font-bold text-xl p-2 dark:text-white">
-              Produk saya
-            </div>
-            <div className="flex flex-start flex-wrap w-full h-full">
-              {isEdit && (
-                <EditProdukModal
-                  produk={onEdit}
-                  onClose={() => setIsEdit(false)}
-                />
-              )}
-              {myProduks?.length > 0 ? (
-                myProduks?.map((item) =>
-                  item.variations?.map((p) => (
-                    <CardProduk
-                      key={p.id}
-                      nama={item.nama}
-                      harga={p.harga}
-                      stok={p.stok}
-                      avgRating={item.avgRating}
-                      totalReviews={item.totalReviews}
-                      onClick={() => router.push(`/produk/${p.productId}`)}
-                      gambar={p.images[0]?.img}
-                      terjual={p.terjual}
-                      edit={currentUser?.user.id === userId ? true : false}
-                      onEdit={() => {
-                        setOnEdit({
-                          variationId: p.id,
-                          productId: item.id,
-                          postId: item.id,
-                          nama: item.nama,
-                          ...p,
-                        });
-                        setIsEdit(true);
-                      }}
-                      onHapus={() => {
-                        handleHapusProduk(p.id);
-                      }}
-                      loveProduk={true}
-                    />
-                  )),
-                )
-              ) : (
-                <div className="w-full flex flex-col items-center justify-center py-16 text-center">
-                  <p className="text-lg font-semibold text-gray-500 dark:text-slate-400">
-                    Belum ada produk
-                  </p>
-                  <h1 className="text-sm text-gray-400 dark:text-slate-500">
-                    Silahkan tambahkan produk anda
-                  </h1>
-                </div>
-              )}
-            </div>
           </div>
         )}
 

@@ -23,6 +23,7 @@ model User {
   imgProfile  String?
   failedLoginAttempts Int         @default(0)
   loginLockedUntil    DateTime?
+  adminCode           String?
 
   products    Product[]
   loves     Love[]
@@ -37,6 +38,7 @@ chatRooms2 ChatRoom[] @relation("User2")
 messages   Message[]
 bankAccount BankAccount?
 payouts     Payout[]
+store       Store?
 }
 
 model Account {
@@ -304,8 +306,23 @@ model Payout {
   @@index([sellerId, status])
 }
 
+model Store {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  namaToko    String
+  deskripsi   String?  @db.Text
+  noTelp      String
+  alamat      String   @db.Text
+  fotoToko    String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 enum Role {
   USER
   ADMIN
   SUPER_ADMIN
+  SELLER
 }

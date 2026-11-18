@@ -189,7 +189,34 @@ export async function POST(req: Request) {
       };
     });
 
-    await prisma.order.createMany({ data: orderRows });
+    // Menggunakan Transaction agar pembuatan order dan pengurangan stok bersifat atomic (aman)
+    try {
+      await prisma.$transaction(async (tx) => {
+        // 1. Buat data order
+        await tx.order.createMany({ data: orderRows });
+
+        // 2. Kurangi stok dan tambahkan jumlah 'terjual' pada setiap variasi produk
+        for (const [variantId, quantity] of counts) {
+          await tx.variation.update({
+            where: { id: variantId },
+            data: {
+              stok: {
+                decrement: quantity,
+              },
+              terjual: {
+                increment: quantity,
+              },
+            },
+          });
+        }
+      });
+    } catch (dbError) {
+      console.error("Gagal menyimpan order & update stok:", dbError);
+      return NextResponse.json(
+        { message: "Gagal memproses pesanan karena perubahan stok." },
+        { status: 500 },
+      );
+    }
 
     let transaction;
 
@@ -219,8 +246,26 @@ export async function POST(req: Request) {
         },
       });
     } catch (paymentError) {
-      await prisma.order.deleteMany({
-        where: { transactionId, buyerId },
+      // Jika pembuatan token Midtrans gagal, rollback/hapus order yang sudah dibuat
+      // dan kembalikan stok produk seperti semula
+      await prisma.$transaction(async (tx) => {
+        await tx.order.deleteMany({
+          where: { transactionId, buyerId },
+        });
+
+        for (const [variantId, quantity] of counts) {
+          await tx.variation.update({
+            where: { id: variantId },
+            data: {
+              stok: {
+                increment: quantity,
+              },
+              terjual: {
+                decrement: quantity,
+              },
+            },
+          });
+        }
       });
 
       throw paymentError;

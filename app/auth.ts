@@ -40,18 +40,80 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const otp =
           typeof credentials?.otp === "string" ? credentials.otp.trim() : "";
 
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user || !user.password || !user.emailVerified) {
+          console.log("[authorize] user tidak ada / belum verifikasi");
+          return null;
+        }
+
+        // =========================================================================
+        // KHUSUS PENJUAL (Login via Bypass OTP Gmail yang divalidasi API seller)
+        // =========================================================================
+        if (password === "SELLER_OTP_BYPASS") {
+          console.log("[authorize] Sesi login penjual terdeteksi via OTP");
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.username || user.nama,
+            image: user.imgProfile,
+            role: user.role,
+            isSellerSession: true, // Penanda khusus sesi penjual
+          };
+        }
+
+        if (user.role === "SUPER_ADMIN" || user.role === "ADMIN") {
+          // Pastikan format OTP 6 digit valid
+          if (!/^\d{6}$/.test(otp)) {
+            console.log(
+              "[authorize] OTP admin/super_admin tidak valid formatnya",
+            );
+            return null;
+          }
+
+          // Cek apakah ada record OTP yang sah di database (sudah diverifikasi oleh endpoint API)
+          const rec = await prisma.otp.findUnique({ where: { email } });
+
+          if (
+            !rec ||
+            rec.type !== "LOGIN" ||
+            rec.blocked ||
+            rec.attempts >= 3 ||
+            rec.expiresAt <= new Date()
+          ) {
+            console.log(
+              "[authorize] record OTP admin/super_admin bermasalah/kedaluwarsa",
+            );
+            return null;
+          }
+
+          const a = Buffer.from(rec.code);
+          const b = Buffer.from(otp);
+          const otpMatch = a.length === b.length && timingSafeEqual(a, b);
+
+          if (!otpMatch) {
+            console.log("[authorize] OTP admin/super_admin tidak cocok");
+            return null;
+          }
+
+          // Hapus OTP setelah berhasil digunakan untuk membuat sesi
+          await prisma.otp.delete({ where: { id: rec.id } }).catch(() => {});
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.username || user.nama,
+            image: user.imgProfile,
+            role: user.role,
+            isOtpVerified: true, // Penanda bahwa admin/super_admin sah melewati verifikasi
+          };
+        }
+
         if (!email || !password || !/^\d{6}$/.test(otp)) {
           console.log("[authorize] input tidak valid", {
             email: !!email,
             password: !!password,
             otpLength: otp.length,
           });
-          return null;
-        }
-
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user || !user.password || !user.emailVerified) {
-          console.log("[authorize] user tidak ada / belum verifikasi");
           return null;
         }
 
@@ -120,6 +182,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           name: user.username || user.nama,
           image: user.imgProfile,
           role: user.role,
+          isOtpVerified: true,
         };
       },
     }),
@@ -131,8 +194,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user, trigger, session }) {
-      if (user?.id) {
+      if (user) {
         token.id = user.id;
+        token.isOtpVerified = Boolean(
+          (user as { isOtpVerified?: boolean }).isOtpVerified,
+        );
+        token.isSellerSession = Boolean(
+          (user as { isSellerSession?: boolean }).isSellerSession,
+        );
       }
 
       if (token.id) {
@@ -170,6 +239,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.name = token.name as string;
         session.user.image = token.picture as string;
         session.user.role = token.role as "USER" | "ADMIN" | "SUPER_ADMIN";
+        (session.user as { isOtpVerified?: boolean }).isOtpVerified = Boolean(
+          token.isOtpVerified,
+        );
+        (session.user as { isSellerSession?: boolean }).isSellerSession =
+          Boolean(token.isSellerSession);
       }
 
       return session;

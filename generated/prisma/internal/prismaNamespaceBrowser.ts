@@ -68,7 +68,8 @@ export const ModelName = {
   ChatRoom: 'ChatRoom',
   Message: 'Message',
   BankAccount: 'BankAccount',
-  Payout: 'Payout'
+  Payout: 'Payout',
+  Store: 'Store'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -102,7 +103,8 @@ export const UserScalarFieldEnum = {
   jenisKelamin: 'jenisKelamin',
   imgProfile: 'imgProfile',
   failedLoginAttempts: 'failedLoginAttempts',
-  loginLockedUntil: 'loginLockedUntil'
+  loginLockedUntil: 'loginLockedUntil',
+  adminCode: 'adminCode'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -350,6 +352,21 @@ export const PayoutScalarFieldEnum = {
 } as const
 
 export type PayoutScalarFieldEnum = (typeof PayoutScalarFieldEnum)[keyof typeof PayoutScalarFieldEnum]
+
+
+export const StoreScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  namaToko: 'namaToko',
+  deskripsi: 'deskripsi',
+  noTelp: 'noTelp',
+  alamat: 'alamat',
+  fotoToko: 'fotoToko',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StoreScalarFieldEnum = (typeof StoreScalarFieldEnum)[keyof typeof StoreScalarFieldEnum]
 
 
 export const SortOrder = {

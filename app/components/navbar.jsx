@@ -30,6 +30,7 @@ export default function Navbar({ className = "", currentUser }) {
   } = useChatStore();
 
   const user = currentUser?.user;
+  console.log("Navbar user:", user);
   const userId = user?.id;
   const isLoggedIn = Boolean(userId);
 
@@ -181,7 +182,27 @@ export default function Navbar({ className = "", currentUser }) {
         <SlBasket className="text-2xl" />
       </Link>
 
-      {isLoggedIn && <Link href="/sell">Sell</Link>}
+      <button
+        type="button"
+        onClick={() => {
+          if (!isLoggedIn) {
+            // Belum login sama sekali -> arahkan ke login penjual
+            router.push("/seller/login");
+          } else if (
+            user?.role == "ADMIN" ||
+            user?.role == "SUPER_ADMIN" ||
+            user?.role == "USER"
+          ) {
+            // Sudah login sebagai user biasa (belum jadi penjual) -> arahkan ke halaman pendaftaran/aktivasi penjual
+            router.push("/seller/login");
+          } else if (user?.role == "SELLER") {
+            router.push("/seller/dashboard");
+          }
+        }}
+        className="cursor-pointer"
+      >
+        Mulai Menjual
+      </button>
 
       <div className="flex gap-6 text-sm items-center">
         {isLoggedIn ? (

@@ -2,6 +2,31 @@ import { NextResponse } from "next/server";
 import { getOrCreateRoom } from "@/lib/getOrCreateRoom";
 import { prisma } from "@/lib/prisma";
 import redis from "@/lib/redis";
+import crypto from "crypto";
+
+// Mengambil kunci enkripsi dan memastikan tipenya selalu string dengan fallback
+const ENCRYPTION_KEY =
+  process.env.ENCRYPTION_KEY || "12345678901234567890123456789012";
+
+// Fungsi untuk Dekripsi pesan dari database agar bisa dibaca di chat
+function decrypt(text: string) {
+  try {
+    const textParts = text.split(":");
+    const iv = Buffer.from(textParts.shift()!, "hex");
+    const encryptedText = Buffer.from(textParts.join(":"), "hex");
+    const decipher = crypto.createDecipheriv(
+      "aes-256-cbc",
+      Buffer.from(ENCRYPTION_KEY),
+      iv,
+    );
+    let decrypted = decipher.update(encryptedText);
+    decrypted = Buffer.concat([decrypted, decipher.final()]);
+    return decrypted.toString();
+  } catch {
+    // Jika gagal dekripsi (misal teks biasa/bukan terenkripsi), kembalikan teks asli
+    return text;
+  }
+}
 
 export async function POST(req: Request) {
   const { user1Id, user2Id } = await req.json();
@@ -18,13 +43,12 @@ export async function GET(req: Request) {
 
   const cacheKey = `chat_history:${userId}`;
 
-  // 1. Coba ambil dari Redis Cache (Bila Redis down, skip ke Prisma)
+  // 1. Coba ambil dari Redis Cache
   try {
     const cachedData = await redis.get(cacheKey);
     if (cachedData) {
       const parsedData =
         typeof cachedData === "string" ? JSON.parse(cachedData) : cachedData;
-      // console.log("Mengambil history dari Redis...");
       return NextResponse.json(parsedData);
     }
   } catch (err) {
@@ -50,19 +74,23 @@ export async function GET(req: Request) {
 
     const history = rooms.map((room) => {
       const otherUser = room.user1Id === userId ? room.user2 : room.user1;
+      const rawLastMessage = room.messages[0]?.content || "Belum ada pesan";
+
+      // Dekripsi pesan terakhir agar tampil normal di daftar chat
+      const decryptedLastMessage = decrypt(rawLastMessage);
+
       return {
         roomId: room.id,
         otherUserId: otherUser.id,
         otherUser: otherUser.username,
         otherUserImg: otherUser.imgProfile,
-        lastMessage: room.messages[0]?.content || "Belum ada pesan",
+        lastMessage: decryptedLastMessage,
         updatedAt: room.messages[0]?.createdAt || room.createdAt,
       };
     });
 
     // 3. Simpan ke Redis Cache jika Redis tersedia
     try {
-      // Menangani kompatibilitas antara ioredis dan @upstash/redis REST
       if (typeof redis.set === "function") {
         await redis.set(cacheKey, JSON.stringify(history), "EX", 600);
       }

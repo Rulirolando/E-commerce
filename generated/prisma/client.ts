@@ -131,3 +131,8 @@ export type BankAccount = Prisma.BankAccountModel
  * 
  */
 export type Payout = Prisma.PayoutModel
+/**
+ * Model Store
+ * 
+ */
+export type Store = Prisma.StoreModel

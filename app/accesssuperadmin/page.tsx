@@ -4,6 +4,9 @@ import Link from "next/link";
 
 export default async function AccessSuperAdminPage() {
   const session = await auth();
+  const isOtpVerified = Boolean(
+    (session?.user as { isOtpVerified?: boolean } | undefined)?.isOtpVerified,
+  );
 
   if (!session?.user) {
     redirect("/auth/login");
@@ -11,10 +14,14 @@ export default async function AccessSuperAdminPage() {
 
   if (session.user.role !== "SUPER_ADMIN") {
     if (session.user.role === "ADMIN") {
-      redirect("/accessadmin");
+      redirect("/accessadmin/login");
     }
 
     redirect("/");
+  }
+
+  if (!isOtpVerified) {
+    redirect("/accesssuperadmin/login");
   }
 
   return (

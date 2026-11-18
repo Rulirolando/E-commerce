@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Navbar from "../../app/components/navbar";
 import { IoSend } from "react-icons/io5";
+import Image from "next/image";
 
 function ChatContent() {
   const { data: session, status } = useSession();
@@ -25,7 +26,6 @@ function ChatContent() {
   const searchParams = useSearchParams();
   const roomId = searchParams.get("roomId") || "";
 
-  // Helper fetching history
   const fetchHistory = useCallback(async () => {
     if (!userId) return;
     try {
@@ -40,7 +40,6 @@ function ChatContent() {
     }
   }, [userId]);
 
-  // Initial Load History & Switch View State
   useEffect(() => {
     if (status === "authenticated" && userId) {
       fetchHistory();
@@ -52,7 +51,6 @@ function ChatContent() {
     }
   }, [status, userId, roomId, fetchHistory]);
 
-  // Socket setup untuk list updates
   useEffect(() => {
     if (!userId) return;
 
@@ -84,7 +82,6 @@ function ChatContent() {
     return () => socket.off("update-chat-list");
   }, [userId, fetchHistory]);
 
-  // Load Messages per Room
   useEffect(() => {
     if (!userId || !roomId) return;
 
@@ -106,7 +103,6 @@ function ChatContent() {
     loadMessages();
   }, [roomId, userId]);
 
-  // Socket handler for new incoming message
   useEffect(() => {
     socket.on("newMessage", (msg, serverOffset) => {
       if (msg.roomId === roomId) {
@@ -119,7 +115,6 @@ function ChatContent() {
     return () => socket.off("newMessage");
   }, [roomId]);
 
-  // Auto Scroll yang disempurnakan agar langsung berada di bawah
   useEffect(() => {
     if (roomId && messages.length > 0) {
       const scrollToBottom = () => {
@@ -131,7 +126,6 @@ function ChatContent() {
         }
       };
 
-      // Jalankan dua kali untuk memastikan render elemen/gambar selesai sempurna
       const timer1 = setTimeout(scrollToBottom, 50);
       const timer2 = setTimeout(scrollToBottom, 200);
 
@@ -187,6 +181,46 @@ function ChatContent() {
     } catch (err) {
       console.error("Gagal mengirim pesan:", err);
     }
+  };
+
+  // Render format pesan jika berupa Card Produk
+  const renderMessageContent = (content) => {
+    if (content.startsWith("[PRODUK_CARD]")) {
+      try {
+        const product = JSON.parse(content.replace("[PRODUK_CARD]", ""));
+        return (
+          <div
+            onClick={() => router.push(`/produk/${product.productId}`)}
+            className="cursor-pointer bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex gap-3 items-center hover:shadow-md transition"
+          >
+            {product.gambar && (
+              <Image
+                src={product.gambar}
+                alt={product.nama}
+                width={60}
+                height={60}
+                className="w-14 h-14 object-cover rounded-lg border border-slate-200 dark:border-slate-700"
+              />
+            )}
+            <div className="flex flex-col text-xs space-y-1">
+              <span className="font-bold line-clamp-1">{product.nama}</span>
+              <span className="text-indigo-600 dark:text-indigo-400 font-semibold">
+                Rp {product.harga?.toLocaleString("id-ID")}
+              </span>
+              <span className="text-slate-500 dark:text-slate-400">
+                Warna: {product.warna} | Ukuran: {product.ukuran}
+              </span>
+              <span className="text-[10px] text-blue-500 underline font-semibold mt-1">
+                Klik untuk lihat produk →
+              </span>
+            </div>
+          </div>
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return <p className="text-sm leading-relaxed">{content}</p>;
   };
 
   if (status === "loading") {
@@ -253,7 +287,9 @@ function ChatContent() {
                           </p>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-white truncate">
-                          {chat.lastMessage}
+                          {chat.lastMessage.startsWith("[PRODUK_CARD]")
+                            ? "[Mengirim kartu produk]"
+                            : chat.lastMessage}
                         </p>
                       </div>
                     </div>
@@ -274,13 +310,13 @@ function ChatContent() {
                     }`}
                   >
                     <div
-                      className={`px-4 py-2 rounded-2xl max-w-[75%] shadow-sm wrap-break-word md:max-w-[48%] w-fit ${
+                      className={`px-4 py-2 rounded-2xl max-w-[80%] shadow-sm wrap-break-word md:max-w-[60%] w-fit ${
                         msg.senderId === userId
                           ? "bg-indigo-500 text-white rounded-tr-none"
                           : "bg-indigo-500 text-white border rounded-tl-none"
                       }`}
                     >
-                      <p className="text-sm leading-relaxed">{msg.content}</p>
+                      {renderMessageContent(msg.content)}
                       <span className="text-[10px] opacity-70 block text-right mt-1">
                         {msg.createdAt
                           ? new Date(msg.createdAt).toLocaleTimeString([], {

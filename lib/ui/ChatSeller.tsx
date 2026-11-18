@@ -1,47 +1,71 @@
 "use client";
-
 import { useRouter } from "next/navigation";
-import { LuMessageSquareMore } from "react-icons/lu";
 
-export default function ChatButton({
+interface ProductInfo {
+  productId: string | number;
+  nama: string;
+  harga: number;
+  warna: string;
+  ukuran: string;
+  gambar: string;
+}
+
+interface ChatSellerProps {
+  sellerId: string;
+  userId?: string;
+  productInfo?: ProductInfo;
+}
+
+export default function ChatSeller({
   sellerId,
   userId,
-}: {
-  sellerId: string;
-  userId: string;
-}) {
+  productInfo,
+}: ChatSellerProps) {
   const router = useRouter();
-  const myId = userId;
 
-  const handleChatPenjual = async () => {
-    if (!myId) return alert("Silakan login terlebih dahulu");
-    if (myId === sellerId) return alert("Ini produk Anda sendiri");
+  const handleChat = async () => {
+    if (!userId) {
+      alert("Silakan login terlebih dahulu.");
+      return;
+    }
+    if (userId === sellerId) {
+      alert("Anda tidak bisa chat dengan diri sendiri.");
+      return;
+    }
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user1Id: myId,
-          user2Id: sellerId,
-        }),
+        body: JSON.stringify({ user1Id: userId, user2Id: sellerId }),
       });
-
       const room = await res.json();
-      if (room.id) {
-        router.push(`/chat?roomId=${encodeURIComponent(room.id)}`);
+      if (room && room.id) {
+        // Jika membawa info produk, kirimkan pesan otomatis ke chat
+        if (productInfo && productInfo.warna && productInfo.ukuran) {
+          const messageContent = `[PRODUK_CARD]${JSON.stringify(productInfo)}`;
+          await fetch("/api/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              roomId: room.id,
+              senderId: userId,
+              content: messageContent,
+            }),
+          });
+        }
+        router.push(`/chat?roomId=${room.id}`);
       }
-    } catch {
-      alert("Gagal memulai chat");
+    } catch (err) {
+      console.error("Gagal membuka chat:", err);
     }
   };
 
   return (
     <button
-      onClick={handleChatPenjual}
-      className="mt-4 px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition-colors duration-200 cursor-pointer flex items-center gap-2"
+      onClick={handleChat}
+      className="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors duration-200 cursor-pointer shadow"
     >
-      <LuMessageSquareMore />
       Chat Penjual
     </button>
   );

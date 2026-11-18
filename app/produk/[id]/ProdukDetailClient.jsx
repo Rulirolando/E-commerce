@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/Footer";
@@ -7,6 +8,7 @@ import { useSession } from "next-auth/react";
 import ChatSeller from "../../../lib/ui/ChatSeller";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { IoMdShare } from "react-icons/io";
+import { FaStore } from "react-icons/fa";
 
 export default function ProdukDetail({ id }) {
   const { data: session } = useSession();
@@ -341,6 +343,18 @@ export default function ProdukDetail({ id }) {
           <div className="text-3xl md:text-4xl font-semibold mt-4">
             <p>{capitalizeFirst(produkChose.nama)}</p>
           </div>
+
+          {/* LINK MENU KUNJUNGI TOKO */}
+          <div className="mt-2">
+            <Link
+              href={`/toko/${produkChose.ownerId}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-lg text-xs font-semibold hover:underline transition"
+            >
+              <FaStore size={14} />
+              <span>Kunjungi Toko Penjual ↗</span>
+            </Link>
+          </div>
+
           <div className="text-xl font-bold mt-4 text-blue-700 dark:text-blue-400">
             <span>
               Rp{" "}
@@ -463,6 +477,16 @@ export default function ProdukDetail({ id }) {
             <ChatSeller
               sellerId={produkChose.ownerId}
               userId={currentUser?.user?.id}
+              productInfo={{
+                productId: id,
+                nama: produkChose.nama,
+                harga: produkIdChoose
+                  ? produkIdChoose.harga
+                  : produkChose?.variations?.[0]?.harga,
+                warna: selectedProduk.warna,
+                ukuran: selectedProduk.ukuran,
+                gambar: selectedProduk.gambar || firstImage,
+              }}
             />
           </div>
         </div>
